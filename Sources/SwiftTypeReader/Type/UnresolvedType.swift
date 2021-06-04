@@ -1,4 +1,4 @@
-public struct UnresolvedType: UnresolvedProtocol {
+public struct UnresolvedType: AlwaysResolvableProtocol {
     public typealias ResolvedType = Type
 
     private unowned let module: Module
@@ -12,7 +12,7 @@ public struct UnresolvedType: UnresolvedProtocol {
         self.specifier = specifier
     }
 
-    public func resolved() -> Type? {
+    public func resolved() -> Type {
         module.resolveType(specifier: specifier)
     }
 

@@ -35,104 +35,24 @@ private final class ReaderImpl {
         let statements = sourceFile.statements.map { $0.item }
 
         for statement in statements {
-            if let structDecl = statement.as(StructDeclSyntax.self) {
-                var storedProperties: [StoredProperty] = []
-
-                let decls = structDecl.members.members.map { $0.decl }
-                for decl in decls {
-                    storedProperties += readStoredProperties(decl: decl)
+            if let decl = statement.as(StructDeclSyntax.self) {
+                if let st = StructReader(module: module)
+                    .read(structDecl: decl)
+                {
+                    module.types.append(.struct(st))
                 }
-
-                let st = StructType(
-                    name: structDecl.identifier.text,
-                    storedProperties: storedProperties
-                )
-
-                module.types.append(.struct(st))
+            } else if let decl = statement.as(EnumDeclSyntax.self) {
+                if let et = EnumReader(module: module)
+                    .read(enumDecl: decl)
+                {
+                    module.types.append(.enum(et))
+                }
             }
         }
 
         return module
     }
 
-    private func readStoredProperties(decl: DeclSyntax) -> [StoredProperty] {
-        if let varDecl = decl.as(VariableDeclSyntax.self) {
-            return varDecl.bindings.compactMap {
-                readStoredProperty($0)
-            }
-        } else {
-            return []
-        }
-    }
-
-    private func readStoredProperty(_ binding: PatternBindingSyntax) -> StoredProperty? {
-        if let _ = binding.accessor {
-            return nil
-        }
-
-        guard let ident = binding.pattern.as(IdentifierPatternSyntax.self) else {
-            return nil
-        }
-
-        let name = unescapeIdentifier(ident.identifier.text)
-
-        guard let typeAnno = binding.typeAnnotation,
-              let typeSpec = readTypeSpecifier(typeAnno.type) else
-        {
-            return nil
-        }
-
-        let type = UnresolvedType(
-            module: module,
-            specifier: typeSpec
-        )
-
-        return StoredProperty(
-            name: name,
-            unresolvedType: type
-        )
-    }
-
-    private func readTypeSpecifier(_ typeSyntax: TypeSyntax) -> TypeSpecifier? {
-        if let simple = typeSyntax.as(SimpleTypeIdentifierSyntax.self) {
-            let args: [TypeSpecifier]
-            if let gac = simple.genericArgumentClause {
-                args = gac.arguments.compactMap { readTypeSpecifier($0.argumentType) }
-                guard args.count == gac.arguments.count else { return nil }
-            } else {
-                args = []
-            }
-            return TypeSpecifier(
-                name: simple.name.text,
-                genericArguments: args
-            )
-        } else if let opt = typeSyntax.as(OptionalTypeSyntax.self) {
-            guard let wrapped = readTypeSpecifier(opt.wrappedType) else { return nil }
-            return TypeSpecifier(
-                name: "Optional",
-                genericArguments: [wrapped]
-            )
-        } else if let array = typeSyntax.as(ArrayTypeSyntax.self) {
-            guard let element = readTypeSpecifier(array.elementType) else { return nil }
-            return TypeSpecifier(
-                name: "Array",
-                genericArguments: [element]
-            )
-        } else if let dict = typeSyntax.as(DictionaryTypeSyntax.self) {
-            guard let key = readTypeSpecifier(dict.keyType),
-                  let value = readTypeSpecifier(dict.valueType) else { return nil }
-            return TypeSpecifier(
-                name: "Dictionary",
-                genericArguments: [key, value]
-            )
-        } else {
-            return nil
-        }
-    }
-
-    private func unescapeIdentifier(_ str: String) -> String {
-        return str.trimmingCharacters(in: ["`"])
-    }
 
     private func walk(directory: URL, _ f: (URL) throws -> Void) throws {
         let items = try fm.contentsOfDirectory(atPath: directory.path)

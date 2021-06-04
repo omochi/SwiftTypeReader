@@ -1,10 +1,20 @@
-public protocol UnresolvedProtocol {
+public protocol ResolvableProtocol {
     associatedtype ResolvedType
 
-    func resolved() -> ResolvedType?
+    func resolvedOrNone() -> ResolvedType?
 }
 
-public final class Resolvable<Unresolved: UnresolvedProtocol> {
+public protocol AlwaysResolvableProtocol: ResolvableProtocol {
+    func resolved() -> ResolvedType
+}
+
+extension AlwaysResolvableProtocol {
+    public func resolvedOrNone() -> ResolvedType? {
+        resolved()
+    }
+}
+
+public final class Resolvable<Unresolved: ResolvableProtocol> {
     public enum Value {
         case resolved(Unresolved.ResolvedType)
         case unresolved(Unresolved)
@@ -16,13 +26,26 @@ public final class Resolvable<Unresolved: UnresolvedProtocol> {
         self.value = .unresolved(unresolved)
     }
 
-    public func resolved() -> Unresolved.ResolvedType? {
+    public func resolvedOrNone() -> Unresolved.ResolvedType? {
         switch value {
         case .resolved(let r): return r
         case .unresolved(let u):
-            guard let r = u.resolved() else { return nil }
+            guard let r = u.resolvedOrNone() else { return nil }
             value = .resolved(r)
             return r
         }
     }
+
+    public func resolved() -> Unresolved.ResolvedType where
+        Unresolved: AlwaysResolvableProtocol
+    {
+        switch value {
+        case .resolved(let r): return r
+        case .unresolved(let u):
+            let r = u.resolved()
+            value = .resolved(r)
+            return r
+        }
+    }
+
 }
