@@ -5,14 +5,14 @@ public class Module {
 
     public var types: [Type] = []
 
-    public func resolveType(specifier: TypeSpecifier) -> Type? {
-        guard var type = findType(name: specifier.name) else { return nil }
+    public func resolveType(specifier: TypeSpecifier) -> Type {
+        guard var type = findType(name: specifier.name) else {
+            return .unresolved(UnresolvedType(module: self, specifier: specifier))
+        }
 
         let args = specifier.genericArguments.compactMap { (argSpec) in
             resolveType(specifier: argSpec)
         }
-
-        guard args.count == specifier.genericArguments.count else { return nil }
 
         type.genericArguments = args
 

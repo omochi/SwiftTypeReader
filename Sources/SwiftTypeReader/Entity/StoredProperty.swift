@@ -4,7 +4,7 @@ public struct StoredProperty {
         unresolvedType: UnresolvedType
     ) {
         self.name = name
-        self.unresolvedType = .unresolved(unresolvedType)
+        self.unresolvedType = .init(unresolved: unresolvedType)
     }
 
     public var name: String

@@ -1,6 +1,7 @@
 public enum Type: CustomStringConvertible {
     case `struct`(StructType)
     case `enum`(EnumType)
+    case unresolved(UnresolvedType)
 
     public var `struct`: StructType? {
         guard case .struct(let x) = self else { return nil }
@@ -12,10 +13,16 @@ public enum Type: CustomStringConvertible {
         return x
     }
 
+    public var `unresolved`: UnresolvedType? {
+        guard case .unresolved(let x) = self else { return nil }
+        return x
+    }
+
     public var name: String {
         switch self {
         case .struct(let st): return st.name
         case .enum(let et): return et.name
+        case .unresolved(let ut): return ut.name
         }
     }
 
@@ -24,6 +31,7 @@ public enum Type: CustomStringConvertible {
             switch self {
             case .struct(let st): return st.genericsArguments
             case .enum(let et): return et.genericsArguments
+            case .unresolved(let ut): return ut.genericArguments
             }
         }
         set {
@@ -34,15 +42,22 @@ public enum Type: CustomStringConvertible {
             case .enum(var et):
                 et.genericsArguments = newValue
                 self = .enum(et)
+            case .unresolved(var ut):
+                ut.genericArguments = newValue
+                self = .unresolved(ut)
             }
         }
     }
 
     public func asSpecifier() -> TypeSpecifier {
-        TypeSpecifier(
-            name: name,
-            genericArguments: genericArguments.map { $0.asSpecifier() }
-        )
+        switch self {
+        case .unresolved(let ut): return ut.specifier
+        default:
+            return TypeSpecifier(
+                name: name,
+                genericArguments: genericArguments.map { $0.asSpecifier() }
+            )
+        }
     }
 
     public var description: String {
