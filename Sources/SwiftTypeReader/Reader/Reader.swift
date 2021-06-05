@@ -15,12 +15,11 @@ private final class ReaderImpl {
     private var module: Module = Module()
 
     func read(directory: URL) throws -> Module {
-        try walk(directory: directory) { (file) in
+        try walk(file: directory) { (file) in
             let ext = file.pathExtension
             guard ext == "swift" else {
                 return
             }
-
 
             let source = try String(contentsOf: file)
             _ = try read(source: source)
@@ -54,17 +53,17 @@ private final class ReaderImpl {
     }
 
 
-    private func walk(directory: URL, _ f: (URL) throws -> Void) throws {
-        let items = try fm.contentsOfDirectory(atPath: directory.path)
-
-        for item in items {
-            let file = directory.appendingPathComponent(item)
-            var isDir: ObjCBool = false
-            if fm.fileExists(atPath: file.path, isDirectory: &isDir), isDir.boolValue {
-                try walk(directory: file, f)
-            } else {
-                try f(file)
+    private func walk(file: URL, _ f: (URL) throws -> Void) throws {
+        var isDir: ObjCBool = false
+        if fm.fileExists(atPath: file.path, isDirectory: &isDir), isDir.boolValue {
+            let dir = file
+            let items = try fm.contentsOfDirectory(atPath: dir.path)
+            for item in items {
+                let file = dir.appendingPathComponent(item)
+                try walk(file: file, f)
             }
+        } else {
+            try f(file)
         }
     }
 }
