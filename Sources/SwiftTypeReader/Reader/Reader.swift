@@ -28,13 +28,12 @@ private final class ReaderImpl {
         for case let file as URL in enumerator {
             let ext = file.pathExtension
             guard ext == "swift" else {
-                return
+                continue
             }
 
             let source = try String(contentsOf: file)
             _ = try read(source: source, file: file)
         }
-
     }
 
     func read(source: String, file: URL?) throws {
