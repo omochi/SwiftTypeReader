@@ -1,6 +1,6 @@
 import Foundation
 
-public class Module {
+public final class Module {
     public init() {}
 
     public var types: [Type] = []

@@ -21,18 +21,33 @@ private final class ReaderImpl {
     var module: Module = Module()
 
     func read(file: URL) throws {
-        guard let enumerator = fm.enumerator(at: file, includingPropertiesForKeys: []) else {
-            return
-        }
-
-        for case let file as URL in enumerator {
+        func process(file: URL) throws {
             let ext = file.pathExtension
             guard ext == "swift" else {
-                continue
+                return
             }
 
             let source = try String(contentsOf: file)
-            _ = try read(source: source, file: file)
+            try read(source: source, file: file)
+        }
+
+        var isDir: ObjCBool = false
+        guard fm.fileExists(atPath: file.path, isDirectory: &isDir) else {
+            return
+        }
+
+        if isDir.boolValue {
+            guard let enumerator = fm.enumerator(
+                at: file, includingPropertiesForKeys: []
+            ) else {
+                return
+            }
+
+            for case let file as URL in enumerator {
+                try process(file: file)
+            }
+        } else {
+            try process(file: file)
         }
     }
 
