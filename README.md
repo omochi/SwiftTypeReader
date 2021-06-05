@@ -71,16 +71,6 @@ struct S {
 }
 ```
 
-## Stored properties with accessors
-
-```swift
-struct S {
-    var x: Int {
-        didSet { }
-    }
-}
-```
-
 ## Methods
 
 ```swift

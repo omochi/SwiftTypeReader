@@ -27,7 +27,6 @@ let package = Package(
             name: "SwiftTypeReaderTests",
             dependencies: ["SwiftTypeReader"],
             exclude: ["Resources"]
-
         )
     ]
 )

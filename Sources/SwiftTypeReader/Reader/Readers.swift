@@ -41,4 +41,20 @@ enum Readers {
     static func unescapeIdentifier(_ str: String) -> String {
         return str.trimmingCharacters(in: ["`"])
     }
+
+    static func isStoredPropertyAccessor(accessor: Syntax) -> Bool {
+        if let _ = accessor.as(CodeBlockSyntax.self) {
+            return false
+        } else if let accessors = accessor.as(AccessorBlockSyntax.self) {
+            return accessors.accessors.allSatisfy { (accsessor) in
+                isStoredPropertyAccessor(name: accsessor.accessorKind.text)
+            }
+        } else {
+            return false
+        }
+    }
+
+    static func isStoredPropertyAccessor(name: String) -> Bool {
+        return name == "willSet" || name == "didSet"
+    }
 }

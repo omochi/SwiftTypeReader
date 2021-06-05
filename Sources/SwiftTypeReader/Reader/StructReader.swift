@@ -32,8 +32,10 @@ final class StructReader {
     }
 
     private func readStoredProperty(_ binding: PatternBindingSyntax) -> StoredProperty? {
-        if let _ = binding.accessor {
-            return nil
+        if let accSyntax = binding.accessor {
+            guard Readers.isStoredPropertyAccessor(accessor: accSyntax) else {
+                return nil
+            }
         }
 
         guard let ident = binding.pattern.as(IdentifierPatternSyntax.self) else {

@@ -1,16 +1,18 @@
 import XCTest
 @testable import SwiftTypeReader
 
+func XCTReadTypes(_ source: String, file: StaticString = #file, line: UInt = #line) throws -> Module {
+    return try Reader().read(source: source)
+}
+
 final class SwiftTypeReaderTests: XCTestCase {
     func testSimple() throws {
-        let reader = Reader()
-
-        let source = """
+        let result = try XCTReadTypes("""
 struct S {
     var a: Int?
 }
 """
-        let result = try reader.read(source: source)
+        )
 
         let s = try XCTUnwrap(result.types[safe: 0]?.struct)
         XCTAssertEqual(s.name, "S")
@@ -28,9 +30,7 @@ struct S {
     }
 
     func testReader() throws {
-        let reader = Reader()
-
-        let source = """
+        let result = try XCTReadTypes("""
 struct S1 {
     var a: Int
     var b: S2
@@ -40,8 +40,7 @@ struct S2 {
     var a: Int
 }
 """
-
-        let result = try reader.read(source: source)
+        )
 
         do {
             let s1 = try XCTUnwrap(result.types[safe: 0]?.struct)
@@ -71,14 +70,12 @@ struct S2 {
     }
 
     func testUnresolved() throws {
-        let reader = Reader()
-
-        let source = """
+        let result = try XCTReadTypes("""
 struct S {
     var a: URL
 }
 """
-        let result = try reader.read(source: source)
+        )
 
         let s = try XCTUnwrap(result.types[safe: 0]?.struct)
 
@@ -87,16 +84,14 @@ struct S {
     }
 
     func testEnum() throws {
-        let reader = Reader()
-
-        let source = """
+        let result = try XCTReadTypes("""
 enum E {
     case a
     case b(Int)
     case c(x: Int, y: Int)
 }
 """
-        let result = try reader.read(source: source)
+        )
 
         let e = try XCTUnwrap(result.types[safe: 0]?.enum)
 
@@ -126,5 +121,28 @@ enum E {
             XCTAssertEqual(y.name, "y")
             XCTAssertEqual(y.type.name, "Int")
         }
+    }
+
+    func testObservedStoredProperty() throws {
+        let result = try XCTReadTypes("""
+struct S {
+    var a: Int { 0 }
+    var b: Int = 0 {
+        willSet {}
+        didSet {}
+    }
+    var c: Int {
+        get { 0 }
+    }
+"""
+        )
+
+        let s = try XCTUnwrap(result.types[safe: 0]?.struct)
+
+        XCTAssertEqual(s.storedProperties.count, 1)
+
+        let b = try XCTUnwrap(s.storedProperties[safe: 0])
+        XCTAssertEqual(b.name, "b")
+        XCTAssertEqual(b.type.name, "Int")
     }
 }
