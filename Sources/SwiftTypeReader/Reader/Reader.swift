@@ -2,11 +2,13 @@ import Foundation
 import SwiftSyntax
 
 public final class Reader {
-    func read(directory: URL) throws -> Module {
+    public init() {}
+    
+    public func read(directory: URL) throws -> Module {
         try ReaderImpl().read(directory: directory)
     }
 
-    func read(source: String) throws -> Module {
+    public func read(source: String) throws -> Module {
         try ReaderImpl().read(source: source, file: nil)
     }
 }
