@@ -5,19 +5,27 @@ public final class Reader {
     public init() {}
 
     public func read(file: URL) throws -> Module {
-        try ReaderImpl().read(file: file)
+        let reader = ReaderImpl()
+        try reader.read(file: file)
+        return reader.module
     }
 
     public func read(source: String, file: URL? = nil) throws -> Module {
-        try ReaderImpl().read(source: source, file: file)
+        let reader = ReaderImpl()
+        try reader.read(source: source, file: file)
+        return reader.module
     }
 }
 
 private final class ReaderImpl {
-    private var module: Module = Module()
+    var module: Module = Module()
 
-    func read(file: URL) throws -> Module {
-        try walk(file: file) { (file) in
+    func read(file: URL) throws {
+        guard let enumerator = fm.enumerator(at: file, includingPropertiesForKeys: []) else {
+            return
+        }
+
+        for case let file as URL in enumerator {
             let ext = file.pathExtension
             guard ext == "swift" else {
                 return
@@ -27,10 +35,9 @@ private final class ReaderImpl {
             _ = try read(source: source, file: file)
         }
 
-        return module
     }
 
-    func read(source: String, file: URL?) throws -> Module {
+    func read(source: String, file: URL?) throws {
         let sourceFile: SourceFileSyntax = try SyntaxParser.parse(source: source)
 
         let statements = sourceFile.statements.map { $0.item }
@@ -49,23 +56,6 @@ private final class ReaderImpl {
                     module.types.append(.enum(et))
                 }
             }
-        }
-
-        return module
-    }
-
-
-    private func walk(file: URL, _ f: (URL) throws -> Void) throws {
-        var isDir: ObjCBool = false
-        if fm.fileExists(atPath: file.path, isDirectory: &isDir), isDir.boolValue {
-            let dir = file
-            let items = try fm.contentsOfDirectory(atPath: dir.path)
-            for item in items {
-                let file = dir.appendingPathComponent(item)
-                try walk(file: file, f)
-            }
-        } else {
-            try f(file)
         }
     }
 }
