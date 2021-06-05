@@ -1,10 +1,13 @@
+import Foundation
 import SwiftSyntax
 
 final class EnumReader {
     private let module: Module
+    private let file: URL?
 
-    init(module: Module) {
+    init(module: Module, file: URL?) {
         self.module = module
+        self.file = file
     }
 
     func read(enumDecl: EnumDeclSyntax) -> EnumType? {
@@ -16,6 +19,7 @@ final class EnumReader {
         }
 
         return EnumType(
+            file: file,
             name: enumDecl.identifier.text,
             caseElements: caseElements
         )
@@ -60,6 +64,7 @@ final class EnumReader {
             name: name,
             unresolvedType: UnresolvedType(
                 module: module,
+                file: file,
                 specifier: typeSpec
             )
         )

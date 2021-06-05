@@ -1,14 +1,19 @@
+import Foundation
+
 public struct UnresolvedType: AlwaysResolvableProtocol {
     public typealias ResolvedType = Type
 
     private unowned let module: Module
+    public var file: URL?
     public var specifier: TypeSpecifier
 
     public init(
         module: Module,
+        file: URL? = nil,
         specifier: TypeSpecifier
     ) {
         self.module = module
+        self.file = file
         self.specifier = specifier
     }
 

@@ -1,3 +1,5 @@
+import Foundation
+
 public enum Type: CustomStringConvertible {
     case `struct`(StructType)
     case `enum`(EnumType)
@@ -23,6 +25,14 @@ public enum Type: CustomStringConvertible {
         case .struct(let st): return st.name
         case .enum(let et): return et.name
         case .unresolved(let ut): return ut.name
+        }
+    }
+
+    public var file: URL? {
+        switch self {
+        case .struct(let st): return st.file
+        case .enum(let et): return et.file
+        case .unresolved(let ut): return ut.file
         }
     }
 

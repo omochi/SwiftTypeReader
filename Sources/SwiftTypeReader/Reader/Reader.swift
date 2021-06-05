@@ -7,7 +7,7 @@ public final class Reader {
     }
 
     func read(source: String) throws -> Module {
-        try ReaderImpl().read(source: source)
+        try ReaderImpl().read(source: source, file: nil)
     }
 }
 
@@ -22,26 +22,26 @@ private final class ReaderImpl {
             }
 
             let source = try String(contentsOf: file)
-            _ = try read(source: source)
+            _ = try read(source: source, file: file)
         }
 
         return module
     }
 
-    func read(source: String) throws -> Module {
+    func read(source: String, file: URL?) throws -> Module {
         let sourceFile: SourceFileSyntax = try SyntaxParser.parse(source: source)
 
         let statements = sourceFile.statements.map { $0.item }
 
         for statement in statements {
             if let decl = statement.as(StructDeclSyntax.self) {
-                if let st = StructReader(module: module)
+                if let st = StructReader(module: module, file: file)
                     .read(structDecl: decl)
                 {
                     module.types.append(.struct(st))
                 }
             } else if let decl = statement.as(EnumDeclSyntax.self) {
-                if let et = EnumReader(module: module)
+                if let et = EnumReader(module: module, file: file)
                     .read(enumDecl: decl)
                 {
                     module.types.append(.enum(et))

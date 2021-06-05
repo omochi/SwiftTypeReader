@@ -1,10 +1,16 @@
+import Foundation
 import SwiftSyntax
 
 final class StructReader {
     private let module: Module
+    private let file: URL?
 
-    init(module: Module) {
+    init(
+        module: Module,
+        file: URL?
+    ) {
         self.module = module
+        self.file = file
     }
 
     func read(structDecl: StructDeclSyntax) -> StructType? {
@@ -16,6 +22,7 @@ final class StructReader {
         }
 
         return StructType(
+            file: file,
             name: structDecl.identifier.text,
             storedProperties: storedProperties
         )
@@ -52,6 +59,7 @@ final class StructReader {
 
         let type = UnresolvedType(
             module: module,
+            file: file,
             specifier: typeSpec
         )
 
