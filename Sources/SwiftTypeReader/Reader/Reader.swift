@@ -3,21 +3,21 @@ import SwiftSyntax
 
 public final class Reader {
     public init() {}
-    
-    public func read(directory: URL) throws -> Module {
-        try ReaderImpl().read(directory: directory)
+
+    public func read(file: URL) throws -> Module {
+        try ReaderImpl().read(file: file)
     }
 
-    public func read(source: String) throws -> Module {
-        try ReaderImpl().read(source: source, file: nil)
+    public func read(source: String, file: URL? = nil) throws -> Module {
+        try ReaderImpl().read(source: source, file: file)
     }
 }
 
 private final class ReaderImpl {
     private var module: Module = Module()
 
-    func read(directory: URL) throws -> Module {
-        try walk(file: directory) { (file) in
+    func read(file: URL) throws -> Module {
+        try walk(file: file) { (file) in
             let ext = file.pathExtension
             guard ext == "swift" else {
                 return
