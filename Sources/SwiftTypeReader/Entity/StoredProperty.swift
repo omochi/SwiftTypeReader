@@ -8,7 +8,7 @@ public struct StoredProperty {
     }
 
     public var name: String
-    public var type: Type {
+    public var type: SType {
         unresolvedType.resolved()
     }
 

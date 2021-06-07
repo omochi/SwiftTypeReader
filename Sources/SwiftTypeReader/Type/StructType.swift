@@ -4,7 +4,7 @@ public struct StructType {
     public init(
         file: URL? = nil,
         name: String,
-        genericsArguments: [Type] = [],
+        genericsArguments: [SType] = [],
         storedProperties: [StoredProperty] = []
     ) {
         self.file = file
@@ -15,6 +15,6 @@ public struct StructType {
 
     public var file: URL?
     public var name: String
-    public var genericsArguments: [Type]
+    public var genericsArguments: [SType]
     public var storedProperties: [StoredProperty]
 }

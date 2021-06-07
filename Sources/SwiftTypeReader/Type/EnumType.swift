@@ -4,7 +4,7 @@ public struct EnumType {
     public init(
         file: URL? = nil,
         name: String,
-        genericsArguments: [Type] = [],
+        genericsArguments: [SType] = [],
         caseElements: [CaseElement] = []
     ) {
         self.file = file
@@ -15,6 +15,6 @@ public struct EnumType {
 
     public var file: URL?
     public var name: String
-    public var genericsArguments: [Type]
+    public var genericsArguments: [SType]
     public var caseElements: [CaseElement]
 }

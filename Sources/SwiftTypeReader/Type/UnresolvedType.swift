@@ -1,7 +1,7 @@
 import Foundation
 
 public struct UnresolvedType: AlwaysResolvableProtocol {
-    public typealias ResolvedType = Type
+    public typealias ResolvedType = SType
 
     private unowned let module: Module
     public var file: URL?
@@ -17,7 +17,7 @@ public struct UnresolvedType: AlwaysResolvableProtocol {
         self.specifier = specifier
     }
 
-    public func resolved() -> Type {
+    public func resolved() -> SType {
         module.resolveType(specifier: specifier)
     }
 
@@ -25,7 +25,7 @@ public struct UnresolvedType: AlwaysResolvableProtocol {
         specifier.name
     }
 
-    public var genericArguments: [Type] {
+    public var genericArguments: [SType] {
         get {
             specifier.genericArguments.map { (arg) in
                 module.resolveType(specifier: arg)

@@ -1,6 +1,12 @@
 import Foundation
 
-public enum Type: CustomStringConvertible {
+/*
+ S prefix can avoid problem from name `Type` that
+ we can't write `SwiftTypeReader.Type`.
+ S means Swift.
+*/
+
+public enum SType: CustomStringConvertible {
     case `struct`(StructType)
     case `enum`(EnumType)
     case unresolved(UnresolvedType)
@@ -36,7 +42,7 @@ public enum Type: CustomStringConvertible {
         }
     }
 
-    public var genericArguments: [Type] {
+    public var genericArguments: [SType] {
         get {
             switch self {
             case .struct(let st): return st.genericsArguments
