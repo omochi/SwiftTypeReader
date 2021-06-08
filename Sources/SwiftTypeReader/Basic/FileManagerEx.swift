@@ -42,7 +42,7 @@ extension FileManager {
         }
     }
 
-    public func directoryOrFileEnumerator(
+    func directoryOrFileEnumerator(
         at url: URL,
         includingPropertiesForKeys keys: [URLResourceKey]? = nil,
         options: DirectoryEnumerationOptions = []
