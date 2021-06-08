@@ -5,49 +5,30 @@ public final class Reader {
     public init() {}
 
     public func read(file: URL) throws -> Module {
-        let reader = ReaderImpl()
+        let reader = Impl()
         try reader.read(file: file)
         return reader.module
     }
 
     public func read(source: String, file: URL? = nil) throws -> Module {
-        let reader = ReaderImpl()
+        let reader = Impl()
         try reader.read(source: source, file: file)
         return reader.module
     }
 }
 
-private final class ReaderImpl {
+private final class Impl {
     var module: Module = Module()
 
     func read(file: URL) throws {
-        func process(file: URL) throws {
+        for file in fm.directoryOrFileEnumerator(at: file) {
             let ext = file.pathExtension
             guard ext == "swift" else {
-                return
+                continue
             }
 
             let source = try String(contentsOf: file)
             try read(source: source, file: file)
-        }
-
-        var isDir: ObjCBool = false
-        guard fm.fileExists(atPath: file.path, isDirectory: &isDir) else {
-            return
-        }
-
-        if isDir.boolValue {
-            guard let enumerator = fm.enumerator(
-                at: file, includingPropertiesForKeys: []
-            ) else {
-                return
-            }
-
-            for case let file as URL in enumerator {
-                try process(file: file)
-            }
-        } else {
-            try process(file: file)
         }
     }
 
