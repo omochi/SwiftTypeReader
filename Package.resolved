@@ -2,8 +2,17 @@
   "object": {
     "pins": [
       {
+        "package": "BinarySwiftSyntax",
+        "repositoryURL": "https://github.com/omochi/BinarySwiftSyntax",
+        "state": {
+          "branch": "main",
+          "revision": "21cfc03f3f518a69bf49767c09eaa475ad523d1a",
+          "version": null
+        }
+      },
+      {
         "package": "SwiftSyntax",
-        "repositoryURL": "https://github.com/apple/swift-syntax.git",
+        "repositoryURL": "https://github.com/apple/swift-syntax",
         "state": {
           "branch": null,
           "revision": "2fff9fc25cdc059379b6bd309377cfab45d8520c",
