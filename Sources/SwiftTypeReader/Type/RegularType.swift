@@ -1,6 +1,6 @@
 import Foundation
 
-public enum RegularType {
+public enum RegularType: RegularTypeProtocol {
     case `struct`(StructType)
     case `enum`(EnumType)
     case `protocol`(ProtocolType)
@@ -62,21 +62,26 @@ public enum RegularType {
 
     public var genericArgumentSpecifiers: [TypeSpecifier] {
         switch self {
-        case .struct(let t):
-            return t.unresolvedGenericArguments.asSpecifiers()
-        case .enum(let t):
-            return t.unresolvedGenericArguments.asSpecifiers()
-        case .protocol: return []
+        case .struct(let t): return t.genericArgumentSpecifiers
+        case .enum(let t): return t.genericArgumentSpecifiers
+        case .protocol(let t): return t.genericArgumentSpecifiers
+        }
+    }
+
+    public var description: String {
+        switch self {
+        case .struct(let t): return t.description
+        case .enum(let t): return t.description
+        case .protocol(let t): return t.description
         }
     }
 
     public func asSpecifier() -> TypeSpecifier {
-        TypeSpecifier(
-            module: module,
-            file: file,
-            name: name,
-            genericArguments: genericArgumentSpecifiers
-        )
+        switch self {
+        case .struct(let t): return t.asSpecifier()
+        case .enum(let t): return t.asSpecifier()
+        case .protocol(let t): return t.asSpecifier()
+        }
     }
 
     public func applyingGenericArguments(_ args: [SType]) throws -> RegularType {
@@ -91,5 +96,28 @@ public enum RegularType {
             throw MessageError("protocol can't be applied generic arguments")
         }
     }
-    
 }
+
+public protocol RegularTypeProtocol: CustomStringConvertible {
+    var module: Module? { get }
+    var file: URL? { get }
+    var name: String { get }
+    var genericArgumentSpecifiers: [TypeSpecifier] { get }
+}
+
+extension RegularTypeProtocol {
+    public func asSpecifier() -> TypeSpecifier {
+        .init(
+            module: module,
+            file: file,
+            name: name,
+            genericArguments: genericArgumentSpecifiers
+        )
+    }
+
+    public var description: String {
+        asSpecifier().description
+    }
+}
+
+

@@ -4,7 +4,7 @@ import Foundation
  Protocol.
  Not exsitential container type.
  */
-public struct ProtocolType {
+public struct ProtocolType: RegularTypeProtocol {
     public init(
         module: Module?,
         file: URL?,
@@ -18,4 +18,9 @@ public struct ProtocolType {
     public weak var module: Module?
     public var file: URL?
     public var name: String
+
+    public var genericArgumentSpecifiers: [TypeSpecifier] {
+        []
+    }
+
 }

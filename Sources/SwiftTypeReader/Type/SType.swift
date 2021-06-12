@@ -84,7 +84,10 @@ public struct SType: CustomStringConvertible {
     }
 
     public var description: String {
-        asSpecifier().description
+        switch state {
+        case .resolved(let t): return t.description
+        case .unresolved(let s): return s.description
+        }
     }
 
     public static func `struct`(_ t: StructType) -> SType {

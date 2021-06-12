@@ -1,6 +1,6 @@
 import Foundation
 
-public struct EnumType {
+public struct EnumType: RegularTypeProtocol {
     public init(
         module: Module,
         file: URL?,
@@ -17,7 +17,7 @@ public struct EnumType {
         self.caseElements = caseElements
     }
 
-    public var module: Module
+    public weak var module: Module?
     public var file: URL?
     public var name: String
     public var unresolvedGenericArguments: TypeCollection
@@ -30,6 +30,10 @@ public struct EnumType {
 
     public mutating func setGenericArguments(_ ts: [SType]) {
         unresolvedGenericArguments = .resolved(ts)
+    }
+
+    public var genericArgumentSpecifiers: [TypeSpecifier] {
+        unresolvedGenericArguments.asSpecifiers()
     }
 
     public func inheritedTypes() throws -> [SType] {

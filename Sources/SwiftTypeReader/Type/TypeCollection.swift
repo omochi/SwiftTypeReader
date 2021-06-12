@@ -28,7 +28,7 @@ public struct TypeCollection {
         self = .unresolved(specifiers)
     }
 
-    public init(_ types: [SType]) {
+    public init(types: [SType]) {
         self = .resolved(types)
     }
 

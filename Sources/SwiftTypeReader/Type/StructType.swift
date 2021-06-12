@@ -1,6 +1,6 @@
 import Foundation
 
-public struct StructType {
+public struct StructType: RegularTypeProtocol {
     public init(
         module: Module,
         file: URL?,
@@ -30,6 +30,10 @@ public struct StructType {
 
     public mutating func setGenericArguments(_ ts: [SType]) {
         unresolvedGenericArguments = .resolved(ts)
+    }
+
+    public var genericArgumentSpecifiers: [TypeSpecifier] {
+        unresolvedGenericArguments.asSpecifiers()
     }
 
     public func inheritedTypes() throws -> [SType] {
