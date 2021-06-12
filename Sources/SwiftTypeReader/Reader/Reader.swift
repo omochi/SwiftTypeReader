@@ -13,28 +13,35 @@ public final class Reader {
 
     public var modules: Modules
 
-    public func read(file: URL) throws -> Result {
-        let reader = Impl(modules: modules)
+    public func read(file: URL, module: Module? = nil) throws -> Result {
+        let reader = Impl(modules: modules, module: module)
         try reader.read(file: file)
         return reader.result()
     }
 
-    public func read(source: String, file: URL? = nil) throws -> Result {
-        let reader = Impl(modules: modules)
+    public func read(source: String, file: URL? = nil, module: Module? = nil) throws -> Result {
+        let reader = Impl(modules: modules, module: module)
         try reader.read(source: source, file: file)
         return reader.result()
     }
 }
 
 private final class Impl {
-    init(modules: Modules) {
+    init(modules: Modules, module: Module?) {
+        let targetModule: Module
+        if let module = module {
+            targetModule = module
+        } else {
+            targetModule = Module(
+                modules: modules,
+                name: nil
+            )
+            // before Swift module
+            modules.modules.insert(targetModule, at: 0)
+        }
+
         self.modules = modules
-        module = Module(
-            modules: modules,
-            name: nil
-        )
-        // before Swift module
-        modules.modules.insert(module, at: 0)
+        self.module = targetModule
     }
 
     let modules: Modules
