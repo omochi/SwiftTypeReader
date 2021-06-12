@@ -4,79 +4,106 @@ import Foundation
  S prefix can avoid problem from name `Type` that
  we can't write `SwiftTypeReader.Type`.
  S means Swift.
+
+ This type hides cache state mutability.
 */
 
-public enum SType: CustomStringConvertible {
-    case `struct`(StructType)
-    case `enum`(EnumType)
-    case unresolved(UnresolvedType)
+public struct SType: CustomStringConvertible {
+    enum State {
+        case resolved(RegularType)
+        case unresolved(TypeSpecifier)
+    }
+
+    let box: MutableBox<State>
+
+    init(_ box: MutableBox<State>) {
+        self.box = box
+    }
+
+    var state: State {
+        get { box.value }
+        nonmutating set { box.value = newValue }
+    }
+
+    init(_ state: State) {
+        self.init(MutableBox(state))
+    }
+
+    public var regular: RegularType? {
+        guard case .resolved(let x) = state else { return nil }
+        return x
+    }
 
     public var `struct`: StructType? {
-        guard case .struct(let x) = self else { return nil }
-        return x
+        regular?.struct
     }
 
     public var `enum`: EnumType? {
-        guard case .enum(let x) = self else { return nil }
+        regular?.enum
+    }
+
+    public var `protocol`: ProtocolType? {
+        regular?.protocol
+    }
+
+    public var `unresolved`: TypeSpecifier? {
+        guard case .unresolved(let x) = state else { return nil }
         return x
     }
 
-    public var `unresolved`: UnresolvedType? {
-        guard case .unresolved(let x) = self else { return nil }
-        return x
+    public func resolved() throws -> SType {
+        if case .unresolved(let s) = state {
+            state = try s.resolve().state
+        }
+        return self
     }
 
     public var name: String {
-        switch self {
-        case .struct(let st): return st.name
-        case .enum(let et): return et.name
-        case .unresolved(let ut): return ut.name
-        }
-    }
-
-    public var file: URL? {
-        switch self {
-        case .struct(let st): return st.file
-        case .enum(let et): return et.file
-        case .unresolved(let ut): return ut.file
-        }
-    }
-
-    public var genericArguments: [SType] {
-        get {
-            switch self {
-            case .struct(let st): return st.genericsArguments
-            case .enum(let et): return et.genericsArguments
-            case .unresolved(let ut): return ut.genericArguments
-            }
-        }
-        set {
-            switch self {
-            case .struct(var st):
-                st.genericsArguments = newValue
-                self = .struct(st)
-            case .enum(var et):
-                et.genericsArguments = newValue
-                self = .enum(et)
-            case .unresolved(var ut):
-                ut.genericArguments = newValue
-                self = .unresolved(ut)
-            }
+        switch state {
+        case .resolved(let t): return t.name
+        case .unresolved(let s): return s.name
         }
     }
 
     public func asSpecifier() -> TypeSpecifier {
-        switch self {
-        case .unresolved(let ut): return ut.specifier
-        default:
-            return TypeSpecifier(
-                name: name,
-                genericArguments: genericArguments.map { $0.asSpecifier() }
-            )
+        switch state {
+        case .unresolved(let s): return s
+        case .resolved(let t): return t.asSpecifier()
+        }
+    }
+
+    public func applyingGenericArguments(_ args: [SType]) throws -> SType {
+        switch state {
+        case .resolved(var t):
+            t = try t.applyingGenericArguments(args)
+            return .resolved(t)
+        case .unresolved(var s):
+            s.genericArguments = args.map { $0.asSpecifier() }
+            return .unresolved(s)
         }
     }
 
     public var description: String {
         asSpecifier().description
+    }
+
+    public static func `struct`(_ t: StructType) -> SType {
+        .init(.resolved(.struct(t)))
+    }
+
+    public static func `enum`(_ t: EnumType) -> SType {
+        .init(.resolved(.enum(t)))
+    }
+
+    public static func `protocol`(_ t: ProtocolType) -> SType {
+        .init(.resolved(.protocol(t)))
+    }
+
+    public static func resolved(_ t: RegularType) -> SType {
+        .init(.resolved(t))
+    }
+
+    public static func unresolved(_ s: TypeSpecifier) -> SType {
+        .init(.unresolved(s))
     }
 }

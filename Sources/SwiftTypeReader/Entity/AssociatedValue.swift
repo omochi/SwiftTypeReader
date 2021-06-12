@@ -1,16 +1,17 @@
 public struct AssociatedValue {
     public init(
         name: String?,
-        unresolvedType: UnresolvedType
+        typeSpecifier: TypeSpecifier
     ) {
         self.name = name
-        self.unresolvedType = .init(unresolved: unresolvedType)
+        self.unresolvedType = .unresolved(typeSpecifier)
     }
 
     public var name: String?
-    public var type: SType {
-        unresolvedType.resolved()
+    
+    public func type() throws -> SType {
+        try unresolvedType.resolved()
     }
 
-    public var unresolvedType: Resolvable<UnresolvedType>
+    public var unresolvedType: SType
 }

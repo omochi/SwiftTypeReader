@@ -1,49 +1,94 @@
 import Foundation
 
 public final class Module {
-    public init() {}
+    public init(
+        modules: Modules?,
+        name: String?
+    ) {
+        self.modules = modules
+        self.name = name
+    }
 
+    public weak var modules: Modules?
+    public var name: String?
     public var types: [SType] = []
 
-    public func resolveType(specifier: TypeSpecifier) -> SType {
+    public func resolveType(specifier: TypeSpecifier) throws -> SType {
         guard var type = findType(name: specifier.name) else {
-            return .unresolved(UnresolvedType(module: self, specifier: specifier))
+            return .unresolved(specifier)
         }
 
-        let args = specifier.genericArguments.compactMap { (argSpec) in
-            resolveType(specifier: argSpec)
+        let args = try specifier.genericArguments.compactMap { (argSpec) in
+            try resolveType(specifier: argSpec)
         }
 
-        type.genericArguments = args
+        if !args.isEmpty {
+            type = try type.applyingGenericArguments(args)
+        }
 
         return type
     }
 
     private func findType(name: String) -> SType? {
-        if let type = (types.first { (type) in
-            type.name == name
-        }) {
-            return type
+        if let t = findTypeLocal(name: name) {
+            return t
         }
 
-        if let type = (Self.standardTypes.first { (type) in
-            type.name == name
-        }) {
-            return type
+        if let m = modules?.swift,
+           let t = m.findTypeLocal(name: name)
+        {
+            return t
         }
 
         return nil
     }
 
-    public static let standardTypes: [SType] = [
-        .struct(StructType(name: "Void")),
-        .struct(StructType(name: "Bool")),
-        .struct(StructType(name: "Int")),
-        .struct(StructType(name: "Float")),
-        .struct(StructType(name: "Double")),
-        .struct(StructType(name: "String")),
-        .struct(StructType(name: "Optional")),
-        .struct(StructType(name: "Array")),
-        .struct(StructType(name: "Dictionary"))
-    ]
+    private func findTypeLocal(name: String) -> SType? {
+        types.first { (type) in
+            type.name == name
+        }
+    }
+
+    static func buildSwift(modules: Modules) -> Module {
+        let m = Module(
+            modules: modules,
+            name: "Swift"
+        )
+
+        m.addStruct(name: "Void")
+        m.addStruct(name: "Bool")
+        m.addStruct(name: "Int")
+        m.addStruct(name: "Float")
+        m.addStruct(name: "Double")
+        m.addStruct(name: "String")
+        m.addStruct(name: "Optional")
+        m.addStruct(name: "Array")
+        m.addStruct(name: "Dictionary")
+
+        m.addProtocol(name: "Encodable")
+        m.addProtocol(name: "Decodable")
+        m.addProtocol(name: "Codable")
+
+        return m
+    }
+
+    func addStruct(name: String) {
+        let t = StructType(
+            module: self,
+            file: nil,
+            name: name
+        )
+
+        types.append(.struct(t))
+    }
+
+    func addProtocol(name: String) {
+        let t = ProtocolType(
+            module: self,
+            file: nil,
+            name: name
+        )
+
+        types.append(.protocol(t))
+    }
 }

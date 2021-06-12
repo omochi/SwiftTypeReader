@@ -14,16 +14,28 @@ final class StructReader {
     }
 
     func read(structDecl: StructDeclSyntax) -> StructType? {
-        var storedProperties: [StoredProperty] = []
+        let inheritedTypes: [TypeSpecifier]
+        if let clause = structDecl.inheritanceClause {
+            inheritedTypes = Readers.readInheritedTypes(
+                module: module,
+                file: file,
+                clause: clause
+            )
+        } else {
+            inheritedTypes = []
+        }
 
+        var storedProperties: [StoredProperty] = []
         let decls = structDecl.members.members.map { $0.decl }
         for decl in decls {
             storedProperties += readStoredProperties(decl: decl)
         }
 
         return StructType(
+            module: module,
             file: file,
             name: structDecl.identifier.text,
+            inheritedTypes: inheritedTypes,
             storedProperties: storedProperties
         )
     }
@@ -52,20 +64,18 @@ final class StructReader {
         let name = Readers.unescapeIdentifier(ident.identifier.text)
 
         guard let typeAnno = binding.typeAnnotation,
-              let typeSpec = Readers.readTypeSpecifier(typeAnno.type) else
+              let typeSpec = Readers.readTypeSpecifier(
+                module: module,
+                file: file,
+                typeSyntax: typeAnno.type
+              ) else
         {
             return nil
         }
 
-        let type = UnresolvedType(
-            module: module,
-            file: file,
-            specifier: typeSpec
-        )
-
         return StoredProperty(
             name: name,
-            unresolvedType: type
+            typeSpecifier: typeSpec
         )
     }
 
