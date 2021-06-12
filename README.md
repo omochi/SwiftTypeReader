@@ -31,14 +31,6 @@ struct S {
 
 # Development
 
-## Run XCTest with Xcode
-
-Set environment variable at scheme configuration to find SwiftSyntax runtime library.
-
-```
-DYLD_LIBRARY_PATH = /Applications/Xcode12.5.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx
-```
-
 ## Design consideration
 
 This library doesn't distinguish type descriptor and concrete type.
@@ -50,12 +42,6 @@ It make implementation simple but ugly especially when generic argument applicat
 
 ```swift
 class C {}
-```
-
-## Inheritance clause
-
-```swift
-struct S: P {}
 ```
 
 ## Computed properties
@@ -101,6 +87,3 @@ struct S {
 }
 ```
 
-## Stored properties of standard types
-
-They are only defined with names.
