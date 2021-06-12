@@ -7,7 +7,7 @@ public final class Reader {
         public var module: Module
     }
 
-    public init(modules: Modules?) {
+    public init(modules: Modules? = nil) {
         self.modules = modules ?? Modules()
     }
 
