@@ -9,7 +9,7 @@ import Foundation
 */
 
 public struct SType: CustomStringConvertible {
-    enum State {
+    public enum State {
         case resolved(RegularType)
         case unresolved(TypeSpecifier)
     }
@@ -20,11 +20,11 @@ public struct SType: CustomStringConvertible {
         self.box = box
     }
 
-    var state: State {
+    public var state: State {
         get { box.value }
     }
 
-    init(_ state: State) {
+    public init(_ state: State) {
         self.init(MutableBox(state))
     }
 
