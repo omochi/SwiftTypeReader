@@ -22,7 +22,6 @@ public struct SType: CustomStringConvertible {
 
     var state: State {
         get { box.value }
-        nonmutating set { box.value = newValue }
     }
 
     init(_ state: State) {
@@ -53,7 +52,8 @@ public struct SType: CustomStringConvertible {
 
     public func resolved() throws -> SType {
         if case .unresolved(let s) = state {
-            state = try s.resolve().state
+            // safe even if shared
+            box.value = try s.resolve().state
         }
         return self
     }

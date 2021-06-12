@@ -50,16 +50,12 @@ public enum RegularType {
         }
     }
 
-    public mutating func genericArguments() throws -> [SType] {
+    public func genericArguments() throws -> [SType] {
         switch self {
-        case .struct(var t):
-            let ret = try t.genericArguments()
-            self = .struct(t)
-            return ret
-        case .enum(var t):
-            let ret = try t.genericArguments()
-            self = .enum(t)
-            return ret
+        case .struct(let t):
+            return try t.genericArguments()
+        case .enum(let t):
+            return try t.genericArguments()
         case .protocol: return []
         }
     }
@@ -67,7 +63,7 @@ public enum RegularType {
     public var genericArgumentSpecifiers: [TypeSpecifier] {
         switch self {
         case .struct(let t):
-            return t.unresolvedInheritedTypes.asSpecifiers()
+            return t.unresolvedGenericArguments.asSpecifiers()
         case .enum(let t):
             return t.unresolvedGenericArguments.asSpecifiers()
         case .protocol: return []

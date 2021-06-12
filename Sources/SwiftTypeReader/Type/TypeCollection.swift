@@ -22,7 +22,6 @@ public struct TypeCollection {
 
     var state: State {
         get { box.value }
-        nonmutating set { box.value = newValue }
     }
 
     public init(_ specifiers: [TypeSpecifier]) {
@@ -35,7 +34,8 @@ public struct TypeCollection {
 
     public func resolved() throws -> [SType] {
         if case .unresolved(let ss) = state {
-            state = .resolved(
+            // safe even if shared
+            box.value = .resolved(
                 try ss.map { try $0.resolve() }
             )
         }
