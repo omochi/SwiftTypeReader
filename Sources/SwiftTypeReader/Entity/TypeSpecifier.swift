@@ -1,9 +1,20 @@
+import Foundation
+
 public struct TypeSpecifier: CustomStringConvertible {
-    public init(name: String, genericArguments: [TypeSpecifier]) {
+    public init(
+        module: Module?,
+        file: URL?,
+        name: String,
+        genericArguments: [TypeSpecifier]
+    ) {
+        self.module = module
+        self.file = file
         self.name = name
         self.genericArguments = genericArguments
     }
 
+    public weak var module: Module?
+    public var file: URL?
     public var name: String
     public var genericArguments: [TypeSpecifier]
 
@@ -16,5 +27,13 @@ public struct TypeSpecifier: CustomStringConvertible {
             str += ">"
         }
         return str
+    }
+
+    public func resolve() throws -> SType {
+        guard let module = self.module else {
+            return .unresolved(self)
+        }
+
+        return try module.resolveType(specifier: self)
     }
 }

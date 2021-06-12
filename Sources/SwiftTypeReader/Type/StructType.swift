@@ -2,19 +2,37 @@ import Foundation
 
 public struct StructType {
     public init(
-        file: URL? = nil,
+        module: Module,
+        file: URL?,
         name: String,
-        genericsArguments: [SType] = [],
+        genericArguments: [TypeSpecifier] = [],
+        inheritedTypes: [TypeSpecifier] = [],
         storedProperties: [StoredProperty] = []
     ) {
+        self.module = module
         self.file = file
         self.name = name
-        self.genericsArguments = genericsArguments
+        self.unresolvedGenericArguments = TypeCollection(genericArguments)
+        self.unresolvedInheritedTypes = TypeCollection(inheritedTypes)
         self.storedProperties = storedProperties
     }
 
+    public weak var module: Module?
     public var file: URL?
     public var name: String
-    public var genericsArguments: [SType]
+    public var unresolvedGenericArguments: TypeCollection
+    public var unresolvedInheritedTypes: TypeCollection
     public var storedProperties: [StoredProperty]
+
+    public func genericArguments() throws -> [SType] {
+        try unresolvedGenericArguments.resolved()
+    }
+
+    public mutating func setGenericArguments(_ ts: [SType]) {
+        unresolvedGenericArguments = .resolved(ts)
+    }
+
+    public func inheritedTypes() throws -> [SType] {
+        try unresolvedInheritedTypes.resolved()
+    }
 }

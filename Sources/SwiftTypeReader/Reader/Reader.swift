@@ -2,23 +2,50 @@ import Foundation
 import SwiftSyntax
 
 public final class Reader {
-    public init() {}
-
-    public func read(file: URL) throws -> Module {
-        let reader = Impl()
-        try reader.read(file: file)
-        return reader.module
+    public struct Result {
+        public var modules: Modules
+        public var module: Module
     }
 
-    public func read(source: String, file: URL? = nil) throws -> Module {
-        let reader = Impl()
+    public init(modules: Modules?) {
+        self.modules = modules ?? Modules()
+    }
+
+    public var modules: Modules
+
+    public func read(file: URL) throws -> Result {
+        let reader = Impl(modules: modules)
+        try reader.read(file: file)
+        return reader.result()
+    }
+
+    public func read(source: String, file: URL? = nil) throws -> Result {
+        let reader = Impl(modules: modules)
         try reader.read(source: source, file: file)
-        return reader.module
+        return reader.result()
     }
 }
 
 private final class Impl {
-    var module: Module = Module()
+    init(modules: Modules) {
+        self.modules = modules
+        module = Module(
+            modules: modules,
+            name: nil
+        )
+        // before Swift module
+        modules.modules.insert(module, at: 0)
+    }
+
+    let modules: Modules
+    let module: Module
+
+    func result() -> Reader.Result {
+        .init(
+            modules: modules,
+            module: module
+        )
+    }
 
     func read(file: URL) throws {
         for file in fm.directoryOrFileEnumerator(at: file) {

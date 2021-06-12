@@ -13,14 +13,25 @@ final class EnumReader {
     func read(enumDecl: EnumDeclSyntax) -> EnumType? {
         var caseElements: [CaseElement] = []
 
+        let inheritedTypes: [TypeSpecifier]
+        if let clause = enumDecl.inheritanceClause {
+            inheritedTypes = Readers.readInheritedTypes(
+                module: module, file: file, clause: clause
+            )
+        } else {
+            inheritedTypes = []
+        }
+
         let decls = enumDecl.members.members.map { $0.decl }
         for decl in decls {
             caseElements += readCaseElements(decl: decl)
         }
 
         return EnumType(
+            module: module,
             file: file,
             name: enumDecl.identifier.text,
+            inheritedTypes: inheritedTypes,
             caseElements: caseElements
         )
     }
@@ -58,15 +69,15 @@ final class EnumReader {
         }
 
         guard let typeSyntax = paramSyntax.type,
-              let typeSpec = Readers.readTypeSpecifier(typeSyntax) else { return nil }
+              let typeSpec = Readers.readTypeSpecifier(
+                module: module,
+                file: file,
+                typeSyntax: typeSyntax
+              ) else { return nil }
 
         return AssociatedValue(
             name: name,
-            unresolvedType: UnresolvedType(
-                module: module,
-                file: file,
-                specifier: typeSpec
-            )
+            typeSpecifier: typeSpec
         )
     }
 }
