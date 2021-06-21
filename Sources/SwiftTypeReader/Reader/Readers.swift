@@ -30,7 +30,7 @@ enum Readers {
                 file: context.file,
                 location: context.location,
                 name: simple.name.text,
-                genericArguments: args
+                genericArgumentSpecifiers: args
             )
         }
 
@@ -46,7 +46,7 @@ enum Readers {
                 file: context.file,
                 location: swiftModule.asLocation(),
                 name: "Optional",
-                genericArguments: [wrapped]
+                genericArgumentSpecifiers: [wrapped]
             )
         } else if let array = typeSyntax.as(ArrayTypeSyntax.self) {
             guard let element = readTypeSpecifier(
@@ -58,7 +58,7 @@ enum Readers {
                 file: context.file,
                 location: swiftModule.asLocation(),
                 name: "Array",
-                genericArguments: [element]
+                genericArgumentSpecifiers: [element]
             )
         } else if let dict = typeSyntax.as(DictionaryTypeSyntax.self) {
             guard let key = readTypeSpecifier(
@@ -74,7 +74,7 @@ enum Readers {
                 file: context.file,
                 location: swiftModule.asLocation(),
                 name: "Dictionary",
-                genericArguments: [key, value]
+                genericArgumentSpecifiers: [key, value]
             )
         } else {
             return nil

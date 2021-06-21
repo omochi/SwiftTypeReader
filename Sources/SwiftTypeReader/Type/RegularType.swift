@@ -48,30 +48,10 @@ public enum RegularType: RegularTypeProtocol {
     public var location: Location { inner.location }
     public var name: String { inner.name }
     public var genericParameters: [GenericParameterType] { inner.genericParameters }
+    public var genericArgumentSpecifiers: [TypeSpecifier] { inner.genericArgumentSpecifiers }
+    public func genericArguments() throws -> [SType] { try inner.genericArguments() }
     public var description: String { inner.description }
     public func asSpecifier() -> TypeSpecifier { inner.asSpecifier() }
-
-    public func genericArguments() throws -> [SType] {
-        switch self {
-        case .struct(let t):
-            return try t.genericArguments()
-        case .enum(let t):
-            return try t.genericArguments()
-        case .protocol:
-            return []
-        case .genericParameter:
-            return []
-        }
-    }
-
-    public var genericArgumentSpecifiers: [TypeSpecifier] {
-        switch self {
-        case .struct(let t): return t.genericArgumentSpecifiers
-        case .enum(let t): return t.genericArgumentSpecifiers
-        case .protocol(let t): return t.genericArgumentSpecifiers
-        case .genericParameter(let t): return t.genericArgumentSpecifiers
-        }
-    }
 
     public func applyingGenericArguments(_ args: [SType]) throws -> RegularType {
         switch self {
@@ -96,6 +76,7 @@ public protocol RegularTypeProtocol: CustomStringConvertible {
     var name: String { get }
     var genericParameters: [GenericParameterType] { get }
     var genericArgumentSpecifiers: [TypeSpecifier] { get }
+    func genericArguments() throws -> [SType]
 }
 
 extension RegularTypeProtocol {
@@ -105,7 +86,7 @@ extension RegularTypeProtocol {
             file: file,
             location: location,
             name: name,
-            genericArguments: genericArgumentSpecifiers
+            genericArgumentSpecifiers: genericArgumentSpecifiers
         )
     }
 

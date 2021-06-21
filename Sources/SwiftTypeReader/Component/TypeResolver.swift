@@ -12,7 +12,7 @@ struct TypeResolver {
             return .unresolved(specifier)
         }
 
-        let args = try specifier.genericArguments.compactMap { (argSpec) in
+        let args = try specifier.genericArgumentSpecifiers.compactMap { (argSpec) in
             try resolveType(module: module, specifier: argSpec)
         }
 

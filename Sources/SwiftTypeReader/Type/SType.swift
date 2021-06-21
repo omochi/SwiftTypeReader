@@ -71,8 +71,22 @@ public struct SType: CustomStringConvertible {
 
     public func asSpecifier() -> TypeSpecifier {
         switch state {
-        case .unresolved(let s): return s
         case .resolved(let t): return t.asSpecifier()
+        case .unresolved(let s): return s
+        }
+    }
+
+    public func genericArguments() throws -> [SType] {
+        switch state {
+        case .resolved(let t): return try t.genericArguments()
+        case .unresolved(let t): return try t.genericArguments()
+        }
+    }
+
+    public var genericArgumentSpecifiers: [TypeSpecifier] {
+        switch state {
+        case .resolved(let t): return t.genericArgumentSpecifiers
+        case .unresolved(let t): return t.genericArgumentSpecifiers
         }
     }
 
@@ -82,7 +96,7 @@ public struct SType: CustomStringConvertible {
             t = try t.applyingGenericArguments(args)
             return .resolved(t)
         case .unresolved(var s):
-            s.genericArguments = args.map { $0.asSpecifier() }
+            s.genericArgumentSpecifiers = args.map { $0.asSpecifier() }
             return .unresolved(s)
         }
     }

@@ -24,6 +24,7 @@ public struct ProtocolType: RegularTypeProtocol {
 
     public var genericParameters: [GenericParameterType] { [] }
 
+    public func genericArguments() throws -> [SType] { [] }
     public var genericArgumentSpecifiers: [TypeSpecifier] { [] }
 
 }
