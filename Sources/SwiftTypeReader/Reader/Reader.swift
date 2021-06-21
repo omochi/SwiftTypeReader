@@ -12,36 +12,44 @@ public final class Reader {
     }
 
     public var modules: Modules
+    public var moduleName: String = "main"
 
     public func read(file: URL, module: Module? = nil) throws -> Result {
-        let reader = Impl(modules: modules, module: module)
+        let module = initModule(module)
+        let reader = try Impl(module: module)
         try reader.read(file: file)
         return reader.result()
     }
 
     public func read(source: String, file: URL? = nil, module: Module? = nil) throws -> Result {
-        let reader = Impl(modules: modules, module: module)
+        let module = initModule(module)
+        let reader = try Impl(module: module)
         try reader.read(source: source, file: file)
         return reader.result()
+    }
+
+    private func initModule(_ module: Module?) -> Module {
+        if let module = module {
+            return module
+        }
+
+        let module = Module(
+            modules: modules,
+            name: moduleName
+        )
+        modules.modules.append(module)
+        return module
     }
 }
 
 private final class Impl {
-    init(modules: Modules, module: Module?) {
-        let targetModule: Module
-        if let module = module {
-            targetModule = module
-        } else {
-            targetModule = Module(
-                modules: modules,
-                name: nil
-            )
-            // before Swift module
-            modules.modules.insert(targetModule, at: 0)
+    init(module: Module) throws {
+        guard let modules = module.modules else {
+            throw MessageError("no Modules")
         }
 
         self.modules = modules
-        self.module = targetModule
+        self.module = module
     }
 
     let modules: Modules
@@ -73,15 +81,21 @@ private final class Impl {
 
         for statement in statements {
             if let decl = statement.as(StructDeclSyntax.self) {
-                if let st = StructReader(module: module, file: file)
-                    .read(structDecl: decl)
-                {
+                let reader = StructReader(
+                    module: module,
+                    file: file,
+                    location: module.asLocation()
+                )
+                if let st = reader.read(structDecl: decl) {
                     module.types.append(.struct(st))
                 }
             } else if let decl = statement.as(EnumDeclSyntax.self) {
-                if let et = EnumReader(module: module, file: file)
-                    .read(enumDecl: decl)
-                {
+                let reader = EnumReader(
+                    module: module,
+                    file: file,
+                    location: module.asLocation()
+                )
+                if let et = reader.read(enumDecl: decl) {
                     module.types.append(.enum(et))
                 }
             }

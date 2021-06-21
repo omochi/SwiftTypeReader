@@ -4,21 +4,40 @@ import SwiftSyntax
 final class StructReader {
     private let module: Module
     private let file: URL?
+    private let location: Location
 
     init(
         module: Module,
-        file: URL?
+        file: URL?,
+        location: Location
     ) {
         self.module = module
         self.file = file
+        self.location = location
     }
 
     func read(structDecl: StructDeclSyntax) -> StructType? {
+        let name = structDecl.identifier.text
+
+        let context = Readers.Context(
+            module: module,
+            file: file,
+            location: location.appending(.type(name: name))
+        )
+
+        let genericParameter: [GenericParameterType]
+        if let clause = structDecl.genericParameterClause {
+            genericParameter = Readers.readGenericParameters(
+                context: context, clause: clause
+            )
+        } else {
+            genericParameter = []
+        }
+
         let inheritedTypes: [TypeSpecifier]
         if let clause = structDecl.inheritanceClause {
             inheritedTypes = Readers.readInheritedTypes(
-                module: module,
-                file: file,
+                context: context,
                 clause: clause
             )
         } else {
@@ -28,29 +47,40 @@ final class StructReader {
         var storedProperties: [StoredProperty] = []
         let decls = structDecl.members.members.map { $0.decl }
         for decl in decls {
-            storedProperties += readStoredProperties(decl: decl)
+            storedProperties += readStoredProperties(
+                context: context,
+                decl: decl
+            )
         }
 
         return StructType(
             module: module,
             file: file,
-            name: structDecl.identifier.text,
+            location: location,
+            name: name,
+            genericParameters: genericParameter,
             inheritedTypes: inheritedTypes,
             storedProperties: storedProperties
         )
     }
 
-    private func readStoredProperties(decl: DeclSyntax) -> [StoredProperty] {
+    private func readStoredProperties(
+        context: Readers.Context,
+        decl: DeclSyntax
+    ) -> [StoredProperty] {
         if let varDecl = decl.as(VariableDeclSyntax.self) {
             return varDecl.bindings.compactMap {
-                readStoredProperty($0)
+                readStoredProperty(context: context, binding: $0)
             }
         } else {
             return []
         }
     }
 
-    private func readStoredProperty(_ binding: PatternBindingSyntax) -> StoredProperty? {
+    private func readStoredProperty(
+        context: Readers.Context,
+        binding: PatternBindingSyntax
+    ) -> StoredProperty? {
         if let accSyntax = binding.accessor {
             guard Readers.isStoredPropertyAccessor(accessor: accSyntax) else {
                 return nil
@@ -65,8 +95,7 @@ final class StructReader {
 
         guard let typeAnno = binding.typeAnnotation,
               let typeSpec = Readers.readTypeSpecifier(
-                module: module,
-                file: file,
+                context: context,
                 typeSyntax: typeAnno.type
               ) else
         {

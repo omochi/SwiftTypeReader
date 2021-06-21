@@ -1,10 +1,6 @@
 import Foundation
 
-/*
- Protocol.
- Not exsitential container type.
- */
-public struct ProtocolType: RegularTypeProtocol {
+public struct GenericParameterType: RegularTypeProtocol {
     public init(
         module: Module?,
         file: URL?,
@@ -25,5 +21,4 @@ public struct ProtocolType: RegularTypeProtocol {
     public var genericParameters: [GenericParameterType] { [] }
 
     public var genericArgumentSpecifiers: [TypeSpecifier] { [] }
-
 }

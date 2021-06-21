@@ -102,6 +102,10 @@ public struct SType: CustomStringConvertible {
         .init(.resolved(.protocol(t)))
     }
 
+    public static func genericParameter(_ t: GenericParameterType) -> SType {
+        .init(.resolved(.genericParameter(t)))
+    }
+
     public static func resolved(_ t: RegularType) -> SType {
         .init(.resolved(t))
     }

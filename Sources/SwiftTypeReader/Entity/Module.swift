@@ -3,15 +3,23 @@ import Foundation
 public final class Module {
     public init(
         modules: Modules?,
-        name: String?
+        name: String
     ) {
         self.modules = modules
         self.name = name
     }
 
     public weak var modules: Modules?
-    public var name: String?
+    public var name: String
     public var types: [SType] = []
+
+    public func asLocation() -> Location {
+        Location([.module(name: name)])
+    }
+
+    public func resolve(location: Location) throws -> Element? {
+        try LocationResolver().resolve(module: self, location: location)
+    }
 
     public func resolveType(specifier: TypeSpecifier) throws -> SType {
         guard var type = findType(name: specifier.name) else {
@@ -76,6 +84,7 @@ public final class Module {
         let t = StructType(
             module: self,
             file: nil,
+            location: asLocation(),
             name: name
         )
 
@@ -86,6 +95,7 @@ public final class Module {
         let t = ProtocolType(
             module: self,
             file: nil,
+            location: asLocation(),
             name: name
         )
 

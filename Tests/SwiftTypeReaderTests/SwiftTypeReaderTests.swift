@@ -17,6 +17,8 @@ struct S {
         let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
         XCTAssertEqual(s.name, "S")
 
+        XCTAssertEqual(s.location, Location([.module(name: "main")]))
+
         XCTAssertEqual(s.storedProperties.count, 1)
         let a = try XCTUnwrap(s.storedProperties[safe: 0])
         XCTAssertEqual(a.name, "a")
@@ -162,5 +164,27 @@ enum E: Codable {
         XCTAssertNotNil(c.protocol)
         XCTAssertEqual(c.protocol?.module?.name, "Swift")
         XCTAssertEqual(c.name, "Codable")
+    }
+
+    func testGenericParameter() throws {
+        let result = try XCTReadTypes("""
+struct S<T> {
+    var a: T
+}
+"""
+        )
+
+        let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        XCTAssertEqual(s.name, "S")
+
+        XCTAssertEqual(s.genericParameters.count, 1)
+        let t = try XCTUnwrap(s.genericParameters[safe: 0])
+        XCTAssertEqual(t.name, "T")
+
+        XCTAssertEqual(s.storedProperties.count, 1)
+        let a = try XCTUnwrap(s.storedProperties[safe: 0])
+        XCTAssertEqual(a.name, "a")
+
+        print(a)
     }
 }

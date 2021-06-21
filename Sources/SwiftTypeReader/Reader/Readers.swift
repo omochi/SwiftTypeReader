@@ -2,9 +2,14 @@ import Foundation
 import SwiftSyntax
 
 enum Readers {
+    struct Context {
+        var module: Module
+        var file: URL?
+        var location: Location
+    }
+
     static func readTypeSpecifier(
-        module: Module,
-        file: URL?,
+        context: Context,
         typeSyntax: TypeSyntax
     ) -> TypeSpecifier? {
         if let simple = typeSyntax.as(SimpleTypeIdentifierSyntax.self) {
@@ -12,8 +17,7 @@ enum Readers {
             if let gac = simple.genericArgumentClause {
                 args = gac.arguments.compactMap {
                     readTypeSpecifier(
-                        module: module,
-                        file: file,
+                        context: context,
                         typeSyntax: $0.argumentType
                     )
                 }
@@ -22,53 +26,53 @@ enum Readers {
                 args = []
             }
             return TypeSpecifier(
-                module: module,
-                file: file,
+                module: context.module,
+                file: context.file,
+                location: context.location,
                 name: simple.name.text,
                 genericArguments: args
             )
         }
 
-        guard let swiftModule = module.modules?.swift else { return nil }
+        guard let swiftModule = context.module.modules?.swift else { return nil }
 
         if let opt = typeSyntax.as(OptionalTypeSyntax.self) {
             guard let wrapped = readTypeSpecifier(
-                module: module,
-                file: file,
+                context: context,
                 typeSyntax: opt.wrappedType
             ) else { return nil }
             return TypeSpecifier(
                 module: swiftModule,
-                file: file,
+                file: context.file,
+                location: swiftModule.asLocation(),
                 name: "Optional",
                 genericArguments: [wrapped]
             )
         } else if let array = typeSyntax.as(ArrayTypeSyntax.self) {
             guard let element = readTypeSpecifier(
-                module: module,
-                file: file,
+                context: context,
                 typeSyntax: array.elementType
             ) else { return nil }
             return TypeSpecifier(
                 module: swiftModule,
-                file: file,
+                file: context.file,
+                location: swiftModule.asLocation(),
                 name: "Array",
                 genericArguments: [element]
             )
         } else if let dict = typeSyntax.as(DictionaryTypeSyntax.self) {
             guard let key = readTypeSpecifier(
-                module: module,
-                file: file,
+                context: context,
                 typeSyntax: dict.keyType
             ),
             let value = readTypeSpecifier(
-                module: module,
-                file: file,
+                context: context,
                 typeSyntax: dict.valueType
             ) else { return nil }
             return TypeSpecifier(
                 module: swiftModule,
-                file: file,
+                file: context.file,
+                location: swiftModule.asLocation(),
                 name: "Dictionary",
                 genericArguments: [key, value]
             )
@@ -77,16 +81,32 @@ enum Readers {
         }
     }
 
+    static func readGenericParameters(
+        context: Context,
+        clause: GenericParameterClauseSyntax
+    ) -> [GenericParameterType] {
+        var types: [GenericParameterType] = []
+        for syn in clause.genericParameterList {
+            let name = syn.name.text
+            let type = GenericParameterType(
+                module: context.module,
+                file: context.file,
+                location: context.location,
+                name: name
+            )
+            types.append(type)
+        }
+        return types
+    }
+
     static func readInheritedTypes(
-        module: Module,
-        file: URL?,
+        context: Context,
         clause: TypeInheritanceClauseSyntax
     ) -> [TypeSpecifier] {
         var types: [TypeSpecifier] = []
         for type in clause.inheritedTypeCollection {
             if let typeSpec = readTypeSpecifier(
-                module: module,
-                file: file,
+                context: context,
                 typeSyntax: type.typeName
             ) {
                 types.append(typeSpec)

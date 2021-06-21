@@ -4,6 +4,7 @@ public enum RegularType: RegularTypeProtocol {
     case `struct`(StructType)
     case `enum`(EnumType)
     case `protocol`(ProtocolType)
+    case `genericParameter`(GenericParameterType)
 
     public var `struct`: StructType? {
         guard case .struct(let t) = self else {
@@ -26,29 +27,29 @@ public enum RegularType: RegularTypeProtocol {
         return t
     }
 
-    public var module: Module? {
+    public var `genericParameter`: GenericParameterType? {
+        guard case .genericParameter(let t) = self else {
+            return nil
+        }
+        return t
+    }
+
+    var inner: RegularTypeProtocol {
         switch self {
-        case .struct(let t): return t.module
-        case .enum(let t): return t.module
-        case .protocol(let t): return t.module
+        case .struct(let t): return t
+        case .enum(let t): return t
+        case .protocol(let t): return t
+        case .genericParameter(let t): return t
         }
     }
 
-    public var file: URL? {
-        switch self {
-        case .struct(let t): return t.file
-        case .enum(let t): return t.file
-        case .protocol(let t): return t.file
-        }
-    }
-
-    public var name: String {
-        switch self {
-        case .struct(let t): return t.name
-        case .enum(let t): return t.name
-        case .protocol(let t): return t.name
-        }
-    }
+    public var module: Module? { inner.module }
+    public var file: URL? { inner.file }
+    public var location: Location { inner.location }
+    public var name: String { inner.name }
+    public var genericParameters: [GenericParameterType] { inner.genericParameters }
+    public var description: String { inner.description }
+    public func asSpecifier() -> TypeSpecifier { inner.asSpecifier() }
 
     public func genericArguments() throws -> [SType] {
         switch self {
@@ -56,7 +57,10 @@ public enum RegularType: RegularTypeProtocol {
             return try t.genericArguments()
         case .enum(let t):
             return try t.genericArguments()
-        case .protocol: return []
+        case .protocol:
+            return []
+        case .genericParameter:
+            return []
         }
     }
 
@@ -65,22 +69,7 @@ public enum RegularType: RegularTypeProtocol {
         case .struct(let t): return t.genericArgumentSpecifiers
         case .enum(let t): return t.genericArgumentSpecifiers
         case .protocol(let t): return t.genericArgumentSpecifiers
-        }
-    }
-
-    public var description: String {
-        switch self {
-        case .struct(let t): return t.description
-        case .enum(let t): return t.description
-        case .protocol(let t): return t.description
-        }
-    }
-
-    public func asSpecifier() -> TypeSpecifier {
-        switch self {
-        case .struct(let t): return t.asSpecifier()
-        case .enum(let t): return t.asSpecifier()
-        case .protocol(let t): return t.asSpecifier()
+        case .genericParameter(let t): return t.genericArgumentSpecifiers
         }
     }
 
@@ -94,6 +83,8 @@ public enum RegularType: RegularTypeProtocol {
             return .enum(t)
         case .protocol:
             throw MessageError("protocol can't be applied generic arguments")
+        case .genericParameter:
+            throw MessageError("generic parameter can't be applied generic arguments")
         }
     }
 }
@@ -101,7 +92,9 @@ public enum RegularType: RegularTypeProtocol {
 public protocol RegularTypeProtocol: CustomStringConvertible {
     var module: Module? { get }
     var file: URL? { get }
+    var location: Location { get }
     var name: String { get }
+    var genericParameters: [GenericParameterType] { get }
     var genericArgumentSpecifiers: [TypeSpecifier] { get }
 }
 
@@ -110,6 +103,7 @@ extension RegularTypeProtocol {
         .init(
             module: module,
             file: file,
+            location: location,
             name: name,
             genericArguments: genericArgumentSpecifiers
         )
