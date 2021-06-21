@@ -185,6 +185,13 @@ struct S<T> {
         let a = try XCTUnwrap(s.storedProperties[safe: 0])
         XCTAssertEqual(a.name, "a")
 
-        print(a)
+        let at = try XCTUnwrap(a.type().genericParameter)
+        XCTAssertEqual(
+            at.location,
+            Location([
+                .module(name: "main"),
+                .type(name: "S")
+            ])
+        )
     }
 }

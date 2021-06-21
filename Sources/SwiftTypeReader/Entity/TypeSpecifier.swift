@@ -34,7 +34,7 @@ public struct TypeSpecifier: CustomStringConvertible {
 
     public func resolve() throws -> SType {
         guard let module = self.module else {
-            return .unresolved(self)
+            throw MessageError("no Module")
         }
 
         return try module.resolveType(specifier: self)

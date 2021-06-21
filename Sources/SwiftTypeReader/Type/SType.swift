@@ -45,6 +45,10 @@ public struct SType: CustomStringConvertible {
         regular?.protocol
     }
 
+    public var `genericParameter`: GenericParameterType? {
+        regular?.genericParameter
+    }
+
     public var `unresolved`: TypeSpecifier? {
         guard case .unresolved(let x) = state else { return nil }
         return x

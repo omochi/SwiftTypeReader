@@ -1,7 +1,7 @@
 import Foundation
 
-struct TypeFinder {
-    var module: Modules
+struct ModuleTypeFinder {
+    var module: Module
 
     func callAsFunction(name: String, location: Location) throws -> SType? {
         var location = location

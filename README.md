@@ -65,12 +65,6 @@ struct S {
 }
 ```
 
-## User defined generics
-
-```swift
-struct S<T> { }
-```
-
 ## Variable without type annotation
 
 ```swift

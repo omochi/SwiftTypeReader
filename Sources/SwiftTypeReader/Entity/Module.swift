@@ -22,39 +22,7 @@ public final class Module {
     }
 
     public func resolveType(specifier: TypeSpecifier) throws -> SType {
-        guard var type = findType(name: specifier.name) else {
-            return .unresolved(specifier)
-        }
-
-        let args = try specifier.genericArguments.compactMap { (argSpec) in
-            try resolveType(specifier: argSpec)
-        }
-
-        if !args.isEmpty {
-            type = try type.applyingGenericArguments(args)
-        }
-
-        return type
-    }
-
-    private func findType(name: String) -> SType? {
-        if let t = findTypeLocal(name: name) {
-            return t
-        }
-
-        if let m = modules?.swift,
-           let t = m.findTypeLocal(name: name)
-        {
-            return t
-        }
-
-        return nil
-    }
-
-    private func findTypeLocal(name: String) -> SType? {
-        types.first { (type) in
-            type.name == name
-        }
+        try TypeResolver()(module: self, specifier: specifier)
     }
 
     static func buildSwift(modules: Modules) -> Module {
