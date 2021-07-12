@@ -12,53 +12,82 @@ enum Readers {
         context: Context,
         typeSyntax: TypeSyntax
     ) -> TypeSpecifier? {
-        if let simple = typeSyntax.as(SimpleTypeIdentifierSyntax.self) {
-            let args: [TypeSpecifier]
-            if let gac = simple.genericArgumentClause {
-                args = gac.arguments.compactMap {
-                    readTypeSpecifier(
-                        context: context,
-                        typeSyntax: $0.argumentType
-                    )
-                }
-                guard args.count == gac.arguments.count else { return nil }
-            } else {
-                args = []
-            }
-            return TypeSpecifier(
+        func makeTypeSpecifier(
+            context: Context = context,
+            elements: [TypeSpecifier.Element]
+        ) -> TypeSpecifier {
+            .init(
                 module: context.module,
                 file: context.file,
                 location: context.location,
-                name: simple.name.text,
-                genericArgumentSpecifiers: args
+                elements: elements
             )
         }
 
+        if let member = typeSyntax.as(MemberTypeIdentifierSyntax.self) {
+            guard let base = readTypeSpecifier(
+                context: context,
+                typeSyntax: member.baseType
+            ) else { return nil }
+
+            let args = member.genericArgumentClause.flatMap {
+                readGenericArguments(context: context, clause: $0)
+            } ?? []
+
+            var elements = base.elements
+            elements.append(
+                .init(
+                    name: member.name.text,
+                    genericArgumentSpecifiers: args
+                )
+            )
+            return makeTypeSpecifier(elements: elements)
+        }
+
+        if let simple = typeSyntax.as(SimpleTypeIdentifierSyntax.self) {
+            let args = simple.genericArgumentClause.flatMap {
+                readGenericArguments(context: context, clause: $0)
+            } ?? []
+
+            return makeTypeSpecifier(elements: [.init(
+                name: simple.name.text,
+                genericArgumentSpecifiers: args
+            )])
+        }
+
         guard let swiftModule = context.module.modules?.swift else { return nil }
+
+        var swiftModuleContext: Context {
+            .init(
+                module: swiftModule,
+                file: context.file,
+                location: swiftModule.asLocation()
+            )
+        }
 
         if let opt = typeSyntax.as(OptionalTypeSyntax.self) {
             guard let wrapped = readTypeSpecifier(
                 context: context,
                 typeSyntax: opt.wrappedType
             ) else { return nil }
-            return TypeSpecifier(
-                module: swiftModule,
-                file: context.file,
-                location: swiftModule.asLocation(),
-                name: "Optional",
-                genericArgumentSpecifiers: [wrapped]
+            return makeTypeSpecifier(
+                context: swiftModuleContext,
+                elements: [.init(
+                    name: "Optional",
+                    genericArgumentSpecifiers: [wrapped]
+                )]
             )
         } else if let array = typeSyntax.as(ArrayTypeSyntax.self) {
             guard let element = readTypeSpecifier(
                 context: context,
                 typeSyntax: array.elementType
             ) else { return nil }
-            return TypeSpecifier(
-                module: swiftModule,
-                file: context.file,
-                location: swiftModule.asLocation(),
-                name: "Array",
-                genericArgumentSpecifiers: [element]
+            return makeTypeSpecifier(
+                context: swiftModuleContext,
+                elements: [.init(
+                    name: "Array",
+                    genericArgumentSpecifiers: [element]
+                )]
             )
         } else if let dict = typeSyntax.as(DictionaryTypeSyntax.self) {
             guard let key = readTypeSpecifier(
@@ -69,16 +98,30 @@ enum Readers {
                 context: context,
                 typeSyntax: dict.valueType
             ) else { return nil }
-            return TypeSpecifier(
-                module: swiftModule,
-                file: context.file,
-                location: swiftModule.asLocation(),
-                name: "Dictionary",
-                genericArgumentSpecifiers: [key, value]
+            return makeTypeSpecifier(
+                context: swiftModuleContext,
+                elements: [.init(
+                    name: "Dictionary",
+                    genericArgumentSpecifiers: [key, value]
+                )]
             )
         } else {
             return nil
         }
+    }
+
+    static func readGenericArguments(
+        context: Context,
+        clause: GenericArgumentClauseSyntax
+    ) -> [TypeSpecifier]? {
+        let args = clause.arguments.compactMap {
+            readTypeSpecifier(
+                context: context,
+                typeSyntax: $0.argumentType
+            )
+        }
+        guard args.count == clause.arguments.count else { return nil }
+        return args
     }
 
     static func readGenericParameters(

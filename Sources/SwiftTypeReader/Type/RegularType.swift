@@ -81,12 +81,19 @@ public protocol RegularTypeProtocol: CustomStringConvertible {
 
 extension RegularTypeProtocol {
     public func asSpecifier() -> TypeSpecifier {
-        .init(
+        // TODO
+        let elements: [TypeSpecifier.Element] = [
+            .init(
+                name: name,
+                genericArgumentSpecifiers: genericArgumentSpecifiers
+            )
+        ]
+
+        return TypeSpecifier(
             module: module,
             file: file,
             location: location,
-            name: name,
-            genericArgumentSpecifiers: genericArgumentSpecifiers
+            elements: elements
         )
     }
 

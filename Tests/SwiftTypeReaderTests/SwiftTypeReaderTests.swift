@@ -84,7 +84,7 @@ struct S {
         let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
 
         let a = try XCTUnwrap(s.storedProperties[safe: 0]?.type().unresolved)
-        XCTAssertEqual(a.name, "URL")
+        XCTAssertEqual(a.lastElement.name, "URL")
     }
 
     func testEnum() throws {
@@ -193,5 +193,28 @@ struct S<T> {
                 .type(name: "S")
             ])
         )
+    }
+
+    func testNestedTypeProperty() throws {
+        let result = try XCTReadTypes("""
+struct S {
+    var x: A.B
+    var y: A.B.C
+}
+"""
+        )
+
+        let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        XCTAssertEqual(s.name, "S")
+
+        XCTAssertEqual(s.storedProperties.count, 2)
+
+        let x = try XCTUnwrap(s.storedProperties[safe: 0])
+        XCTAssertEqual(x.name, "x")
+        XCTAssertEqual(try x.type().description, "A.B")
+
+        let y = try XCTUnwrap(s.storedProperties[safe: 1])
+        XCTAssertEqual(y.name, "y")
+        XCTAssertEqual(try y.type().description, "A.B.C")
     }
 }

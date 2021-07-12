@@ -4,15 +4,18 @@ struct TypeResolver {
     }
 
     func resolveType(module: Module, specifier: TypeSpecifier) throws -> SType {
+        // TODO
+        let element = specifier.lastElement
+
         guard var type = try findType(
                 module: module,
-                name: specifier.name,
+                name: element.name,
                 location: specifier.location
         ) else {
             return .unresolved(specifier)
         }
 
-        let args = try specifier.genericArgumentSpecifiers.compactMap { (argSpec) in
+        let args = try element.genericArgumentSpecifiers.compactMap { (argSpec) in
             try resolveType(module: module, specifier: argSpec)
         }
 

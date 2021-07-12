@@ -65,7 +65,7 @@ public struct SType: CustomStringConvertible {
     public var name: String {
         switch state {
         case .resolved(let t): return t.name
-        case .unresolved(let s): return s.name
+        case .unresolved(let s): return s.lastElement.name
         }
     }
 
@@ -79,14 +79,14 @@ public struct SType: CustomStringConvertible {
     public func genericArguments() throws -> [SType] {
         switch state {
         case .resolved(let t): return try t.genericArguments()
-        case .unresolved(let t): return try t.genericArguments()
+        case .unresolved(let t): return try t.lastElement.genericArguments()
         }
     }
 
     public var genericArgumentSpecifiers: [TypeSpecifier] {
         switch state {
         case .resolved(let t): return t.genericArgumentSpecifiers
-        case .unresolved(let t): return t.genericArgumentSpecifiers
+        case .unresolved(let t): return t.lastElement.genericArgumentSpecifiers
         }
     }
 
@@ -95,9 +95,8 @@ public struct SType: CustomStringConvertible {
         case .resolved(var t):
             t = try t.applyingGenericArguments(args)
             return .resolved(t)
-        case .unresolved(var s):
-            s.genericArgumentSpecifiers = args.map { $0.asSpecifier() }
-            return .unresolved(s)
+        case .unresolved:
+            throw MessageError("unresolved type can't be applied generic arguments")
         }
     }
 
