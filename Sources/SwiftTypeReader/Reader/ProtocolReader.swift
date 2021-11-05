@@ -135,14 +135,14 @@ final class ProtocolReader {
         let name = funDecl.identifier.text
         let isStatic = funDecl.modifiers?.contains(where: { $0.name.text == "static" }) ?? false
 
-        let inputParams = funDecl.signature.input.parameterList.compactMap { param -> FunctionRequirement.InputParameter? in
+        let inputParams = funDecl.signature.input.parameterList.compactMap { param -> FunctionRequirement.Parameter? in
             guard let typeSyntax = param.type,
                   let type = Readers.readTypeSpecifier(context: context, typeSyntax: typeSyntax),
                     let firstName = param.firstName?.text
             else { return nil }
 
             let secondName = param.secondName?.text
-            return FunctionRequirement.InputParameter(
+            return FunctionRequirement.Parameter(
                 label: secondName == nil ? nil : firstName,
                 name: secondName == nil ? firstName : secondName.unsafelyUnwrapped,
                 type: type
@@ -158,7 +158,7 @@ final class ProtocolReader {
 
         return .init(
             name: name,
-            inputParameters: inputParams,
+            parameters: inputParams,
             outputType: outputType,
             isStatic: isStatic,
             isThrows: funDecl.signature.throwsOrRethrowsKeyword?.text == "throws",

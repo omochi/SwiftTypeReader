@@ -1,7 +1,7 @@
 import Foundation
 
 public struct FunctionRequirement {
-    public struct InputParameter {
+    public struct Parameter {
         public init(label: String?, name: String, type: TypeSpecifier) {
             self.label = label
             self.name = name
@@ -19,7 +19,7 @@ public struct FunctionRequirement {
 
     public init(
         name: String,
-        inputParameters: [InputParameter],
+        parameters: [Parameter],
         outputType: TypeSpecifier?,
         isStatic: Bool,
         isThrows: Bool,
@@ -28,7 +28,7 @@ public struct FunctionRequirement {
         isReasync: Bool
     ) {
         self.name = name
-        self.inputParameters = inputParameters
+        self.parameters = parameters
         self.unresolvedOutputType = outputType.map(SType.unresolved(_:))
         self.isStatic = isStatic
         self.isThrows = isThrows
