@@ -127,6 +127,65 @@ enum E {
         }
     }
 
+    func testProtocol() throws {
+        let result = try XCTReadTypes("""
+protocol P: Encodable {
+    associatedtype T: Decodable
+    var a: String { mutating get async throws }
+    func b(x: Int) async throws -> Double
+    static var c: Int { get nonmutating set }
+    static func d(_ x: Int, for y: Int)
+}
+""")
+        let p = try XCTUnwrap(result.module.types[safe: 0]?.protocol)
+
+        XCTAssertEqual(try p.inheritedTypes().first?.name, "Encodable")
+        XCTAssertEqual(p.associatedTypes, ["T"])
+
+        do {
+            let a = try XCTUnwrap(p.propertyRequirements[safe: 0])
+            XCTAssertEqual(a.name, "a")
+            XCTAssertEqual(a.unresolvedType.name, "String")
+            XCTAssertEqual(a.accessors, [.get(mutating: true, async: true, throws: true)])
+            XCTAssertEqual(a.isStatic, false)
+        }
+
+        do {
+            let b = try XCTUnwrap(p.functionRequirements[safe: 0])
+            XCTAssertEqual(b.name, "b")
+            XCTAssertEqual(b.parameters.first?.label, nil)
+            XCTAssertEqual(b.parameters.first?.name, "x")
+            XCTAssertEqual(b.parameters.first?.unresolvedType.name, "Int")
+            XCTAssertEqual(b.unresolvedOutputType?.name, "Double")
+            XCTAssertEqual(b.isAsync, true)
+            XCTAssertEqual(b.isThrows, true)
+            XCTAssertEqual(b.isStatic, false)
+        }
+
+        do {
+            let c = try XCTUnwrap(p.propertyRequirements[safe: 1])
+            XCTAssertEqual(c.name, "c")
+            XCTAssertEqual(c.unresolvedType.name, "Int")
+            XCTAssertEqual(c.accessors, [.get(), .set(nonmutating: true)])
+            XCTAssertEqual(c.isStatic, true)
+        }
+
+        do {
+            let d = try XCTUnwrap(p.functionRequirements[safe: 1])
+            XCTAssertEqual(d.name, "d")
+            XCTAssertEqual(d.parameters.first?.label, "_")
+            XCTAssertEqual(d.parameters.first?.name, "x")
+            XCTAssertEqual(d.parameters.first?.unresolvedType.name, "Int")
+            XCTAssertEqual(d.parameters[safe: 1]?.label, "for")
+            XCTAssertEqual(d.parameters[safe: 1]?.name, "y")
+            XCTAssertEqual(d.parameters[safe: 1]?.unresolvedType.name, "Int")
+            XCTAssertEqual(d.unresolvedOutputType?.name, nil)
+            XCTAssertEqual(d.isAsync, false)
+            XCTAssertEqual(d.isThrows, false)
+            XCTAssertEqual(d.isStatic, true)
+        }
+    }
+
     func testObservedStoredProperty() throws {
         let result = try XCTReadTypes("""
 struct S {

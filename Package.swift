@@ -5,6 +5,20 @@ import PackageDescription
 var dependencies: [Package.Dependency] = []
 var targetDependencies: [Target.Dependency] = []
 
+#if swift(>=5.5)
+dependencies.append(
+    .package(
+        name: "SwiftSyntax",
+        url: "https://github.com/apple/swift-syntax", .exact("0.50500.0")
+    )
+)
+targetDependencies.append(
+    .product(
+        name: "SwiftSyntax",
+        package: "SwiftSyntax"
+    )
+)
+#else
 #if os(macOS)
 dependencies.append(
     .package(
@@ -31,6 +45,7 @@ targetDependencies.append(
         package: "SwiftSyntax"
     )
 )
+#endif
 #endif
 
 let package = Package(

@@ -9,22 +9,37 @@ public struct ProtocolType: RegularTypeProtocol {
         module: Module?,
         file: URL?,
         location: Location,
-        name: String
+        name: String,
+        inheritedTypes: [TypeSpecifier] = [],
+        propertyRequirements: [PropertyRequirement] = [],
+        functionRequirements: [FunctionRequirement] = [],
+        associatedTypes: [String] = []
     ) {
         self.module = module
         self.file = file
         self.location = location
         self.name = name
+        self.unresolvedInheritedTypes = TypeCollection(inheritedTypes)
+        self.propertyRequirements = propertyRequirements
+        self.functionRequirements = functionRequirements
+        self.associatedTypes = associatedTypes
     }
 
     public weak var module: Module?
     public var file: URL?
     public var location: Location
     public var name: String
+    public var unresolvedInheritedTypes: TypeCollection
+    public var propertyRequirements: [PropertyRequirement]
+    public var functionRequirements: [FunctionRequirement]
+    public var associatedTypes: [String]
 
     public var genericParameters: [GenericParameterType] { [] }
 
     public func genericArguments() throws -> [SType] { [] }
     public var genericArgumentSpecifiers: [TypeSpecifier] { [] }
 
+    public func inheritedTypes() throws -> [SType] {
+        try unresolvedInheritedTypes.resolved()
+    }
 }
