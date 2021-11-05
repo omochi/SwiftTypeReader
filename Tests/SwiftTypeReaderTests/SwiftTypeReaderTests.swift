@@ -131,13 +131,15 @@ enum E {
         let result = try XCTReadTypes("""
 protocol P: Encodable {
     var a: String { mutating get async throws }
-    func b(x: Int) -> Double
+    func b(x: Int) async throws -> Double
     static var c: Int { get nonmutating set }
-    static func d(x: Int) -> Double
+    static func d(_ x: Int, for y: Int)
     associatedType: T: Decodable
 }
 """)
         let p = try XCTUnwrap(result.module.types[safe: 0]?.protocol)
+
+        XCTAssertEqual(try p.inheritedTypes().first?.name, "Encodable")
 
         do {
             let a = try XCTUnwrap(p.propertyRequirements[safe: 0])
@@ -148,11 +150,38 @@ protocol P: Encodable {
         }
 
         do {
+            let b = try XCTUnwrap(p.functionRequirements[safe: 0])
+            XCTAssertEqual(b.name, "b")
+            XCTAssertEqual(b.inputParameters.first?.label, nil)
+            XCTAssertEqual(b.inputParameters.first?.name, "x")
+            XCTAssertEqual(b.inputParameters.first?.unresolvedType.name, "Int")
+            XCTAssertEqual(b.unresolvedOutputType?.name, "Double")
+            XCTAssertEqual(b.isAsync, true)
+            XCTAssertEqual(b.isThrows, true)
+            XCTAssertEqual(b.isStatic, false)
+        }
+
+        do {
             let c = try XCTUnwrap(p.propertyRequirements[safe: 1])
             XCTAssertEqual(c.name, "c")
             XCTAssertEqual(c.unresolvedType.name, "Int")
             XCTAssertEqual(c.accessors, [.get(), .set(nonmutating: true)])
             XCTAssertEqual(c.isStatic, true)
+        }
+
+        do {
+            let d = try XCTUnwrap(p.functionRequirements[safe: 1])
+            XCTAssertEqual(d.name, "d")
+            XCTAssertEqual(d.inputParameters.first?.label, "_")
+            XCTAssertEqual(d.inputParameters.first?.name, "x")
+            XCTAssertEqual(d.inputParameters.first?.unresolvedType.name, "Int")
+            XCTAssertEqual(d.inputParameters[safe: 1]?.label, "for")
+            XCTAssertEqual(d.inputParameters[safe: 1]?.name, "y")
+            XCTAssertEqual(d.inputParameters[safe: 1]?.unresolvedType.name, "Int")
+            XCTAssertEqual(d.unresolvedOutputType?.name, nil)
+            XCTAssertEqual(d.isAsync, false)
+            XCTAssertEqual(d.isThrows, false)
+            XCTAssertEqual(d.isStatic, true)
         }
     }
 

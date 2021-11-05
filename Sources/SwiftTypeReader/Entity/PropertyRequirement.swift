@@ -1,11 +1,5 @@
 import Foundation
 
-protocol A {
-    @available(macOS 12.0.0, *)
-    var a: Int { mutating get async throws }
-    var b: Int { get  set }
-}
-
 public struct PropertyRequirement {
     public enum Accessor: Equatable {
         case get(mutating: Bool = false, async: Bool = false, throws: Bool = false)

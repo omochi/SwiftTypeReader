@@ -25,8 +25,6 @@ final class ProtocolReader {
             location: location.appending(.type(name: name))
         )
 
-        var caseElements: [CaseElement] = []
-
         let inheritedTypes: [TypeSpecifier]
         if let clause = protocolDecl.inheritanceClause {
             inheritedTypes = Readers.readInheritedTypes(
@@ -40,11 +38,20 @@ final class ProtocolReader {
         var propertyRequirements: [PropertyRequirement] = []
         let decls = protocolDecl.members.members.map { $0.decl }
         for decl in decls {
-            print(decl, decl.syntaxNodeType)
             propertyRequirements += readStoredProperties(
                 context: context,
                 decl: decl
             )
+        }
+
+        var functionRequirements: [FunctionRequirement] = []
+        for decl in decls {
+            if let functionRequirement = readFunctionRequirement(
+                context: context,
+                decl: decl
+            ) {
+                functionRequirements.append(functionRequirement)
+            }
         }
 
         return ProtocolType(
@@ -53,7 +60,8 @@ final class ProtocolReader {
             location: location,
             name: name,
             inheritedTypes: inheritedTypes,
-            propertyRequirements: propertyRequirements
+            propertyRequirements: propertyRequirements,
+            functionRequirements: functionRequirements
         )
     }
 
@@ -119,4 +127,45 @@ final class ProtocolReader {
         )
     }
 
+    private func readFunctionRequirement(
+        context: Readers.Context,
+        decl: DeclSyntax
+    ) -> FunctionRequirement? {
+        guard let funDecl = decl.as(FunctionDeclSyntax.self) else { return nil }
+
+        let name = funDecl.identifier.text
+        let isStatic = funDecl.modifiers?.contains(where: { $0.name.text == "static" }) ?? false
+
+        let inputParams = funDecl.signature.input.parameterList.compactMap { param -> FunctionRequirement.InputParameter? in
+            guard let typeSyntax = param.type,
+                  let type = Readers.readTypeSpecifier(context: context, typeSyntax: typeSyntax),
+                    let firstName = param.firstName?.text
+            else { return nil }
+
+            let secondName = param.secondName?.text
+            return FunctionRequirement.InputParameter(
+                label: secondName == nil ? nil : firstName,
+                name: secondName == nil ? firstName : secondName.unsafelyUnwrapped,
+                type: type
+            )
+        }
+
+        let outputType: TypeSpecifier?
+        if let output = funDecl.signature.output {
+            outputType = Readers.readTypeSpecifier(context: context, typeSyntax: output.returnType)
+        } else {
+            outputType = nil
+        }
+
+        return .init(
+            name: name,
+            inputParameters: inputParams,
+            outputType: outputType,
+            isStatic: isStatic,
+            isThrows: funDecl.signature.throwsOrRethrowsKeyword?.text == "throws",
+            isRethrows: funDecl.signature.throwsOrRethrowsKeyword?.text == "rethrows",
+            isAsync: funDecl.signature.asyncOrReasyncKeyword?.text == "async",
+            isReasync: funDecl.signature.asyncOrReasyncKeyword?.text == "reasync"
+        )
+    }
 }
