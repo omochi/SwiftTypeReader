@@ -39,7 +39,7 @@ public struct FunctionRequirement {
 
     public var name: String
 
-    public var inputParameters: [InputParameter]
+    public var parameters: [Parameter]
 
     public func outputType() throws -> SType? {
         try unresolvedOutputType?.resolved()
