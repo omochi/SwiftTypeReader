@@ -127,6 +127,35 @@ enum E {
         }
     }
 
+    func testProtocol() throws {
+        let result = try XCTReadTypes("""
+protocol P: Encodable {
+    var a: String { mutating get async throws }
+    func b(x: Int) -> Double
+    static var c: Int { get nonmutating set }
+    static func d(x: Int) -> Double
+    associatedType: T: Decodable
+}
+""")
+        let p = try XCTUnwrap(result.module.types[safe: 0]?.protocol)
+
+        do {
+            let a = try XCTUnwrap(p.propertyRequirements[safe: 0])
+            XCTAssertEqual(a.name, "a")
+            XCTAssertEqual(a.unresolvedType.name, "String")
+            XCTAssertEqual(a.accessors, [.get(mutating: true, async: true, throws: true)])
+            XCTAssertEqual(a.isStatic, false)
+        }
+
+        do {
+            let c = try XCTUnwrap(p.propertyRequirements[safe: 1])
+            XCTAssertEqual(c.name, "c")
+            XCTAssertEqual(c.unresolvedType.name, "Int")
+            XCTAssertEqual(c.accessors, [.get(), .set(nonmutating: true)])
+            XCTAssertEqual(c.isStatic, true)
+        }
+    }
+
     func testObservedStoredProperty() throws {
         let result = try XCTReadTypes("""
 struct S {

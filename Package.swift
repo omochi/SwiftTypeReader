@@ -6,6 +6,20 @@ var dependencies: [Package.Dependency] = []
 var targetDependencies: [Target.Dependency] = []
 
 #if os(macOS)
+#if swift(>=5.5)
+dependencies.append(
+    .package(
+        name: "SwiftSyntax",
+        url: "https://github.com/apple/swift-syntax", .exact("0.50500.0")
+    )
+)
+targetDependencies.append(
+    .product(
+        name: "SwiftSyntax",
+        package: "SwiftSyntax"
+    )
+)
+#else
 dependencies.append(
     .package(
         name: "BinarySwiftSyntax",
@@ -18,6 +32,7 @@ targetDependencies.append(
         package: "BinarySwiftSyntax"
     )
 )
+#endif
 #else
 dependencies.append(
     .package(

@@ -98,6 +98,13 @@ private final class Impl {
                 if let et = reader.read(enumDecl: decl) {
                     module.types.append(.enum(et))
                 }
+            } else if let decl = statement.as(ProtocolDeclSyntax.self) {
+                let reader = ProtocolReader(
+                    module: module, file: file, location: module.asLocation()
+                )
+                if let pt = reader.read(protocolDecl: decl) {
+                    module.types.append(.protocol(pt))
+                }
             }
         }
     }
