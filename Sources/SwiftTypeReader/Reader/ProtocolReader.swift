@@ -35,23 +35,21 @@ final class ProtocolReader {
             inheritedTypes = []
         }
 
-        var propertyRequirements: [PropertyRequirement] = []
         let decls = protocolDecl.members.members.map { $0.decl }
-        for decl in decls {
-            propertyRequirements += readStoredProperties(
+        
+        let propertyRequirements: [PropertyRequirement] = decls.flatMap { decl in
+            readStoredProperties(
                 context: context,
                 decl: decl
             )
         }
 
-        var functionRequirements: [FunctionRequirement] = []
-        for decl in decls {
-            if let functionRequirement = readFunctionRequirement(
-                context: context,
-                decl: decl
-            ) {
-                functionRequirements.append(functionRequirement)
-            }
+        let functionRequirements: [FunctionRequirement] = decls.compactMap { decl in
+            readFunctionRequirement(context: context, decl: decl)
+        }
+
+        let associatedTypes = decls.compactMap { decl in
+            readAssociatedType(context: context, decl: decl)
         }
 
         return ProtocolType(
@@ -61,7 +59,8 @@ final class ProtocolReader {
             name: name,
             inheritedTypes: inheritedTypes,
             propertyRequirements: propertyRequirements,
-            functionRequirements: functionRequirements
+            functionRequirements: functionRequirements,
+            associatedTypes: associatedTypes
         )
     }
 
@@ -167,5 +166,16 @@ final class ProtocolReader {
             isAsync: funDecl.signature.asyncOrReasyncKeyword?.text == "async",
             isReasync: funDecl.signature.asyncOrReasyncKeyword?.text == "reasync"
         )
+    }
+
+    private func readAssociatedType(
+        context: Readers.Context,
+        decl: DeclSyntax
+    ) -> String? {
+        guard let assocDecl = decl.as(AssociatedtypeDeclSyntax.self) else { return nil }
+
+        let typeName = assocDecl.identifier.text
+        // TODO: inheritanceClause, genericWhereClause are not supported yet.
+        return typeName
     }
 }

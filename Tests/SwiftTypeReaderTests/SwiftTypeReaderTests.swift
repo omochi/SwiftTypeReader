@@ -130,16 +130,17 @@ enum E {
     func testProtocol() throws {
         let result = try XCTReadTypes("""
 protocol P: Encodable {
+    associatedtype T: Decodable
     var a: String { mutating get async throws }
     func b(x: Int) async throws -> Double
     static var c: Int { get nonmutating set }
     static func d(_ x: Int, for y: Int)
-    associatedType: T: Decodable
 }
 """)
         let p = try XCTUnwrap(result.module.types[safe: 0]?.protocol)
 
         XCTAssertEqual(try p.inheritedTypes().first?.name, "Encodable")
+        XCTAssertEqual(p.associatedTypes, ["T"])
 
         do {
             let a = try XCTUnwrap(p.propertyRequirements[safe: 0])
