@@ -5,7 +5,6 @@ import PackageDescription
 var dependencies: [Package.Dependency] = []
 var targetDependencies: [Target.Dependency] = []
 
-#if os(macOS)
 #if swift(>=5.5)
 dependencies.append(
     .package(
@@ -20,6 +19,7 @@ targetDependencies.append(
     )
 )
 #else
+#if os(macOS)
 dependencies.append(
     .package(
         name: "BinarySwiftSyntax",
@@ -32,7 +32,6 @@ targetDependencies.append(
         package: "BinarySwiftSyntax"
     )
 )
-#endif
 #else
 dependencies.append(
     .package(
@@ -46,6 +45,7 @@ targetDependencies.append(
         package: "SwiftSyntax"
     )
 )
+#endif
 #endif
 
 let package = Package(
