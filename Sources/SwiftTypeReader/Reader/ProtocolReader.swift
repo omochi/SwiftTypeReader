@@ -38,7 +38,7 @@ final class ProtocolReader {
         let decls = protocolDecl.members.members.map { $0.decl }
         
         let propertyRequirements: [PropertyRequirement] = decls.flatMap { decl in
-            readStoredProperties(
+            readPropertyRequirements(
                 context: context,
                 decl: decl
             )
@@ -64,7 +64,7 @@ final class ProtocolReader {
         )
     }
 
-    private func readStoredProperties(
+    private func readPropertyRequirements(
         context: Readers.Context,
         decl: DeclSyntax
     ) -> [PropertyRequirement] {
