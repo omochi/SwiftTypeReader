@@ -4,10 +4,6 @@ public struct PropertyRequirement {
     public enum Accessor: Equatable {
         case get(mutating: Bool = false, async: Bool = false, throws: Bool = false)
         case set(nonmutating: Bool = false)
-        @available(macOS 12.0.0, *)
-        case async
-        @available(macOS 12.0.0, *)
-        case `throws`
     }
 
     public init(
