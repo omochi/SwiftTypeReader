@@ -5,7 +5,20 @@ import PackageDescription
 var dependencies: [Package.Dependency] = []
 var targetDependencies: [Target.Dependency] = []
 
-#if swift(>=5.5)
+#if os(macOS)
+dependencies.append(
+    .package(
+        name: "BinarySwiftSyntax",
+        url: "https://github.com/omochi/BinarySwiftSyntax", .branch("main")
+    )
+)
+targetDependencies.append(
+    .product(
+        name: "SwiftSyntax-Xcode13.0",
+        package: "BinarySwiftSyntax"
+    )
+)
+#else
 dependencies.append(
     .package(
         name: "SwiftSyntax",
@@ -18,34 +31,6 @@ targetDependencies.append(
         package: "SwiftSyntax"
     )
 )
-#else
-#if os(macOS)
-dependencies.append(
-    .package(
-        name: "BinarySwiftSyntax",
-        url: "https://github.com/omochi/BinarySwiftSyntax", .branch("main")
-    )
-)
-targetDependencies.append(
-    .product(
-        name: "SwiftSyntax-Xcode12.5",
-        package: "BinarySwiftSyntax"
-    )
-)
-#else
-dependencies.append(
-    .package(
-        name: "SwiftSyntax",
-        url: "https://github.com/apple/swift-syntax", .exact("0.50400.0")
-    )
-)
-targetDependencies.append(
-    .product(
-        name: "SwiftSyntax",
-        package: "SwiftSyntax"
-    )
-)
-#endif
 #endif
 
 let package = Package(
@@ -64,8 +49,7 @@ let package = Package(
         ),
         .testTarget(
             name: "SwiftTypeReaderTests",
-            dependencies: ["SwiftTypeReader"],
-            exclude: ["Resources"]
+            dependencies: ["SwiftTypeReader"]
         )
     ]
 )
