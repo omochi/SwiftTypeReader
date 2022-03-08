@@ -7,12 +7,13 @@ public final class Reader {
         public var module: Module
     }
 
-    public init(modules: Modules? = nil) {
+    public init(modules: Modules? = nil, moduleName: String = "main") {
         self.modules = modules ?? Modules()
+        self.moduleName = moduleName
     }
 
     public var modules: Modules
-    public var moduleName: String = "main"
+    public var moduleName: String
 
     public func read(file: URL, module: Module? = nil) throws -> Result {
         let module = initModule(module)

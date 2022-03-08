@@ -33,13 +33,12 @@ struct TypeResolver {
             return t
         }
 
-        if let swiftModule = module.modules?.swift,
-           let t = try findTypeInModule(
-            module: swiftModule,
-            name: name,
-            location: swiftModule.asLocation()
-           ) {
-            return t
+        for module in (module.modules?.modules ?? []) {
+            if let t = try findTypeInModule(
+                module: module, name: name, location: module.asLocation()
+            ) {
+                return t 
+            }
         }
 
         return nil

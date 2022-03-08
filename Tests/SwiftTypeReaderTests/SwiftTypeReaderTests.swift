@@ -276,4 +276,31 @@ struct S {
         XCTAssertEqual(y.name, "y")
         XCTAssertEqual(try y.type().description, "A.B.C")
     }
+
+    func testModules() throws {
+        let modules = Modules()
+        _ = try Reader(modules: modules, moduleName: "MyLib").read(source: """
+public enum E {
+    case a
+}
+"""
+        )
+
+        let result = try Reader(modules: modules, moduleName: "main").read(source: """
+import MyLib
+
+protocol P {
+    func f() -> E
+}
+"""
+        )
+
+        let p = try XCTUnwrap(result.module.types[safe: 0]?.protocol)
+        XCTAssertEqual(p.name, "P")
+        let f = try XCTUnwrap(p.functionRequirements[safe: 0])
+        XCTAssertEqual(f.name, "f")
+        let e = try XCTUnwrap(try f.outputType()?.enum)
+        let c = try XCTUnwrap(e.caseElements[safe: 0])
+        XCTAssertEqual(c.name, "a")
+    }
 }
