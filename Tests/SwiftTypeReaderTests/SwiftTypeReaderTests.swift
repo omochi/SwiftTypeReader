@@ -280,7 +280,7 @@ struct S {
     func testModules() throws {
         let modules = Modules()
         _ = try Reader(modules: modules, moduleName: "MyLib").read(source: """
-enum E {
+public enum E {
     case a
 }
 """
