@@ -1,37 +1,6 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.6
 
 import PackageDescription
-
-var dependencies: [Package.Dependency] = []
-var targetDependencies: [Target.Dependency] = []
-
-#if os(macOS)
-dependencies.append(
-    .package(
-        name: "BinarySwiftSyntax",
-        url: "https://github.com/omochi/BinarySwiftSyntax", .branch("main")
-    )
-)
-targetDependencies.append(
-    .product(
-        name: "SwiftSyntax-Xcode13.0",
-        package: "BinarySwiftSyntax"
-    )
-)
-#else
-dependencies.append(
-    .package(
-        name: "SwiftSyntax",
-        url: "https://github.com/apple/swift-syntax", .exact("0.50500.0")
-    )
-)
-targetDependencies.append(
-    .product(
-        name: "SwiftSyntax",
-        package: "SwiftSyntax"
-    )
-)
-#endif
 
 let package = Package(
     name: "SwiftTypeReader",
@@ -41,11 +10,15 @@ let package = Package(
             targets: ["SwiftTypeReader"]
         )
     ],
-    dependencies: dependencies,
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-syntax", branch: "0.50600.1"),
+    ],
     targets: [
         .target(
             name: "SwiftTypeReader",
-            dependencies: targetDependencies
+            dependencies: [
+                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+            ]
         ),
         .testTarget(
             name: "SwiftTypeReaderTests",
