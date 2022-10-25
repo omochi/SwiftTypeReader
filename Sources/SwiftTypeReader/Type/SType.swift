@@ -69,6 +69,14 @@ public struct SType: CustomStringConvertible {
         }
     }
 
+    public func location() throws -> Location {
+        switch state {
+        case .resolved(let t): return t.location
+        case .unresolved:
+            throw MessageError("location of unresolved type is unknown")
+        }
+    }
+
     public func asSpecifier() -> TypeSpecifier {
         switch state {
         case .resolved(let t): return t.asSpecifier()
@@ -105,6 +113,11 @@ public struct SType: CustomStringConvertible {
         case .resolved(let t): return t.description
         case .unresolved(let s): return s.description
         }
+    }
+
+    public func get(name: String) -> SType? {
+        guard let type = regular else { return nil }
+        return type.get(name: name)
     }
 
     public static func `struct`(_ t: StructType) -> SType {

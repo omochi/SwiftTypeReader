@@ -52,6 +52,14 @@ public enum RegularType: RegularTypeProtocol {
     public func genericArguments() throws -> [SType] { try inner.genericArguments() }
     public var description: String { inner.description }
     public func asSpecifier() -> TypeSpecifier { inner.asSpecifier() }
+    public var types: [SType] {
+        switch self {
+        case .struct(let t): return t.types
+        case .enum(let t): return t.types
+        case .protocol: return []
+        case .genericParameter: return []
+        }
+    }
 
     public func applyingGenericArguments(_ args: [SType]) throws -> RegularType {
         switch self {
@@ -76,18 +84,46 @@ public protocol RegularTypeProtocol: CustomStringConvertible {
     var name: String { get }
     var genericParameters: [GenericParameterType] { get }
     var genericArgumentSpecifiers: [TypeSpecifier] { get }
+    var types: [SType] { get }
     func genericArguments() throws -> [SType]
+    func get(name: String) -> SType?
+    func asSpecifier() -> TypeSpecifier
 }
 
 extension RegularTypeProtocol {
+    public func get(name: String) -> SType? {
+        if let type = genericParameters.first(where: { $0.name == name }) {
+            return .genericParameter(type)
+        }
+
+        if let type = types.first(where: { $0.name == name }) {
+            return type
+        }
+
+        return nil
+    }
+
     public func asSpecifier() -> TypeSpecifier {
-        // TODO
-        let elements: [TypeSpecifier.Element] = [
+        var elements: [TypeSpecifier.Element] = []
+
+        for element in location.elements {
+            switch element {
+            case .module(name: let name):
+                elements.append(.init(name: name))
+            case .type(name: let name):
+                elements.append(.init(name: name))
+            case .genericParameter:
+                // invalid location
+                break
+            }
+        }
+
+        elements.append(
             .init(
                 name: name,
                 genericArgumentSpecifiers: genericArgumentSpecifiers
             )
-        ]
+        )
 
         return TypeSpecifier(
             module: module,

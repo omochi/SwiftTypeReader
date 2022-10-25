@@ -42,4 +42,6 @@ public struct ProtocolType: RegularTypeProtocol {
     public func inheritedTypes() throws -> [SType] {
         try unresolvedInheritedTypes.resolved()
     }
+
+    public var types: [SType] { [] }
 }

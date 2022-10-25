@@ -80,33 +80,19 @@ private final class Impl {
         let sourceFile: SourceFileSyntax = try SyntaxParser.parse(source: source)
 
         let statements = sourceFile.statements.map { $0.item }
-
+        
         for statement in statements {
-            if let decl = statement.as(StructDeclSyntax.self) {
-                let reader = StructReader(
+            if let decl = statement.as(DeclSyntax.self),
+               let type = Readers.readTypeDeclaration(
+                context: .init(
                     module: module,
                     file: file,
                     location: module.asLocation()
-                )
-                if let st = reader.read(structDecl: decl) {
-                    module.types.append(.struct(st))
-                }
-            } else if let decl = statement.as(EnumDeclSyntax.self) {
-                let reader = EnumReader(
-                    module: module,
-                    file: file,
-                    location: module.asLocation()
-                )
-                if let et = reader.read(enumDecl: decl) {
-                    module.types.append(.enum(et))
-                }
-            } else if let decl = statement.as(ProtocolDeclSyntax.self) {
-                let reader = ProtocolReader(
-                    module: module, file: file, location: module.asLocation()
-                )
-                if let pt = reader.read(protocolDecl: decl) {
-                    module.types.append(.protocol(pt))
-                }
+                ),
+                declaration: decl
+               )
+            {
+                module.types.append(type)
             }
         }
     }

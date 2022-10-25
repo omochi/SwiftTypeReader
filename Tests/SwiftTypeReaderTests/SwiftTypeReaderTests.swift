@@ -277,6 +277,75 @@ struct S {
         XCTAssertEqual(try y.type().description, "A.B.C")
     }
 
+    func testNestedTypeInStruct() throws {
+        let result = try XCTReadTypes("""
+struct A {
+    struct B {}
+}
+"""
+        )
+
+        XCTAssertEqual(result.module.types.count, 1)
+        let a = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        XCTAssertEqual(a.name, "A")
+
+        XCTAssertEqual(a.types.count, 1)
+        let b = try XCTUnwrap(a.types[safe: 0]?.struct)
+        XCTAssertEqual(b.name, "B")
+        XCTAssertEqual(
+            b.location,
+            Location([.module(name: "main"), .type(name: "A")])
+        )
+    }
+
+    func testNestedTypeInEnum() throws {
+        let result = try XCTReadTypes("""
+enum A {
+    struct B {}
+}
+"""
+        )
+
+        let a = try XCTUnwrap(result.module.types[safe: 0]?.enum)
+        XCTAssertEqual(a.name, "A")
+
+        let b = try XCTUnwrap(a.types[safe: 0]?.struct)
+        XCTAssertEqual(b.name, "B")
+        XCTAssertEqual(
+            b.location,
+            Location([.module(name: "main"), .type(name: "A")])
+        )
+    }
+
+    func testResolveNestedTypes() throws {
+        let result = try XCTReadTypes("""
+struct A {
+    struct B {
+        var b1: Int = 0
+    }
+
+    var x: B
+}
+
+struct B {
+    var b2: Int = 0
+}
+
+struct C {
+    var y: B
+}
+""")
+        let a = try XCTUnwrap(result.module.getType(name: "A")?.struct)
+
+        let xb = try XCTUnwrap(a.storedProperties[safe: 0]?.type().struct)
+        XCTAssertEqual(xb.storedProperties[safe: 0]?.name, "b1")
+
+        let c = try XCTUnwrap(result.module.getType(name: "C")?.struct)
+
+        let yb = try XCTUnwrap(c.storedProperties[safe: 0]?.type().struct)
+        XCTAssertEqual(yb.storedProperties[safe: 0]?.name, "b2")
+    }
+
     func testModules() throws {
         let modules = Modules()
         _ = try Reader(modules: modules, moduleName: "MyLib").read(source: """

@@ -8,6 +8,45 @@ enum Readers {
         var location: Location
     }
 
+    static func readTypeDeclaration(
+        context: Context,
+        declaration: DeclSyntax
+    ) -> SType? {
+        if let decl = declaration.as(StructDeclSyntax.self) {
+            let reader = StructReader(
+                module: context.module,
+                file: context.file,
+                location: context.location
+            )
+            guard let type = reader.read(structDecl: decl) else {
+                return nil
+            }
+            return .struct(type)
+        } else if let decl = declaration.as(EnumDeclSyntax.self) {
+            let reader = EnumReader(
+                module: context.module,
+                file: context.file,
+                location: context.location
+            )
+            guard let type = reader.read(enumDecl: decl) else {
+                return nil
+            }
+            return .enum(type)
+        } else if let decl = declaration.as(ProtocolDeclSyntax.self) {
+            let reader = ProtocolReader(
+                module: context.module,
+                file: context.file,
+                location: context.location
+            )
+            guard let pt = reader.read(protocolDecl: decl) else {
+                return nil
+            }
+            return .protocol(pt)
+        } else {
+            return nil
+        }
+    }
+
     static func readTypeSpecifier(
         context: Context,
         typeSyntax: TypeSyntax
@@ -55,23 +94,13 @@ enum Readers {
             )])
         }
 
-        guard let swiftModule = context.module.modules?.swift else { return nil }
-
-        var swiftModuleContext: Context {
-            .init(
-                module: swiftModule,
-                file: context.file,
-                location: swiftModule.asLocation()
-            )
-        }
-
         if let opt = typeSyntax.as(OptionalTypeSyntax.self) {
             guard let wrapped = readTypeSpecifier(
                 context: context,
                 typeSyntax: opt.wrappedType
             ) else { return nil }
             return makeTypeSpecifier(
-                context: swiftModuleContext,
+                context: context,
                 elements: [.init(
                     name: "Optional",
                     genericArgumentSpecifiers: [wrapped]
@@ -83,7 +112,7 @@ enum Readers {
                 typeSyntax: array.elementType
             ) else { return nil }
             return makeTypeSpecifier(
-                context: swiftModuleContext,
+                context: context,
                 elements: [.init(
                     name: "Array",
                     genericArgumentSpecifiers: [element]
@@ -99,7 +128,7 @@ enum Readers {
                 typeSyntax: dict.valueType
             ) else { return nil }
             return makeTypeSpecifier(
-                context: swiftModuleContext,
+                context: context,
                 elements: [.init(
                     name: "Dictionary",
                     genericArgumentSpecifiers: [key, value]
