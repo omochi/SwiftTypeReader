@@ -9,7 +9,8 @@ public struct StructType: RegularTypeProtocol {
         genericParameters: [GenericParameterType] = [],
         genericArguments: [TypeSpecifier] = [],
         inheritedTypes: [TypeSpecifier] = [],
-        storedProperties: [StoredProperty] = []
+        storedProperties: [StoredProperty] = [],
+        types: [SType] = []
     ) {
         self.module = module
         self.file = file
@@ -19,6 +20,7 @@ public struct StructType: RegularTypeProtocol {
         self.unresolvedGenericArguments = TypeCollection(genericArguments)
         self.unresolvedInheritedTypes = TypeCollection(inheritedTypes)
         self.storedProperties = storedProperties
+        self.types = types
     }
 
     public weak var module: Module?
@@ -29,6 +31,7 @@ public struct StructType: RegularTypeProtocol {
     public var unresolvedGenericArguments: TypeCollection
     public var unresolvedInheritedTypes: TypeCollection
     public var storedProperties: [StoredProperty]
+    public var types: [SType]
 
     public func genericArguments() throws -> [SType] {
         try unresolvedGenericArguments.resolved()

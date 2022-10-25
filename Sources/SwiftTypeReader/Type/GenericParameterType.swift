@@ -22,4 +22,19 @@ public struct GenericParameterType: RegularTypeProtocol {
 
     public func genericArguments() throws -> [SType] { [] }
     public var genericArgumentSpecifiers: [TypeSpecifier] { [] }
+
+    public var types: [SType] { [] }
+
+    public func asSpecifier() -> TypeSpecifier {
+        let elements: [TypeSpecifier.Element] = [
+            .init(name: name)
+        ]
+
+        return TypeSpecifier(
+            module: module,
+            file: file,
+            location: location,
+            elements: elements
+        )
+    }
 }

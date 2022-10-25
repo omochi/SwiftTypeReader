@@ -45,12 +45,19 @@ final class StructReader {
         }
 
         var storedProperties: [StoredProperty] = []
+        var nestedTypes: [SType] = []
         let decls = structDecl.members.members.map { $0.decl }
         for decl in decls {
             storedProperties += readStoredProperties(
                 context: context,
                 decl: decl
             )
+            if let nestedType = Readers.readTypeDeclaration(
+                context: context,
+                declaration: decl
+            ) {
+                nestedTypes.append(nestedType)
+            }
         }
 
         return StructType(
@@ -60,7 +67,8 @@ final class StructReader {
             name: name,
             genericParameters: genericParameter,
             inheritedTypes: inheritedTypes,
-            storedProperties: storedProperties
+            storedProperties: storedProperties,
+            types: nestedTypes
         )
     }
 

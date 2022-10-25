@@ -1,44 +1,52 @@
+/*
+ Resolve complete location into concrete element
+ */
 struct LocationResolver {
     func resolve(modules: Modules, location: Location) throws -> Element? {
+        return try resolve(
+            modules: modules.modules,
+            location: location
+        )
+    }
+
+    func resolve(module: Module, location: Location) throws -> Element? {
+        return try resolve(
+            modules: module.modulesForFind,
+            location: location
+        )
+    }
+
+    private func resolve(modules: [Module], location: Location) throws -> Element? {
         guard let first = location.elements.first,
               case .module(let name) = first else
         {
             throw MessageError("broken location: \(location)")
         }
 
-        guard let module = (modules.modules.first { $0.name == name }) else { return nil }
+        guard let module = modules.first(where: { $0.name == name }) else {
+            return nil
+        }
 
         return try resolve(module: module, location: location, index: 1)
     }
 
-    func resolve(module: Module, location: Location) throws -> Element? {
-        // short cut
-        if let first = location.elements.first,
-              case .module(let name) = first,
-              name == module.name
-        {
-            return try resolve(module: module, location: location, index: 1)
+    private func resolve(element: Element, location: Location, index: Int) throws -> Element? {
+        switch element {
+        case .module(let module):
+            return try resolve(module: module, location: location, index: index)
+        case .type(let type):
+            return try resolve(type: type, location: location, index: index)
         }
-
-        guard let modules = module.modules else { return nil }
-        return try resolve(modules: modules, location: location)
     }
 
     private func resolve(module: Module, location: Location, index: Int) throws -> Element? {
         guard index < location.elements.count else {
             return .module(module)
         }
-
-        switch location.elements[index] {
-        case .type(name: let name):
-            guard let type = (module.types.first { $0.name == name }) else {
-                return nil
-            }
-
-            return .type(type)
-        case .module, .genericParameter:
-            throw MessageError("broken location: \(location)")
+        guard let element = module.get(element: location.elements[index]) else {
+            return nil
         }
+        return try resolve(element: element, location: location, index: index + 1)
     }
 
     private func resolve(type: SType, location: Location, index: Int) throws -> Element? {
@@ -47,9 +55,18 @@ struct LocationResolver {
         }
 
         switch location.elements[index] {
-        case .type:
-            // TODO: inner type
-            return nil
+        case .type(let name):
+            guard let type = type.regular else { return nil }
+
+            guard let nestedType = type.types.first(where: { $0.name == name }) else {
+                return nil
+            }
+
+            return try resolve(
+                type: nestedType,
+                location: location,
+                index: index + 1
+            )
         case .genericParameter(let gi):
             guard let type = type.regular else { return nil }
 
@@ -59,7 +76,8 @@ struct LocationResolver {
 
             return try resolve(
                 genericParameter: type.genericParameters[gi],
-                location: location, index: index + 1
+                location: location,
+                index: index + 1
             )
         case .module:
             throw MessageError("broken location: \(location)")

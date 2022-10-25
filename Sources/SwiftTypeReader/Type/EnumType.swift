@@ -9,7 +9,8 @@ public struct EnumType: RegularTypeProtocol {
         genericParameters: [GenericParameterType] = [],
         genericArguments: [TypeSpecifier] = [],
         inheritedTypes: [TypeSpecifier] = [],
-        caseElements: [CaseElement] = []
+        caseElements: [CaseElement] = [],
+        types: [SType] = []
     ) {
         self.module = module
         self.file = file
@@ -19,6 +20,7 @@ public struct EnumType: RegularTypeProtocol {
         self.unresolvedGenericArguments = TypeCollection(genericArguments)
         self.unresolvedInheritedTypes = TypeCollection(inheritedTypes)
         self.caseElements = caseElements
+        self.types = types
     }
 
     public weak var module: Module?
@@ -29,6 +31,7 @@ public struct EnumType: RegularTypeProtocol {
     public var unresolvedGenericArguments: TypeCollection
     public var unresolvedInheritedTypes: TypeCollection
     public var caseElements: [CaseElement]
+    public var types: [SType]
 
     public func genericArguments() throws -> [SType] {
         try unresolvedGenericArguments.resolved()

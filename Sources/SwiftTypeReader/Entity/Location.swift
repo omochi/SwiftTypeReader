@@ -1,3 +1,8 @@
+/*
+ First element must be module
+
+ FIXME: extract first element to single property
+ */
 public struct Location: Equatable, CustomStringConvertible {
     public init(_ elements: [LocationElement]) {
         self.elements = elements

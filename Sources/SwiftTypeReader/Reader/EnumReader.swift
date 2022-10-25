@@ -48,8 +48,15 @@ final class EnumReader {
         }
 
         let decls = enumDecl.members.members.map { $0.decl }
+        var nestedTypes: [SType] = []
         for decl in decls {
             caseElements += readCaseElements(context: context, decl: decl)
+            if let type = Readers.readTypeDeclaration(
+                context: context,
+                declaration: decl
+            ) {
+                nestedTypes.append(type)
+            }
         }
 
         return EnumType(
@@ -59,7 +66,8 @@ final class EnumReader {
             name: name,
             genericParameters: genericParameters,
             inheritedTypes: inheritedTypes,
-            caseElements: caseElements
+            caseElements: caseElements,
+            types: nestedTypes
         )
     }
 
