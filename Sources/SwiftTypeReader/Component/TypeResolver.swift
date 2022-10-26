@@ -12,22 +12,16 @@ struct TypeResolver {
     }
 
     func resolve(specifier: TypeSpecifier) throws -> SType? {
-        guard let first = specifier.elements.first else {
-            throw MessageError("broken specifier: \(specifier)")
-        }
-
         /*
          Find out specifier is absolute or relative
          */
-        if let element = module.get(name: first.name),
-           case .module(let module) = element
-        {
+        var specifier = specifier
+        if let module = specifier.removeModuleElement() {
             // Absolute specifier
-            return try resolveOnModule(module, specifier: specifier, index: 1)
+            return try resolveOnModule(module, specifier: specifier, index: 0)
         }
 
-        if var type = try findType(name: first.name, location: specifier.location) {
-            type = try applyGenericArguments(type: type, specifier: first)
+        if let type = try findFirstElementType(specifier: specifier) {
             return try resolveOnType(type, specifier: specifier, index: 1)
         }
 
@@ -85,28 +79,41 @@ struct TypeResolver {
         return Location(elements)
     }
 
-    private func findType(name: String, location: Location) throws -> SType? {
-        var location = location
-
-        while true {
-            if location.elements.isEmpty {
-                break
-            }
-
-            if let type = try getType(name: name, location: location) {
-                return type
-            }
-
-            location = location.deletingLast()
+    private func findFirstElementType(specifier: TypeSpecifier) throws -> SType? {
+        guard let first = specifier.elements.first else {
+            return nil
         }
 
-        /*
-         Find from top level of other modules
-         */
-        for module in module.otherModules {
-            if let type = module.getType(name: name) {
-                return type
+        func findType(name: String) throws -> SType? {
+            var location = specifier.location
+
+            while true {
+                if location.elements.isEmpty {
+                    break
+                }
+
+                if let type = try getType(name: first.name, location: location) {
+                    return type
+                }
+
+                location = location.deletingLast()
             }
+
+            /*
+             Find from top level of other modules
+             */
+            for module in module.otherModules {
+                if let type = module.getType(name: first.name) {
+                    return type
+                }
+            }
+
+            return nil
+        }
+
+        if var type = try findType(name: first.name) {
+            type = try applyGenericArguments(type: type, specifier: first)
+            return type
         }
 
         return nil

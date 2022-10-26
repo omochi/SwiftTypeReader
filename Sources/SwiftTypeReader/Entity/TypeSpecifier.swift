@@ -90,4 +90,17 @@ public struct TypeSpecifier: CustomStringConvertible {
         
         return try TypeResolver(module: module)(specifier: self)
     }
+
+    public mutating func removeModuleElement() -> Module? {
+        if let module = self.module,
+           let first = elements.first,
+           let element = module.get(name: first.name),
+           case .module(let module) = element
+        {
+            self.elements.removeFirst()
+            return module
+        }
+
+        return nil
+    }
 }
