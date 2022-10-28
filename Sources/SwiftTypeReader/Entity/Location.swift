@@ -3,7 +3,7 @@
 
  FIXME: extract first element to single property
  */
-public struct Location: Equatable, CustomStringConvertible {
+public struct Location: Hashable & CustomStringConvertible {
     public init(_ elements: [LocationElement]) {
         self.elements = elements
     }
@@ -29,7 +29,7 @@ public struct Location: Equatable, CustomStringConvertible {
     }
 }
 
-public enum LocationElement: Equatable, CustomStringConvertible {
+public enum LocationElement: Hashable & CustomStringConvertible {
     case module(name: String)
     case type(name: String)
     case genericParameter(index: Int)
