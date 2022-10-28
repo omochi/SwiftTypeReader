@@ -23,6 +23,8 @@ public struct GenericParameterType: RegularTypeProtocol {
     public func genericArguments() throws -> [SType] { [] }
     public var genericArgumentSpecifiers: [TypeSpecifier] { [] }
 
+    public func inheritedTypes() throws -> [SType] { [] }
+
     public var types: [SType] { [] }
 
     public func asSpecifier() -> TypeSpecifier {

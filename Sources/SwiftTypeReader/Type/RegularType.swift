@@ -50,6 +50,7 @@ public enum RegularType: RegularTypeProtocol {
     public var genericParameters: [GenericParameterType] { inner.genericParameters }
     public var genericArgumentSpecifiers: [TypeSpecifier] { inner.genericArgumentSpecifiers }
     public func genericArguments() throws -> [SType] { try inner.genericArguments() }
+    public func inheritedTypes() throws -> [SType] { try inner.inheritedTypes() }
     public var description: String { inner.description }
     public func asSpecifier() -> TypeSpecifier { inner.asSpecifier() }
     public var types: [SType] {
@@ -86,6 +87,7 @@ public protocol RegularTypeProtocol: CustomStringConvertible {
     var genericArgumentSpecifiers: [TypeSpecifier] { get }
     var types: [SType] { get }
     func genericArguments() throws -> [SType]
+    func inheritedTypes() throws -> [SType]
     func get(name: String) -> SType?
     func asSpecifier() -> TypeSpecifier
 }
