@@ -13,7 +13,7 @@ struct S {
         let s = try XCTUnwrap(module.types[safe: 0]?.struct)
         XCTAssertEqual(s.name, "S")
 
-        XCTAssertEqual(s.location, Location([.module(name: "main")]))
+        XCTAssertEqual(s.location, Location(module: "main"))
 
         XCTAssertEqual(s.storedProperties.count, 1)
         let a = try XCTUnwrap(s.storedProperties[safe: 0])
@@ -243,10 +243,7 @@ struct S<T> {
         let at = try XCTUnwrap(a.type().genericParameter)
         XCTAssertEqual(
             at.location,
-            Location([
-                .module(name: "main"),
-                .type(name: "S")
-            ])
+            Location(module: "main", elements: [.type(name: "S")])
         )
     }
 
@@ -290,7 +287,7 @@ struct A {
         XCTAssertEqual(b.name, "B")
         XCTAssertEqual(
             b.location,
-            Location([.module(name: "main"), .type(name: "A")])
+            Location(module: "main", elements: [.type(name: "A")])
         )
     }
 
@@ -309,7 +306,7 @@ enum A {
         XCTAssertEqual(b.name, "B")
         XCTAssertEqual(
             b.location,
-            Location([.module(name: "main"), .type(name: "A")])
+            Location(module: "main", elements: [.type(name: "A")])
         )
     }
 

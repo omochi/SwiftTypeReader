@@ -106,12 +106,12 @@ extension RegularTypeProtocol {
     }
 
     public func asSpecifier() -> TypeSpecifier {
-        var elements: [TypeSpecifier.Element] = []
+        var elements: [TypeSpecifier.Element] = [
+            .init(name: location.module)
+        ]
 
         for element in location.elements {
             switch element {
-            case .module(name: let name):
-                elements.append(.init(name: name))
             case .type(name: let name):
                 elements.append(.init(name: name))
             case .genericParameter:

@@ -17,28 +17,28 @@ struct A {
 
         XCTAssertEqual(
             try context.resolve(
-                location: Location([.module(name: "Swift")])
+                location: Location(module: "Swift")
             )?.module?.name,
             "Swift"
         )
 
         XCTAssertEqual(
             try context.resolve(
-                location: Location([.module(name: "Swift"), .type(name: "Int")])
+                location: Location(module: "Swift", elements: [.type(name: "Int")])
             )?.type?.asSpecifier().elements,
             [.init(name: "Swift"), .init(name: "Int")]
         )
 
         XCTAssertEqual(
             try context.resolve(
-                location: Location([.module(name: "main")])
+                location: Location(module: "main")
             )?.module?.name,
             "main"
         )
 
         XCTAssertEqual(
             try context.resolve(
-                location: Location([.module(name: "main"), .type(name: "G")])
+                location: Location(module: "main", elements: [.type(name: "G")])
             )?.type?.asSpecifier().elements,
             [.init(name: "main"), .init(name: "G")]
         )
@@ -46,13 +46,13 @@ struct A {
         do {
             let t = try XCTUnwrap(
                 try context.resolve(
-                    location: Location([.module(name: "main"), .type(name: "G"), .genericParameter(index: 0)])
+                    location: Location(module: "main", elements: [.type(name: "G"), .genericParameter(index: 0)])
                 )?.type
             )
 
             XCTAssertEqual(
                 try t.location(),
-                Location([.module(name: "main"), .type(name: "G")])
+                Location(module: "main", elements: [.type(name: "G")])
             )
             XCTAssertEqual(
                 t.asSpecifier().elements,
@@ -62,21 +62,21 @@ struct A {
 
         XCTAssertEqual(
             try context.resolve(
-                location: Location([.module(name: "main"), .type(name: "A"), .type(name: "B")])
+                location: Location(module: "main", elements: [.type(name: "A"), .type(name: "B")])
             )?.type?.asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "B")]
         )
 
         XCTAssertEqual(
             try context.resolve(
-                location: Location([.module(name: "main"), .type(name: "A"), .type(name: "B"), .type(name: "C")])
+                location: Location(module: "main", elements: [.type(name: "A"), .type(name: "B"), .type(name: "C")])
             )?.type?.asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "B"), .init(name: "C")]
         )
 
         XCTAssertEqual(
             try context.resolve(
-                location: Location([.module(name: "main"), .type(name: "A"), .type(name: "G")])
+                location: Location(module: "main", elements: [.type(name: "A"), .type(name: "G")])
             )?.type?.asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "G")]
         )
@@ -84,13 +84,16 @@ struct A {
         do {
             let t = try XCTUnwrap(
                 try context.resolve(
-                    location: Location([.module(name: "main"), .type(name: "A"), .type(name: "G"), .genericParameter(index: 0)])
+                    location: Location(
+                        module: "main",
+                        elements: [.type(name: "A"), .type(name: "G"), .genericParameter(index: 0)]
+                    )
                 )?.type
             )
 
             XCTAssertEqual(
                 try t.location(),
-                Location([.module(name: "main"), .type(name: "A"), .type(name: "G")])
+                Location(module: "main", elements: [.type(name: "A"), .type(name: "G")])
             )
             XCTAssertEqual(
                 t.asSpecifier().elements,
