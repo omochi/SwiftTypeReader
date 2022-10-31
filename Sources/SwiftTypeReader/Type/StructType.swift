@@ -23,7 +23,7 @@ public struct StructType: RegularTypeProtocol {
         self.types = types
     }
 
-    public weak var module: Module?
+    public unowned var module: Module
     public var file: URL?
     public var location: Location
     public var name: String
@@ -33,8 +33,8 @@ public struct StructType: RegularTypeProtocol {
     public var storedProperties: [StoredProperty]
     public var types: [SType]
 
-    public func genericArguments() throws -> [SType] {
-        try unresolvedGenericArguments.resolved()
+    public func genericArguments() -> [SType] {
+        unresolvedGenericArguments.resolved()
     }
 
     public mutating func setGenericArguments(_ ts: [SType]) {
@@ -45,7 +45,7 @@ public struct StructType: RegularTypeProtocol {
         unresolvedGenericArguments.asSpecifiers()
     }
 
-    public func inheritedTypes() throws -> [SType] {
-        try unresolvedInheritedTypes.resolved()
+    public func inheritedTypes() -> [SType] {
+        unresolvedInheritedTypes.resolved()
     }
 }

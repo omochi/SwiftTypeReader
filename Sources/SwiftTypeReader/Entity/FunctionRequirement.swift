@@ -11,8 +11,8 @@ public struct FunctionRequirement {
         public var label: String?
         public var name: String
 
-        public func type() throws -> SType {
-            try unresolvedType.resolved()
+        public func type() -> SType {
+            unresolvedType.resolved()
         }
         public var unresolvedType: SType
     }
@@ -41,8 +41,8 @@ public struct FunctionRequirement {
 
     public var parameters: [Parameter]
 
-    public func outputType() throws -> SType? {
-        try unresolvedOutputType?.resolved()
+    public func outputType() -> SType? {
+        unresolvedOutputType?.resolved()
     }
     public var unresolvedOutputType: SType?
 

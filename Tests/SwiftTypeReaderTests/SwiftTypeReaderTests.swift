@@ -20,12 +20,12 @@ struct S {
         XCTAssertEqual(a.name, "a")
 
         let aType = try XCTUnwrap(a.type().struct)
-        XCTAssertEqual(aType.module?.name, "Swift")
+        XCTAssertEqual(aType.module.name, "Swift")
         XCTAssertEqual(aType.name, "Optional")
-        XCTAssertEqual(try aType.genericArguments().count, 1)
+        XCTAssertEqual(aType.genericArguments().count, 1)
 
         let aWrappedType = try XCTUnwrap(aType.genericArguments()[safe: 0]?.struct)
-        XCTAssertEqual(aWrappedType.module?.name, "Swift")
+        XCTAssertEqual(aWrappedType.module.name, "Swift")
         XCTAssertEqual(aWrappedType.name, "Int")
     }
 
@@ -48,12 +48,12 @@ struct S2 {
 
             let a = try XCTUnwrap(s1.storedProperties[safe: 0])
             XCTAssertEqual(a.name, "a")
-            XCTAssertEqual(try a.type().name, "Int")
+            XCTAssertEqual(a.type().name, "Int")
 
             let b = try XCTUnwrap(s1.storedProperties[safe: 1])
             XCTAssertEqual(b.name, "b")
 
-            let s2 = try XCTUnwrap(try b.type().struct)
+            let s2 = try XCTUnwrap(b.type().struct)
             XCTAssertEqual(s2.name, "S2")
             XCTAssertEqual(s2.storedProperties.count, 1)
         }
@@ -64,7 +64,7 @@ struct S2 {
 
             let a = try XCTUnwrap(s2.storedProperties[safe: 0])
             XCTAssertEqual(a.name, "a")
-            XCTAssertEqual(try a.type().name, "Int")
+            XCTAssertEqual(a.type().name, "Int")
         }
 
     }
@@ -106,7 +106,7 @@ enum E {
 
             let x = try XCTUnwrap(c.associatedValues[safe: 0])
             XCTAssertNil(x.name)
-            XCTAssertEqual(try x.type().name, "Int")
+            XCTAssertEqual(x.type().name, "Int")
         }
 
         do {
@@ -115,11 +115,11 @@ enum E {
 
             let x = try XCTUnwrap(c.associatedValues[safe: 0])
             XCTAssertEqual(x.name, "x")
-            XCTAssertEqual(try x.type().name, "Int")
+            XCTAssertEqual(x.type().name, "Int")
 
             let y = try XCTUnwrap(c.associatedValues[safe: 1])
             XCTAssertEqual(y.name, "y")
-            XCTAssertEqual(try y.type().name, "Int")
+            XCTAssertEqual(y.type().name, "Int")
         }
     }
 
@@ -135,7 +135,7 @@ protocol P: Encodable {
 """)
         let p = try XCTUnwrap(module.types[safe: 0]?.protocol)
 
-        XCTAssertEqual(try p.inheritedTypes().first?.name, "Encodable")
+        XCTAssertEqual(p.inheritedTypes().first?.name, "Encodable")
         XCTAssertEqual(p.associatedTypes, ["T"])
 
         do {
@@ -202,7 +202,7 @@ struct S {
 
         let b = try XCTUnwrap(s.storedProperties[safe: 0])
         XCTAssertEqual(b.name, "b")
-        XCTAssertEqual(try b.type().name, "Int")
+        XCTAssertEqual(b.type().name, "Int")
     }
 
     func testInheritanceClause() throws {
@@ -213,11 +213,11 @@ enum E: Codable {
 """)
         let e = try XCTUnwrap(module.types[safe: 0]?.enum)
 
-        XCTAssertEqual(try e.inheritedTypes().count, 1)
+        XCTAssertEqual(e.inheritedTypes().count, 1)
 
         let c = try XCTUnwrap(e.inheritedTypes()[safe: 0])
         XCTAssertNotNil(c.protocol)
-        XCTAssertEqual(c.protocol?.module?.name, "Swift")
+        XCTAssertEqual(c.protocol?.module.name, "Swift")
         XCTAssertEqual(c.name, "Codable")
     }
 
@@ -263,11 +263,11 @@ struct S {
 
         let x = try XCTUnwrap(s.storedProperties[safe: 0])
         XCTAssertEqual(x.name, "x")
-        XCTAssertEqual(try x.type().description, "A.B")
+        XCTAssertEqual(x.type().description, "A.B")
 
         let y = try XCTUnwrap(s.storedProperties[safe: 1])
         XCTAssertEqual(y.name, "y")
-        XCTAssertEqual(try y.type().description, "A.B.C")
+        XCTAssertEqual(y.type().description, "A.B.C")
     }
 
     func testNestedTypeInStruct() throws {
@@ -365,7 +365,7 @@ protocol P {
         XCTAssertEqual(p.name, "P")
         let f = try XCTUnwrap(p.functionRequirements[safe: 0])
         XCTAssertEqual(f.name, "f")
-        let e = try XCTUnwrap(try f.outputType()?.enum)
+        let e = try XCTUnwrap(f.outputType()?.enum)
         let c = try XCTUnwrap(e.caseElements[safe: 0])
         XCTAssertEqual(c.name, "a")
     }
