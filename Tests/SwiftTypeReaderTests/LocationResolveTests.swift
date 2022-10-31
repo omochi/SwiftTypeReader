@@ -1,11 +1,9 @@
 import XCTest
 import SwiftTypeReader
 
-final class LocationResolveTests: XCTestCase {
+final class LocationResolveTests: ReaderTestCaseBase {
     func testLocationResolve() throws {
-        let modules = Modules()
-
-        _ = try Reader(modules: modules, moduleName: "main").read(source: """
+        _ = try read("""
 struct G<T> {}
 
 struct A {
@@ -18,28 +16,28 @@ struct A {
 """)
 
         XCTAssertEqual(
-            try modules.resolve(
+            try context.resolve(
                 location: Location([.module(name: "Swift")])
             )?.module?.name,
             "Swift"
         )
 
         XCTAssertEqual(
-            try modules.resolve(
+            try context.resolve(
                 location: Location([.module(name: "Swift"), .type(name: "Int")])
             )?.type?.asSpecifier().elements,
             [.init(name: "Swift"), .init(name: "Int")]
         )
 
         XCTAssertEqual(
-            try modules.resolve(
+            try context.resolve(
                 location: Location([.module(name: "main")])
             )?.module?.name,
             "main"
         )
 
         XCTAssertEqual(
-            try modules.resolve(
+            try context.resolve(
                 location: Location([.module(name: "main"), .type(name: "G")])
             )?.type?.asSpecifier().elements,
             [.init(name: "main"), .init(name: "G")]
@@ -47,7 +45,7 @@ struct A {
 
         do {
             let t = try XCTUnwrap(
-                try modules.resolve(
+                try context.resolve(
                     location: Location([.module(name: "main"), .type(name: "G"), .genericParameter(index: 0)])
                 )?.type
             )
@@ -63,21 +61,21 @@ struct A {
         }
 
         XCTAssertEqual(
-            try modules.resolve(
+            try context.resolve(
                 location: Location([.module(name: "main"), .type(name: "A"), .type(name: "B")])
             )?.type?.asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "B")]
         )
 
         XCTAssertEqual(
-            try modules.resolve(
+            try context.resolve(
                 location: Location([.module(name: "main"), .type(name: "A"), .type(name: "B"), .type(name: "C")])
             )?.type?.asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "B"), .init(name: "C")]
         )
 
         XCTAssertEqual(
-            try modules.resolve(
+            try context.resolve(
                 location: Location([.module(name: "main"), .type(name: "A"), .type(name: "G")])
             )?.type?.asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "G")]
@@ -85,7 +83,7 @@ struct A {
 
         do {
             let t = try XCTUnwrap(
-                try modules.resolve(
+                try context.resolve(
                     location: Location([.module(name: "main"), .type(name: "A"), .type(name: "G"), .genericParameter(index: 0)])
                 )?.type
             )
