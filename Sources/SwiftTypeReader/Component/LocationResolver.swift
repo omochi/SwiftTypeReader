@@ -2,16 +2,11 @@
  Resolve complete location into concrete element
  */
 struct LocationResolver {
-    func resolve(modules: Modules, location: Location) throws -> Element? {
-        return try resolve(
-            modules: modules.modules,
-            location: location
-        )
-    }
+    var context: Context
 
-    func resolve(module: Module, location: Location) throws -> Element? {
+    func resolve(module: Module?, location: Location) throws -> Element? {
         return try resolve(
-            modules: module.modulesForFind,
+            modules: module?.modulesForFind ?? context.modules,
             location: location
         )
     }

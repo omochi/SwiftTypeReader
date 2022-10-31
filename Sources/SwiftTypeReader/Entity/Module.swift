@@ -2,14 +2,14 @@ import Foundation
 
 public final class Module {
     public init(
-        modules: Modules?,
+        context: Context,
         name: String
     ) {
-        self.modules = modules
+        self.context = context
         self.name = name
     }
 
-    public weak var modules: Modules?
+    public unowned let context: Context
     public var name: String
     public var types: [SType] = []
 
@@ -22,11 +22,7 @@ public final class Module {
     }
 
     public var otherModules: [Module] {
-        guard let modules = self.modules else {
-            return []
-        }
-
-        return modules.modules.filter { $0 !== self }
+        return context.modules.filter { $0 !== self }
     }
 
     public func getModule(name: String) -> Module? {
@@ -34,11 +30,7 @@ public final class Module {
     }
 
     public func getType(name: String) -> SType? {
-        guard let type = types.first(where: { $0.name == name }) else {
-            return nil
-        }
-
-        return type
+        return types.first { $0.name == name }
     }
 
     public func get(name: String) -> Element? {
@@ -68,12 +60,13 @@ public final class Module {
     }
 
     public func resolve(location: Location) throws -> Element? {
-        try LocationResolver().resolve(module: self, location: location)
+        try LocationResolver(context: context)
+            .resolve(module: self, location: location)
     }
 
-    static func buildSwift(modules: Modules) -> Module {
+    static func swiftStandardLibrary(context: Context) -> Module {
         let m = Module(
-            modules: modules,
+            context: context,
             name: "Swift"
         )
 

@@ -1,20 +1,16 @@
 import XCTest
-@testable import SwiftTypeReader
+import SwiftTypeReader
 
-func XCTReadTypes(_ source: String, file: StaticString = #file, line: UInt = #line) throws -> Reader.Result {
-    return try Reader(modules: nil).read(source: source)
-}
-
-final class SwiftTypeReaderTests: XCTestCase {
+final class SwiftTypeReaderTests: ReaderTestCaseBase {
     func testSimple() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 struct S {
     var a: Int?
 }
 """
         )
 
-        let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
         XCTAssertEqual(s.name, "S")
 
         XCTAssertEqual(s.location, Location([.module(name: "main")]))
@@ -34,7 +30,7 @@ struct S {
     }
 
     func testReader() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 struct S1 {
     var a: Int
     var b: S2
@@ -47,7 +43,7 @@ struct S2 {
         )
 
         do {
-            let s1 = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+            let s1 = try XCTUnwrap(module.types[safe: 0]?.struct)
             XCTAssertEqual(s1.name, "S1")
 
             let a = try XCTUnwrap(s1.storedProperties[safe: 0])
@@ -63,7 +59,7 @@ struct S2 {
         }
 
         do {
-            let s2 = try XCTUnwrap(result.module.types[safe: 1]?.struct)
+            let s2 = try XCTUnwrap(module.types[safe: 1]?.struct)
             XCTAssertEqual(s2.name, "S2")
 
             let a = try XCTUnwrap(s2.storedProperties[safe: 0])
@@ -74,21 +70,21 @@ struct S2 {
     }
 
     func testUnresolved() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 struct S {
     var a: URL
 }
 """
         )
 
-        let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
 
         let a = try XCTUnwrap(s.storedProperties[safe: 0]?.type().unresolved)
         XCTAssertEqual(a.lastElement.name, "URL")
     }
 
     func testEnum() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 enum E {
     case a
     case b(Int)
@@ -97,7 +93,7 @@ enum E {
 """
         )
 
-        let e = try XCTUnwrap(result.module.types[safe: 0]?.enum)
+        let e = try XCTUnwrap(module.types[safe: 0]?.enum)
 
         do {
             let c = try XCTUnwrap(e.caseElements[safe: 0])
@@ -128,7 +124,7 @@ enum E {
     }
 
     func testProtocol() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 protocol P: Encodable {
     associatedtype T: Decodable
     var a: String { mutating get async throws }
@@ -137,7 +133,7 @@ protocol P: Encodable {
     static func d(_ x: Int, for y: Int)
 }
 """)
-        let p = try XCTUnwrap(result.module.types[safe: 0]?.protocol)
+        let p = try XCTUnwrap(module.types[safe: 0]?.protocol)
 
         XCTAssertEqual(try p.inheritedTypes().first?.name, "Encodable")
         XCTAssertEqual(p.associatedTypes, ["T"])
@@ -187,7 +183,7 @@ protocol P: Encodable {
     }
 
     func testObservedStoredProperty() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 struct S {
     var a: Int { 0 }
     var b: Int = 0 {
@@ -200,7 +196,7 @@ struct S {
 """
         )
 
-        let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
 
         XCTAssertEqual(s.storedProperties.count, 1)
 
@@ -210,12 +206,12 @@ struct S {
     }
 
     func testInheritanceClause() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 enum E: Codable {
     case a
 }
 """)
-        let e = try XCTUnwrap(result.module.types[safe: 0]?.enum)
+        let e = try XCTUnwrap(module.types[safe: 0]?.enum)
 
         XCTAssertEqual(try e.inheritedTypes().count, 1)
 
@@ -226,14 +222,14 @@ enum E: Codable {
     }
 
     func testGenericParameter() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 struct S<T> {
     var a: T
 }
 """
         )
 
-        let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
         XCTAssertEqual(s.name, "S")
 
         XCTAssertEqual(s.genericParameters.count, 1)
@@ -255,7 +251,7 @@ struct S<T> {
     }
 
     func testNestedTypeProperty() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 struct S {
     var x: A.B
     var y: A.B.C
@@ -263,7 +259,7 @@ struct S {
 """
         )
 
-        let s = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
         XCTAssertEqual(s.name, "S")
 
         XCTAssertEqual(s.storedProperties.count, 2)
@@ -278,15 +274,15 @@ struct S {
     }
 
     func testNestedTypeInStruct() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 struct A {
     struct B {}
 }
 """
         )
 
-        XCTAssertEqual(result.module.types.count, 1)
-        let a = try XCTUnwrap(result.module.types[safe: 0]?.struct)
+        XCTAssertEqual(module.types.count, 1)
+        let a = try XCTUnwrap(module.types[safe: 0]?.struct)
         XCTAssertEqual(a.name, "A")
 
         XCTAssertEqual(a.types.count, 1)
@@ -299,14 +295,14 @@ struct A {
     }
 
     func testNestedTypeInEnum() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 enum A {
     struct B {}
 }
 """
         )
 
-        let a = try XCTUnwrap(result.module.types[safe: 0]?.enum)
+        let a = try XCTUnwrap(module.types[safe: 0]?.enum)
         XCTAssertEqual(a.name, "A")
 
         let b = try XCTUnwrap(a.types[safe: 0]?.struct)
@@ -318,7 +314,7 @@ enum A {
     }
 
     func testResolveNestedTypes() throws {
-        let result = try XCTReadTypes("""
+        let module = try read("""
 struct A {
     struct B {
         var b1: Int = 0
@@ -335,27 +331,31 @@ struct C {
     var y: B
 }
 """)
-        let a = try XCTUnwrap(result.module.getType(name: "A")?.struct)
+        let a = try XCTUnwrap(module.getType(name: "A")?.struct)
 
         let xb = try XCTUnwrap(a.storedProperties[safe: 0]?.type().struct)
         XCTAssertEqual(xb.storedProperties[safe: 0]?.name, "b1")
 
-        let c = try XCTUnwrap(result.module.getType(name: "C")?.struct)
+        let c = try XCTUnwrap(module.getType(name: "C")?.struct)
 
         let yb = try XCTUnwrap(c.storedProperties[safe: 0]?.type().struct)
         XCTAssertEqual(yb.storedProperties[safe: 0]?.name, "b2")
     }
 
     func testModules() throws {
-        let modules = Modules()
-        _ = try Reader(modules: modules, moduleName: "MyLib").read(source: """
+        _ = try Reader(
+            context: context,
+            module: context.getOrCreateModule(name: "MyLib")
+        ).read(source: """
 public enum E {
     case a
 }
 """
         )
 
-        let result = try Reader(modules: modules, moduleName: "main").read(source: """
+        let module = try Reader(
+            context: context
+        ).read(source: """
 import MyLib
 
 protocol P {
@@ -364,7 +364,7 @@ protocol P {
 """
         )
 
-        let p = try XCTUnwrap(result.module.types[safe: 0]?.protocol)
+        let p = try XCTUnwrap(module.types[safe: 0]?.protocol)
         XCTAssertEqual(p.name, "P")
         let f = try XCTUnwrap(p.functionRequirements[safe: 0])
         XCTAssertEqual(f.name, "f")

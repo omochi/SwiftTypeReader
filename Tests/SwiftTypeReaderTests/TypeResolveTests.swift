@@ -1,9 +1,9 @@
 import XCTest
 import SwiftTypeReader
 
-final class TypeResolveTests: XCTestCase {
+final class TypeResolveTests: ReaderTestCaseBase {
     func testTypeResolve() throws {
-        let result = try Reader().read(source: """
+        let module = try read("""
 struct A {
     struct A {
         struct A {
@@ -12,8 +12,6 @@ struct A {
 }
 """
         )
-
-        let module = result.module
 
         // from top level
 
@@ -122,21 +120,26 @@ struct A {
     }
 
     func testCrossModuleResolve() throws {
-        let modules = Modules()
-        let moduleX = try Reader(modules: modules, moduleName: "X").read(source: """
+        let moduleX = try Reader(
+            context: context,
+            module: context.getOrCreateModule(name: "X")
+        ).read(source: """
 struct Int {
 }
 """
-        ).module
+        )
 
-        let moduleY = try Reader(modules: modules, moduleName: "Y").read(source: """
+        let moduleY = try Reader(
+            context: context,
+            module: context.getOrCreateModule(name: "Y")
+        ).read(source: """
 struct A {
     struct Int {
 
     }
 }
 """
-        ).module
+        )
 
         XCTAssertEqual(
             try TypeSpecifier(
