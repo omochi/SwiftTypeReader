@@ -7,7 +7,7 @@ public struct Reader {
     public var module: Module
 
     public init(
-        context: Context = .default,
+        context: Context,
         module: Module? = nil
     ) {
         self.context = context

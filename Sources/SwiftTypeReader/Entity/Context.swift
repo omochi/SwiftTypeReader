@@ -9,8 +9,6 @@ public final class Context {
         )
     }
 
-    public static let `default`: Context = Context()
-
     public func getModule(name: String) -> Module? {
         modules.first { $0.name == name }
     }
