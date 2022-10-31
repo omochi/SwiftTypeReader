@@ -67,16 +67,14 @@ struct TypeResolver {
     }
 
     private func location(module: Module, specifier: TypeSpecifier) -> Location {
-        var elements: [LocationElement] = [
-            .module(name: module.name)
-        ]
+        var elements: [LocationElement] = []
 
         for spec in specifier.elements {
             // FIXME: generic arguments
             elements.append(.type(name: spec.name))
         }
 
-        return Location(elements)
+        return Location(module: module.name, elements: elements)
     }
 
     private func findFirstElementType(specifier: TypeSpecifier) throws -> SType? {
@@ -88,15 +86,15 @@ struct TypeResolver {
             var location = specifier.location
 
             while true {
-                if location.elements.isEmpty {
-                    break
-                }
-
                 if let type = try getType(name: first.name, location: location) {
                     return type
                 }
 
-                location = location.deletingLast()
+                if location.elements.isEmpty {
+                    break
+                }
+
+                location.removeLast()
             }
 
             /*

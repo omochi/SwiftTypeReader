@@ -1,47 +1,52 @@
-/*
- First element must be module
-
- FIXME: extract first element to single property
- */
 public struct Location: Hashable & CustomStringConvertible {
-    public init(_ elements: [LocationElement]) {
+    public init(
+        module: String,
+        elements: [LocationElement] = []
+    ) {
+        self.module = module
         self.elements = elements
     }
 
+    public var module: String
     public var elements: [LocationElement]
 
     public var description: String {
-        elements.map { $0.description }.joined(separator: " -> ")
+        var parts: [String] = ["module(\(module))"]
+        parts += elements.map { $0.description }
+        return parts.joined(separator: " -> ")
+    }
+
+    public mutating func append(_ element: LocationElement) {
+        elements.append(element)
     }
 
     public func appending(_ element: LocationElement) -> Location {
-        var elements = elements
-        elements.append(element)
-        return Location(elements)
+        var copy = self
+        copy.append(element)
+        return copy
     }
 
-    public func deletingLast() -> Location {
-        if elements.isEmpty { return self }
-
-        var elements = elements
+    public mutating func removeLast() {
         elements.removeLast()
-        return Location(elements)
+    }
+
+    public func removingLast() -> Location {
+        var copy = self
+        copy.removeLast()
+        return copy
     }
 }
 
 public enum LocationElement: Hashable & CustomStringConvertible {
-    case module(name: String)
     case type(name: String)
     case genericParameter(index: Int)
 
     public var description: String {
         switch self {
-        case .module(name: let name):
-            return "module(name: \(name))"
         case .type(name: let name):
-            return "type(name: \(name))"
+            return "type(\(name))"
         case .genericParameter(index: let index):
-            return "genericParameter(index: \(index))"
+            return "genericParameter(\(index))"
         }
     }
 }

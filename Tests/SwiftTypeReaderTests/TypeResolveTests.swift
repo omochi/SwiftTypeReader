@@ -18,7 +18,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main")]),
+                location: Location(module: "main"),
                 elements: [.init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A")]
@@ -27,7 +27,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main")]),
+                location: Location(module: "main"),
                 elements: [.init(name: "A"), .init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "A")]
@@ -36,7 +36,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main")]),
+                location: Location(module: "main"),
                 elements: [.init(name: "A"), .init(name: "A"), .init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "A"), .init(name: "A")]
@@ -47,7 +47,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main"), .type(name: "A")]),
+                location: Location(module: "main", elements: [.type(name: "A")]),
                 elements: [.init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "A")]
@@ -56,7 +56,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main"), .type(name: "A")]),
+                location: Location(module: "main", elements: [.type(name: "A")]),
                 elements: [.init(name: "A"), .init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "A"), .init(name: "A")]
@@ -65,7 +65,7 @@ struct A {
         XCTAssertNotNil(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main"), .type(name: "A")]),
+                location: Location(module: "main", elements: [.type(name: "A")]),
                 elements: [.init(name: "A"), .init(name: "A"), .init(name: "A")]
             ).resolve().unresolved
         )
@@ -75,7 +75,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main"), .type(name: "A"), .type(name: "A")]),
+                location: Location(module: "main", elements: [.type(name: "A"), .type(name: "A")]),
                 elements: [.init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "A"), .init(name: "A")]
@@ -84,7 +84,7 @@ struct A {
         XCTAssertNotNil(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main"), .type(name: "A"), .type(name: "A")]),
+                location: Location(module: "main", elements: [.type(name: "A"), .type(name: "A")]),
                 elements: [.init(name: "A"), .init(name: "A")]
             ).resolve().unresolved
         )
@@ -94,7 +94,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main")]),
+                location: Location(module: "main"),
                 elements: [.init(name: "main"), .init(name: "A"), .init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "A")]
@@ -103,7 +103,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main"), .type(name: "A")]),
+                location: Location(module: "main", elements: [.type(name: "A")]),
                 elements: [.init(name: "main"), .init(name: "A"), .init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "A")]
@@ -112,7 +112,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: module, file: nil,
-                location: Location([.module(name: "main"), .type(name: "A"), .type(name: "A")]),
+                location: Location(module: "main", elements: [.type(name: "A"), .type(name: "A")]),
                 elements: [.init(name: "main"), .init(name: "A"), .init(name: "A")]
             ).resolve().asSpecifier().elements,
             [.init(name: "main"), .init(name: "A"), .init(name: "A")]
@@ -144,7 +144,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: moduleY, file: nil,
-                location: Location([.module(name: "Y")]),
+                location: Location(module: "Y"),
                 elements: [.init(name: "Int")]
             ).resolve().asSpecifier().elements,
             [.init(name: "Swift"), .init(name: "Int")]
@@ -153,7 +153,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: moduleX, file: nil,
-                location: Location([.module(name: "X")]),
+                location: Location(module: "X"),
                 elements: [.init(name: "Int")]
             ).resolve().asSpecifier().elements,
             [.init(name: "X"), .init(name: "Int")]
@@ -162,7 +162,7 @@ struct A {
         XCTAssertEqual(
             try TypeSpecifier(
                 module: moduleY, file: nil,
-                location: Location([.module(name: "Y"), .type(name: "A")]),
+                location: Location(module: "Y", elements: [.type(name: "A")]),
                 elements: [.init(name: "Int")]
             ).resolve().asSpecifier().elements,
             [.init(name: "Y"), .init(name: "A"), .init(name: "Int")]

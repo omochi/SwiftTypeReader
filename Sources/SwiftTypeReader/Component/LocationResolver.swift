@@ -12,17 +12,11 @@ struct LocationResolver {
     }
 
     private func resolve(modules: [Module], location: Location) throws -> Element? {
-        guard let first = location.elements.first,
-              case .module(let name) = first else
-        {
-            throw MessageError("broken location: \(location)")
-        }
-
-        guard let module = modules.first(where: { $0.name == name }) else {
+        guard let module = modules.first(where: { $0.name == location.module }) else {
             return nil
         }
 
-        return try resolve(module: module, location: location, index: 1)
+        return try resolve(module: module, location: location, index: 0)
     }
 
     private func resolve(element: Element, location: Location, index: Int) throws -> Element? {
@@ -74,8 +68,6 @@ struct LocationResolver {
                 location: location,
                 index: index + 1
             )
-        case .module:
-            throw MessageError("broken location: \(location)")
         }
     }
 
@@ -88,7 +80,7 @@ struct LocationResolver {
         case .type:
             // TODO: type name dot expression
             return nil
-        case .genericParameter, .module:
+        case .genericParameter:
             throw MessageError("broken location: \(location)")
         }
     }

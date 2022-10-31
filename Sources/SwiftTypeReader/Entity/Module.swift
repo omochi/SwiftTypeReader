@@ -14,7 +14,7 @@ public final class Module {
     public var types: [SType] = []
 
     public func asLocation() -> Location {
-        Location([.module(name: name)])
+        Location(module: name)
     }
 
     public var modulesForFind: [Module] {
@@ -50,8 +50,6 @@ public final class Module {
 
     public func get(element: LocationElement) -> Element? {
         switch element {
-        case .module(name: let name):
-            return getModule(name: name).map { .module($0) }
         case .type(name: let name):
             return getType(name: name).map { .type($0) }
         case .genericParameter:
