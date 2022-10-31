@@ -43,14 +43,14 @@ public enum RegularType: RegularTypeProtocol {
         }
     }
 
-    public var module: Module? { inner.module }
+    public var module: Module { inner.module }
     public var file: URL? { inner.file }
     public var location: Location { inner.location }
     public var name: String { inner.name }
     public var genericParameters: [GenericParameterType] { inner.genericParameters }
     public var genericArgumentSpecifiers: [TypeSpecifier] { inner.genericArgumentSpecifiers }
-    public func genericArguments() throws -> [SType] { try inner.genericArguments() }
-    public func inheritedTypes() throws -> [SType] { try inner.inheritedTypes() }
+    public func genericArguments() -> [SType] { inner.genericArguments() }
+    public func inheritedTypes() -> [SType] { inner.inheritedTypes() }
     public var description: String { inner.description }
     public func asSpecifier() -> TypeSpecifier { inner.asSpecifier() }
     public var types: [SType] {
@@ -62,7 +62,7 @@ public enum RegularType: RegularTypeProtocol {
         }
     }
 
-    public func applyingGenericArguments(_ args: [SType]) throws -> RegularType {
+    public func applyingGenericArguments(_ args: [SType]) -> RegularType {
         switch self {
         case .struct(var t):
             t.setGenericArguments(args)
@@ -70,24 +70,23 @@ public enum RegularType: RegularTypeProtocol {
         case .enum(var t):
             t.setGenericArguments(args)
             return .enum(t)
-        case .protocol:
-            throw MessageError("protocol can't be applied generic arguments")
-        case .genericParameter:
-            throw MessageError("generic parameter can't be applied generic arguments")
+        case .protocol,
+                .genericParameter:
+            return self
         }
     }
 }
 
 public protocol RegularTypeProtocol: CustomStringConvertible {
-    var module: Module? { get }
+    var module: Module { get }
     var file: URL? { get }
     var location: Location { get }
     var name: String { get }
     var genericParameters: [GenericParameterType] { get }
     var genericArgumentSpecifiers: [TypeSpecifier] { get }
     var types: [SType] { get }
-    func genericArguments() throws -> [SType]
-    func inheritedTypes() throws -> [SType]
+    func genericArguments() -> [SType]
+    func inheritedTypes() -> [SType]
     func get(name: String) -> SType?
     func asSpecifier() -> TypeSpecifier
 }

@@ -57,8 +57,8 @@ public final class Module {
         }
     }
 
-    public func resolve(location: Location) throws -> Element? {
-        try LocationResolver(context: context)
+    public func resolve(location: Location) -> Element? {
+        LocationResolver(context: context)
             .resolve(module: self, location: location)
     }
 

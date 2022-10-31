@@ -54,10 +54,10 @@ public struct SType: CustomStringConvertible {
         return x
     }
 
-    public func resolved() throws -> SType {
+    public func resolved() -> SType {
         if case .unresolved(let s) = state {
             // safe even if shared
-            box.value = try s.resolve().state
+            box.value = s.resolve().state
         }
         return self
     }
@@ -69,14 +69,6 @@ public struct SType: CustomStringConvertible {
         }
     }
 
-    public func location() throws -> Location {
-        switch state {
-        case .resolved(let t): return t.location
-        case .unresolved:
-            throw MessageError("location of unresolved type is unknown")
-        }
-    }
-
     public func asSpecifier() -> TypeSpecifier {
         switch state {
         case .resolved(let t): return t.asSpecifier()
@@ -84,10 +76,10 @@ public struct SType: CustomStringConvertible {
         }
     }
 
-    public func genericArguments() throws -> [SType] {
+    public func genericArguments() -> [SType] {
         switch state {
-        case .resolved(let t): return try t.genericArguments()
-        case .unresolved(let t): return try t.lastElement.genericArguments()
+        case .resolved(let t): return t.genericArguments()
+        case .unresolved(let t): return t.lastElement.genericArguments()
         }
     }
 
@@ -98,13 +90,14 @@ public struct SType: CustomStringConvertible {
         }
     }
 
-    public func applyingGenericArguments(_ args: [SType]) throws -> SType {
+    public func applyingGenericArguments(_ args: [SType]) -> SType {
         switch state {
         case .resolved(var t):
-            t = try t.applyingGenericArguments(args)
+            t = t.applyingGenericArguments(args)
             return .resolved(t)
-        case .unresolved:
-            throw MessageError("unresolved type can't be applied generic arguments")
+        case .unresolved(var spec):
+            spec.lastElement.unresolvedGenericArguments = TypeCollection(types: args)
+            return .unresolved(spec)
         }
     }
 

@@ -5,8 +5,8 @@ public struct TypeSpecifier: CustomStringConvertible {
         public var name: String
         public var unresolvedGenericArguments: TypeCollection
 
-        public func genericArguments() throws -> [SType] {
-            try unresolvedGenericArguments.resolved()
+        public func genericArguments() -> [SType] {
+            unresolvedGenericArguments.resolved()
         }
 
         public var genericArgumentSpecifiers: [TypeSpecifier] {
@@ -60,7 +60,7 @@ public struct TypeSpecifier: CustomStringConvertible {
     }
 
     public init(
-        module: Module?,
+        module: Module,
         file: URL?,
         location: Location,
         elements: [Element]
@@ -72,28 +72,26 @@ public struct TypeSpecifier: CustomStringConvertible {
         self.elements = elements
     }
 
-    public weak var module: Module?
+    public unowned var module: Module
     public var file: URL?
     public var location: Location
     public var elements: [Element]
 
-    public var lastElement: Element { elements.last! }
+    public var lastElement: Element {
+        get { elements[elements.count - 1] }
+        set { elements[elements.count - 1] = newValue }
+    }
 
     public var description: String {
         return elements.map { $0.description }.joined(separator: ".")
     }
 
-    public func resolve() throws -> SType {
-        guard let module = self.module else {
-            throw MessageError("no Module")
-        }
-        
-        return try TypeResolver(module: module)(specifier: self)
+    public func resolve() -> SType {
+        return TypeResolver(module: module)(specifier: self)
     }
 
     public mutating func removeModuleElement() -> Module? {
-        if let module = self.module,
-           let first = elements.first,
+        if let first = elements.first,
            let element = module.get(name: first.name),
            case .module(let module) = element
         {

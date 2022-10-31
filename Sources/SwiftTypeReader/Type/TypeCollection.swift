@@ -32,11 +32,11 @@ public struct TypeCollection {
         self = .resolved(types)
     }
 
-    public func resolved() throws -> [SType] {
+    public func resolved() -> [SType] {
         if case .unresolved(let ss) = state {
             // safe even if shared
             box.value = .resolved(
-                try ss.map { try $0.resolve() }
+                ss.map { $0.resolve() }
             )
         }
         return self.asTypes()

@@ -9,8 +9,8 @@ public struct AssociatedValue {
 
     public var name: String?
     
-    public func type() throws -> SType {
-        try unresolvedType.resolved()
+    public func type() -> SType {
+        unresolvedType.resolved()
     }
 
     public var unresolvedType: SType

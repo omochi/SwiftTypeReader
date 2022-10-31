@@ -16,7 +16,7 @@ struct A {
         // from top level
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main"),
                 elements: [.init(name: "A")]
@@ -25,7 +25,7 @@ struct A {
         )
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main"),
                 elements: [.init(name: "A"), .init(name: "A")]
@@ -34,7 +34,7 @@ struct A {
         )
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main"),
                 elements: [.init(name: "A"), .init(name: "A"), .init(name: "A")]
@@ -45,7 +45,7 @@ struct A {
         // from A
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main", elements: [.type(name: "A")]),
                 elements: [.init(name: "A")]
@@ -54,7 +54,7 @@ struct A {
         )
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main", elements: [.type(name: "A")]),
                 elements: [.init(name: "A"), .init(name: "A")]
@@ -63,7 +63,7 @@ struct A {
         )
 
         XCTAssertNotNil(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main", elements: [.type(name: "A")]),
                 elements: [.init(name: "A"), .init(name: "A"), .init(name: "A")]
@@ -73,7 +73,7 @@ struct A {
         // from A.A
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main", elements: [.type(name: "A"), .type(name: "A")]),
                 elements: [.init(name: "A")]
@@ -82,7 +82,7 @@ struct A {
         )
 
         XCTAssertNotNil(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main", elements: [.type(name: "A"), .type(name: "A")]),
                 elements: [.init(name: "A"), .init(name: "A")]
@@ -92,7 +92,7 @@ struct A {
         // Absolute spec is location agnostic
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main"),
                 elements: [.init(name: "main"), .init(name: "A"), .init(name: "A")]
@@ -101,7 +101,7 @@ struct A {
         )
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main", elements: [.type(name: "A")]),
                 elements: [.init(name: "main"), .init(name: "A"), .init(name: "A")]
@@ -110,7 +110,7 @@ struct A {
         )
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: module, file: nil,
                 location: Location(module: "main", elements: [.type(name: "A"), .type(name: "A")]),
                 elements: [.init(name: "main"), .init(name: "A"), .init(name: "A")]
@@ -142,7 +142,7 @@ struct A {
         )
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: moduleY, file: nil,
                 location: Location(module: "Y"),
                 elements: [.init(name: "Int")]
@@ -151,7 +151,7 @@ struct A {
         )
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: moduleX, file: nil,
                 location: Location(module: "X"),
                 elements: [.init(name: "Int")]
@@ -160,7 +160,7 @@ struct A {
         )
 
         XCTAssertEqual(
-            try TypeSpecifier(
+            TypeSpecifier(
                 module: moduleY, file: nil,
                 location: Location(module: "Y", elements: [.type(name: "A")]),
                 elements: [.init(name: "Int")]

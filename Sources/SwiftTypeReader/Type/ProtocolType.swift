@@ -6,7 +6,7 @@ import Foundation
  */
 public struct ProtocolType: RegularTypeProtocol {
     public init(
-        module: Module?,
+        module: Module,
         file: URL?,
         location: Location,
         name: String,
@@ -25,7 +25,7 @@ public struct ProtocolType: RegularTypeProtocol {
         self.associatedTypes = associatedTypes
     }
 
-    public weak var module: Module?
+    public unowned var module: Module
     public var file: URL?
     public var location: Location
     public var name: String
@@ -36,11 +36,11 @@ public struct ProtocolType: RegularTypeProtocol {
 
     public var genericParameters: [GenericParameterType] { [] }
 
-    public func genericArguments() throws -> [SType] { [] }
+    public func genericArguments() -> [SType] { [] }
     public var genericArgumentSpecifiers: [TypeSpecifier] { [] }
 
-    public func inheritedTypes() throws -> [SType] {
-        try unresolvedInheritedTypes.resolved()
+    public func inheritedTypes() -> [SType] {
+        unresolvedInheritedTypes.resolved()
     }
 
     public var types: [SType] { [] }

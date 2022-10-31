@@ -23,8 +23,8 @@ public final class Context {
         return module
     }
 
-    public func resolve(location: Location) throws -> Element? {
-        return try LocationResolver(context: self)
+    public func resolve(location: Location) -> Element? {
+        return LocationResolver(context: self)
             .resolve(module: nil, location: location)
     }
 

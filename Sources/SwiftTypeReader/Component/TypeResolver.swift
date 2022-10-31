@@ -4,43 +4,43 @@
 struct TypeResolver {
     var module: Module
     
-    func callAsFunction(specifier: TypeSpecifier) throws -> SType {
-        if let type = try resolve(specifier: specifier) {
+    func callAsFunction(specifier: TypeSpecifier) -> SType {
+        if let type = resolve(specifier: specifier) {
             return type
         }
         return .unresolved(specifier)
     }
 
-    func resolve(specifier: TypeSpecifier) throws -> SType? {
+    func resolve(specifier: TypeSpecifier) -> SType? {
         /*
          Find out specifier is absolute or relative
          */
         var specifier = specifier
         if let module = specifier.removeModuleElement() {
             // Absolute specifier
-            return try resolveOnModule(module, specifier: specifier, index: 0)
+            return resolveOnModule(module, specifier: specifier, index: 0)
         }
 
-        if let type = try findFirstElementType(specifier: specifier) {
-            return try resolveOnType(type, specifier: specifier, index: 1)
+        if let type = findFirstElementType(specifier: specifier) {
+            return resolveOnType(type, specifier: specifier, index: 1)
         }
 
         return nil
     }
 
-    private func resolveOnModule(_ module: Module, specifier: TypeSpecifier, index: Int) throws -> SType? {
+    private func resolveOnModule(_ module: Module, specifier: TypeSpecifier, index: Int) -> SType? {
         guard index < specifier.elements.count else {
-            throw MessageError("broken specifier: \(specifier)")
+            return nil
         }
         let spec = specifier.elements[index]
         guard var type = module.getType(name: spec.name) else {
             return nil
         }
-        type = try applyGenericArguments(type: type, specifier: spec)
-        return try resolveOnType(type, specifier: specifier, index: index + 1)
+        type = applyGenericArguments(type: type, specifier: spec)
+        return resolveOnType(type, specifier: specifier, index: index + 1)
     }
 
-    private func resolveOnType(_ type: SType, specifier: TypeSpecifier, index: Int) throws -> SType? {
+    private func resolveOnType(_ type: SType, specifier: TypeSpecifier, index: Int) -> SType? {
         guard index < specifier.elements.count else {
             return type
         }
@@ -48,19 +48,19 @@ struct TypeResolver {
         guard var type = type.get(name: spec.name) else {
             return nil
         }
-        type = try applyGenericArguments(type: type, specifier: spec)
-        return try resolveOnType(type, specifier: specifier, index: index + 1)
+        type = applyGenericArguments(type: type, specifier: spec)
+        return resolveOnType(type, specifier: specifier, index: index + 1)
     }
 
-    private func applyGenericArguments(type: SType, specifier: TypeSpecifier.Element) throws -> SType {
+    private func applyGenericArguments(type: SType, specifier: TypeSpecifier.Element) -> SType {
         var type = type
 
-        let args = try specifier.genericArgumentSpecifiers.map { (argSpec) in
-            try argSpec.resolve()
+        let args = specifier.genericArgumentSpecifiers.map { (argSpec) in
+            argSpec.resolve()
         }
 
         if !args.isEmpty {
-            type = try type.applyingGenericArguments(args)
+            type = type.applyingGenericArguments(args)
         }
 
         return type
@@ -77,16 +77,16 @@ struct TypeResolver {
         return Location(module: module.name, elements: elements)
     }
 
-    private func findFirstElementType(specifier: TypeSpecifier) throws -> SType? {
+    private func findFirstElementType(specifier: TypeSpecifier) -> SType? {
         guard let first = specifier.elements.first else {
             return nil
         }
 
-        func findType(name: String) throws -> SType? {
+        func findType(name: String) -> SType? {
             var location = specifier.location
 
             while true {
-                if let type = try getType(name: first.name, location: location) {
+                if let type = getType(name: first.name, location: location) {
                     return type
                 }
 
@@ -109,16 +109,16 @@ struct TypeResolver {
             return nil
         }
 
-        if var type = try findType(name: first.name) {
-            type = try applyGenericArguments(type: type, specifier: first)
+        if var type = findType(name: first.name) {
+            type = applyGenericArguments(type: type, specifier: first)
             return type
         }
 
         return nil
     }
 
-    private func getType(name: String, location: Location) throws -> SType? {
-        guard let element = try module.resolve(location: location) else {
+    private func getType(name: String, location: Location) -> SType? {
+        guard let element = module.resolve(location: location) else {
             return nil
         }
 
