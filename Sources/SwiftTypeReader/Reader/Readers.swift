@@ -47,6 +47,22 @@ enum Readers {
         }
     }
 
+    static func readImportDeclaration(
+        context: Context,
+        declaration: DeclSyntax
+    ) -> ImportDecl? {
+        if let decl = declaration.as(ImportDeclSyntax.self) {
+            let reader = ImportReader(
+                module: context.module,
+                file: context.file,
+                location: context.location
+            )
+            return reader.read(importDecl: decl)
+        } else {
+            return nil
+        }
+    }
+
     static func readTypeSpecifier(
         context: Context,
         typeSyntax: TypeSyntax

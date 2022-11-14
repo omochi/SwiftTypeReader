@@ -368,5 +368,25 @@ protocol P {
         let e = try XCTUnwrap(f.outputType()?.enum)
         let c = try XCTUnwrap(e.caseElements[safe: 0])
         XCTAssertEqual(c.name, "a")
+        XCTAssertEqual(module.imports[safe: 0]?.name, "MyLib")
+    }
+
+    func testImports() throws {
+        let module = try Reader(
+            context: context
+        ).read(source: """
+import Foo
+@preconcurrency import Bar
+import struct Baz.S
+"""
+        )
+
+        let i0 = try XCTUnwrap(module.imports[safe: 0])
+        XCTAssertEqual(i0.name, "Foo")
+        let i1 = try XCTUnwrap(module.imports[safe: 1])
+        XCTAssertEqual(i1.name, "Bar")
+        let i2 = try XCTUnwrap(module.imports[safe: 2])
+        XCTAssertEqual(i2.name, "Baz.S") // INFO: type importing is not supported yet. this should be treated as TypeSpecifier.
+        // INFO: importKind is not supported yet.
     }
 }

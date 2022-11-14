@@ -12,6 +12,7 @@ public final class Module {
     public unowned let context: Context
     public var name: String
     public var types: [SType] = []
+    public var imports: [ImportDecl] = []
 
     public func asLocation() -> Location {
         Location(module: name)
