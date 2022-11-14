@@ -36,19 +36,17 @@ public struct Reader {
         let sourceFile: SourceFileSyntax = try SyntaxParser.parse(source: source)
 
         let statements = sourceFile.statements.map { $0.item }
+        let context = Readers.Context(
+            module: module,
+            file: file,
+            location: module.asLocation()
+        )
 
-        for statement in statements {
-            if let decl = statement.as(DeclSyntax.self),
-               let type = Readers.readTypeDeclaration(
-                context: .init(
-                    module: module,
-                    file: file,
-                    location: module.asLocation()
-                ),
-                declaration: decl
-               )
-            {
+        for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
+            if let type = Readers.readTypeDeclaration(context: context, declaration: decl) {
                 module.types.append(type)
+            } else if let `import` = Readers.readImportDeclaration(context: context, declaration: decl) {
+                module.imports.append(`import`)
             }
         }
     }
