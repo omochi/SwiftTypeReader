@@ -11,8 +11,11 @@ public final class Module {
 
     public unowned let context: Context
     public var name: String
-    public var types: [SType] = []
-    public var imports: [ImportDecl] = []
+    public var sources: [SourceFile] = []
+
+    public var types: [SType] {
+        sources.flatMap { $0.types }
+    }
 
     public func asLocation() -> Location {
         Location(module: name)
@@ -64,47 +67,61 @@ public final class Module {
     }
 
     static func swiftStandardLibrary(context: Context) -> Module {
-        let m = Module(
-            context: context,
-            name: "Swift"
-        )
+        var builder = StandardLibraryBuilder(context: context)
+        return builder.build()
+    }
+}
 
-        m.addStruct(name: "Void")
-        m.addStruct(name: "Bool")
-        m.addStruct(name: "Int")
-        m.addStruct(name: "Float")
-        m.addStruct(name: "Double")
-        m.addStruct(name: "String")
-        m.addStruct(name: "Optional")
-        m.addStruct(name: "Array")
-        m.addStruct(name: "Dictionary")
+private struct StandardLibraryBuilder {
+    var module: Module
+    var source: SourceFile
 
-        m.addProtocol(name: "Encodable")
-        m.addProtocol(name: "Decodable")
-        m.addProtocol(name: "Codable")
+    var location: Location { module.asLocation() }
 
-        return m
+    init(context: Context) {
+        module = Module(context: context, name: "Swift")
+        source = SourceFile(file: URL(fileURLWithPath: "stdlib.swift"))
     }
 
-    func addStruct(name: String) {
+    mutating func addStruct(name: String) {
         let t = StructType(
-            module: self,
+            module: module,
             file: nil,
-            location: asLocation(),
+            location: location,
             name: name
         )
 
-        types.append(.struct(t))
+        source.types.append(.struct(t))
     }
 
-    func addProtocol(name: String) {
+    mutating func addProtocol(name: String) {
         let t = ProtocolType(
-            module: self,
+            module: module,
             file: nil,
-            location: asLocation(),
+            location: location,
             name: name
         )
 
-        types.append(.protocol(t))
+        source.types.append(.protocol(t))
+    }
+
+    mutating func build() -> Module {
+        addStruct(name: "Void")
+        addStruct(name: "Bool")
+        addStruct(name: "Int")
+        addStruct(name: "Float")
+        addStruct(name: "Double")
+        addStruct(name: "String")
+        addStruct(name: "Optional")
+        addStruct(name: "Array")
+        addStruct(name: "Dictionary")
+
+        addProtocol(name: "Encodable")
+        addProtocol(name: "Decodable")
+        addProtocol(name: "Codable")
+
+        module.sources.append(source)
+
+        return module
     }
 }

@@ -343,22 +343,26 @@ struct C {
         _ = try Reader(
             context: context,
             module: context.getOrCreateModule(name: "MyLib")
-        ).read(source: """
+        ).read(
+            source: """
 public enum E {
     case a
 }
-"""
+""",
+            file: URL(fileURLWithPath: "MyLib.swift")
         )
 
         let module = try Reader(
             context: context
-        ).read(source: """
+        ).read(
+            source: """
 import MyLib
 
 protocol P {
     func f() -> E
 }
-"""
+""",
+            file: URL(fileURLWithPath: "main.swift")
         )
 
         let p = try XCTUnwrap(module.types[safe: 0]?.protocol)
@@ -372,20 +376,22 @@ protocol P {
     }
 
     func testImports() throws {
-        let module = try Reader(
+        let source = try Reader(
             context: context
-        ).read(source: """
+        ).read(
+            source: """
 import Foo
 @preconcurrency import Bar
 import struct Baz.S
-"""
+""",
+            file: URL(fileURLWithPath: "main.swift")
         )
 
-        let i0 = try XCTUnwrap(module.imports[safe: 0])
+        let i0 = try XCTUnwrap(source.imports[safe: 0])
         XCTAssertEqual(i0.name, "Foo")
-        let i1 = try XCTUnwrap(module.imports[safe: 1])
+        let i1 = try XCTUnwrap(source.imports[safe: 1])
         XCTAssertEqual(i1.name, "Bar")
-        let i2 = try XCTUnwrap(module.imports[safe: 2])
+        let i2 = try XCTUnwrap(source.imports[safe: 2])
         XCTAssertEqual(i2.name, "Baz.S") // INFO: type importing is not supported yet. this should be treated as TypeSpecifier.
         // INFO: importKind is not supported yet.
     }
