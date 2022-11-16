@@ -120,25 +120,31 @@ struct A {
     }
 
     func testCrossModuleResolve() throws {
-        let moduleX = try Reader(
+        let moduleX = context.getOrCreateModule(name: "X")
+        _ = try Reader(
             context: context,
-            module: context.getOrCreateModule(name: "X")
-        ).read(source: """
+            module: moduleX
+        ).read(
+            source: """
 struct Int {
 }
-"""
+""",
+            file: URL(fileURLWithPath: "x.swift")
         )
 
-        let moduleY = try Reader(
+        let moduleY = context.getOrCreateModule(name: "Y")
+        _ = try Reader(
             context: context,
-            module: context.getOrCreateModule(name: "Y")
-        ).read(source: """
+            module: moduleY
+        ).read(
+            source: """
 struct A {
     struct Int {
 
     }
 }
-"""
+""",
+            file: URL(fileURLWithPath: "y.swift")
         )
 
         XCTAssertEqual(

@@ -3,12 +3,12 @@ import SwiftSyntax
 
 final class StructReader {
     private let module: Module
-    private let file: URL?
+    private let file: URL
     private let location: Location
 
     init(
         module: Module,
-        file: URL?,
+        file: URL,
         location: Location
     ) {
         self.module = module

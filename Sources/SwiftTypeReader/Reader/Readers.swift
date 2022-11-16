@@ -4,7 +4,7 @@ import SwiftSyntax
 enum Readers {
     struct Context {
         var module: Module
-        var file: URL?
+        var file: URL
         var location: Location
     }
 
