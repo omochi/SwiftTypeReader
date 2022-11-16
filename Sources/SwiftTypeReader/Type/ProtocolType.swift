@@ -7,7 +7,7 @@ import Foundation
 public struct ProtocolType: RegularTypeProtocol {
     public init(
         module: Module,
-        file: URL?,
+        file: URL,
         location: Location,
         name: String,
         inheritedTypes: [TypeSpecifier] = [],
@@ -26,7 +26,7 @@ public struct ProtocolType: RegularTypeProtocol {
     }
 
     public unowned var module: Module
-    public var file: URL?
+    public var file: URL
     public var location: Location
     public var name: String
     public var unresolvedInheritedTypes: TypeCollection

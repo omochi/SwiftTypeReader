@@ -46,7 +46,7 @@ public struct Reader {
             location: module.asLocation()
         )
 
-        var source = SourceFile(file: file)
+        var source = SourceFile(module: module, file: file)
 
         for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
             if let type = Readers.readTypeDeclaration(context: context, declaration: decl) {

@@ -3,7 +3,7 @@ import Foundation
 public struct EnumType: RegularTypeProtocol {
     public init(
         module: Module,
-        file: URL?,
+        file: URL,
         location: Location,
         name: String,
         genericParameters: [GenericParameterType] = [],
@@ -24,7 +24,7 @@ public struct EnumType: RegularTypeProtocol {
     }
 
     public unowned var module: Module
-    public var file: URL?
+    public var file: URL
     public var location: Location
     public var name: String
     public var genericParameters: [GenericParameterType]

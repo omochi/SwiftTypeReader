@@ -80,13 +80,16 @@ private struct StandardLibraryBuilder {
 
     init(context: Context) {
         module = Module(context: context, name: "Swift")
-        source = SourceFile(file: URL(fileURLWithPath: "stdlib.swift"))
+        source = SourceFile(
+            module: module,
+            file: URL(fileURLWithPath: "stdlib.swift")
+        )
     }
 
     mutating func addStruct(name: String) {
         let t = StructType(
             module: module,
-            file: nil,
+            file: source.file,
             location: location,
             name: name
         )
@@ -97,7 +100,7 @@ private struct StandardLibraryBuilder {
     mutating func addProtocol(name: String) {
         let t = ProtocolType(
             module: module,
-            file: nil,
+            file: source.file,
             location: location,
             name: name
         )

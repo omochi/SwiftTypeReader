@@ -44,7 +44,7 @@ public enum RegularType: RegularTypeProtocol {
     }
 
     public var module: Module { inner.module }
-    public var file: URL? { inner.file }
+    public var file: URL { inner.file }
     public var location: Location { inner.location }
     public var name: String { inner.name }
     public var genericParameters: [GenericParameterType] { inner.genericParameters }
@@ -79,7 +79,7 @@ public enum RegularType: RegularTypeProtocol {
 
 public protocol RegularTypeProtocol: CustomStringConvertible {
     var module: Module { get }
-    var file: URL? { get }
+    var file: URL { get }
     var location: Location { get }
     var name: String { get }
     var genericParameters: [GenericParameterType] { get }
