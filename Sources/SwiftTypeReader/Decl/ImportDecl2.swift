@@ -9,7 +9,5 @@ public final class ImportDecl2: Decl {
 
     public unowned var source: SourceFileDecl
     public var name: String
-    public var context: (any DeclContext)? {
-        source
-    }
+    public var parentContext: (any DeclContext)? { source }
 }

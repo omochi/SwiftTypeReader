@@ -5,9 +5,3 @@
  S means Swift.
  */
 public protocol SType2: Hashable & CustomStringConvertible {}
-
-extension SType2 {
-    func asAnyType() -> AnyType {
-        AnyType(self)
-    }
-}

@@ -1,9 +1,9 @@
 public struct UnknownType: SType2 {
     public init(repr: some TypeRepr) {
-        self.repr = repr.asAnyTypeRepr()
+        self.repr = repr
     }
 
-    public var repr: AnyTypeRepr
+    @AnyTypeReprStorage public var repr: any TypeRepr
 
     public var description: String {
         repr.description

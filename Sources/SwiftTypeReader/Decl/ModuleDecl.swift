@@ -3,14 +3,14 @@ public final class ModuleDecl: ValueDecl & DeclContext {
         context: Context,
         name: String
     ) {
-        self._context = context
+        self.context = context
         self.name = name
         self.sources = []
     }
 
-    public unowned var _context: Context
+    public unowned var context: Context
     public var name: String
-    public var context: (any DeclContext)? { nil }
+    public var parentContext: (any DeclContext)? { nil }
 
     public var sources: [SourceFileDecl]
 

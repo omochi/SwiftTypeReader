@@ -4,22 +4,22 @@ public final class VarDecl: StorageDecl {
         name: String,
         typeRepr: any TypeRepr
     ) {
-        self._context = context
+        self.context = context
         self.name = name
         self.typeRepr = typeRepr
     }
-    public unowned var _context: any DeclContext
-    public var context: (any DeclContext)? { _context }
+    public unowned var context: any DeclContext
+    public var parentContext: (any DeclContext)? { context }
 
     public var name: String
     public var typeRepr: any TypeRepr
 
     public var interfaceType: any SType2 {
         get throws {
-            try _context.rootContext.evaluator(
+            try context.rootContext.evaluator(
                 TypeResolveRequest(
-                    context: _context.asAnyDeclContext(),
-                    repr: typeRepr.asAnyTypeRepr()
+                    context: context,
+                    repr: typeRepr
                 )
             )
         }

@@ -1,13 +1,13 @@
 struct UnqualifiedLookupRequest: Request {
-    var context: AnyDeclContext
+    @AnyDeclContextStorage var context: any DeclContext
     var name: String
     var options: LookupOptions
 
     func evaluate(on evaluator: RequestEvaluator) throws -> (any Decl)? {
-        var context = context
+        var context: any DeclContext = context
         
         while true {
-            switch context.value {
+            switch context {
             case let module as ModuleDecl:
                 return try evaluator(
                     TopLevelLookupRequest(
@@ -27,15 +27,15 @@ struct UnqualifiedLookupRequest: Request {
             default: break
             }
             
-            if let decl = context.value.findOwn(name: name, options: options) {
+            if let decl = context.findOwn(name: name, options: options) {
                 return decl
             }
             
-            guard let parent = context.value.context else {
+            guard let parent = context.parentContext else {
                 return nil
             }
             
-            context = parent.asAnyDeclContext()
+            context = parent
         }
     }
 }

@@ -1,14 +1,14 @@
 public struct IdentTypeRepr: TypeRepr {
     public init(
         name: String,
-        genericArgs: [AnyTypeRepr]
+        genericArgs: [any TypeRepr]
     ) {
         self.name = name
         self.genericArgs = genericArgs
     }
 
     public var name: String
-    public var genericArgs: [AnyTypeRepr]
+    @AnyTypeReprArrayStorage public var genericArgs: [any TypeRepr]
 
     public var description: String {
         var s = name

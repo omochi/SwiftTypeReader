@@ -2,10 +2,10 @@ public struct MetatypeType: SType2 {
     public init(
         instance: some SType2
     ) {
-        self.instance = instance.asAnyType()
+        self.instance = instance
     }
 
-    public var instance: AnyType
+    @AnyTypeStorage public var instance: any SType2
 
     public var description: String {
         "\(instance).Type"

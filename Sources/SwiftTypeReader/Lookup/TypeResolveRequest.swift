@@ -1,6 +1,6 @@
 struct TypeResolveRequest: Request {
-    var context: AnyDeclContext
-    var repr: AnyTypeRepr
+    @AnyDeclContextStorage var context: any DeclContext
+    @AnyTypeReprStorage var repr: any TypeRepr
 
     func evaluate(on evaluator: RequestEvaluator) throws -> any SType2 {
         return try Evaluate(
@@ -13,11 +13,11 @@ struct TypeResolveRequest: Request {
 
 private struct Evaluate {
     var evaluator: RequestEvaluator
-    var context: AnyDeclContext
-    var repr: AnyTypeRepr
+    var context: any DeclContext
+    var repr: any TypeRepr
 
     func callAsFunction() throws -> any SType2 {
-        switch repr.value.switcher {
+        switch repr.switcher {
         case .ident(let repr):
             return try resolve(items: [repr])
         case .chained(let repr):

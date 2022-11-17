@@ -1,5 +1,5 @@
 public protocol _DeclParentContextHolder {
-    var context: (any DeclContext)? { get }
+    var parentContext: (any DeclContext)? { get }
 }
 
 extension _DeclParentContextHolder {
@@ -8,7 +8,7 @@ extension _DeclParentContextHolder {
             return module
         }
 
-        if let parent = context {
+        if let parent = parentContext {
             return parent.moduleContext
         }
 
@@ -16,6 +16,6 @@ extension _DeclParentContextHolder {
     }
 
     public var rootContext: Context {
-        moduleContext._context
+        moduleContext.context
     }
 }

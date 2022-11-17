@@ -13,7 +13,7 @@ public final class SourceFileDecl: Decl & DeclContext {
 
     public unowned var module: ModuleDecl
     public var file: URL
-    public var context: (any DeclContext)? { module }
+    public var parentContext: (any DeclContext)? { module }
 
     public var imports: [ImportDecl2]
     public var types: [any NominalTypeDecl]

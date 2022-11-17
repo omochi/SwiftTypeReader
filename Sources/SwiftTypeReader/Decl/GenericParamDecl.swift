@@ -3,13 +3,13 @@ public final class GenericParamDecl: TypeDecl {
         context: some DeclContext,
         name: String
     ) {
-        self._context = context
+        self.context = context
         self.name = name
     }
 
-    public unowned var _context: any DeclContext
+    public unowned var context: any DeclContext
     public var name: String
-    public var context: (any DeclContext)? { _context }
+    public var parentContext: (any DeclContext)? { context }
 
     public var declaredInterfaceType: any SType2 {
         GenericParamType2(decl: self)

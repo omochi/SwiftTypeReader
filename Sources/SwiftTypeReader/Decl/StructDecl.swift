@@ -3,14 +3,14 @@ public final class StructDecl: NominalTypeDecl & DeclContext {
         context: some DeclContext,
         name: String
     ) {
-        self._context = context
+        self.context = context
         self.name = name
         self.genericParams = .init()
     }
 
-    public unowned var _context: any DeclContext
+    public unowned var context: any DeclContext
     public var name: String
-    public var context: (any DeclContext)? { _context }
+    public var parentContext: (any DeclContext)? { context }
     public var genericParams: GenericParamList
 
     public var declaredInterfaceType: any SType2 {
