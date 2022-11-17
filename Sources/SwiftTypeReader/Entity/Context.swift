@@ -1,13 +1,15 @@
 public final class Context {
-    public var modules: [Module]
-
     public init() {
+        self.evaluator = RequestEvaluator()
         self.modules = []
 
         modules.append(
             .swiftStandardLibrary(context: self)
         )
     }
+
+    let evaluator: RequestEvaluator
+    public var modules: [Module]
 
     public func getModule(name: String) -> Module? {
         modules.first { $0.name == name }

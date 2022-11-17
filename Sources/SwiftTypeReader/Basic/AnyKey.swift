@@ -23,10 +23,10 @@ struct AnyKey: Hashable {
     }
 
     public func hash(into hasher: inout Hasher) {
-        hash(value, into: &hasher)
+        Self.hash(value, into: &hasher)
     }
 
-    private func hash<T>(_ value: T, into hasher: inout Hasher) where T: Hashable {
+    private static func hash<T>(_ value: T, into hasher: inout Hasher) where T: Hashable {
         hasher.combine(ObjectIdentifier(T.self))
         hasher.combine(value)
     }

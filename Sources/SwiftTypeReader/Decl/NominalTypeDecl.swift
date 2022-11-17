@@ -1,0 +1,3 @@
+public protocol NominalTypeDecl: GenericTypeDecl {
+    
+}
