@@ -3,24 +3,28 @@ public final class Context {
         self.evaluator = RequestEvaluator()
         self.modules = []
 
-        modules.append(
-            .swiftStandardLibrary(context: self)
-        )
+        // TODO
+//        modules.append(
+//            .swiftStandardLibrary(context: self)
+//        )
+
+        self.implicitImportModuleNames = ["Swift"]
     }
 
     let evaluator: RequestEvaluator
-    public var modules: [Module]
+    public var modules: [ModuleDecl]
+    public var implicitImportModuleNames: [String]
 
-    public func getModule(name: String) -> Module? {
+    public func getModule(name: String) -> ModuleDecl? {
         modules.first { $0.name == name }
     }
 
-    public func getOrCreateModule(name: String) -> Module {
+    public func getOrCreateModule(name: String) -> ModuleDecl {
         if let module = getModule(name: name) {
             return module
         }
 
-        let module = Module(context: self, name: name)
+        let module = ModuleDecl(context: self, name: name)
         modules.append(module)
         return module
     }

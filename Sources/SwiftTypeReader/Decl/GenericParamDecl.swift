@@ -11,7 +11,13 @@ public final class GenericParamDecl: TypeDecl {
     public var name: String
     public var context: (any DeclContext)? { _context }
 
-    public var interfaceType: any SType2 {
+    public var declaredInterfaceType: any SType2 {
         GenericParamType2(decl: self)
     }
+
+    public var interfaceType: any SType2 {
+        MetatypeType(instance: declaredInterfaceType)
+    }
+
+
 }

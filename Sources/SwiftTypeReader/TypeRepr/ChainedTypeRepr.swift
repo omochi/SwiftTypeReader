@@ -8,4 +8,6 @@ public struct ChainedTypeRepr: TypeRepr {
     public var description: String {
         items.map { $0.description }.joined(separator: ".")
     }
+
+    public var switcher: TypeReprSwitcher { .chained(self) }
 }

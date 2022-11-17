@@ -10,11 +10,28 @@ public final class ModuleDecl: ValueDecl & DeclContext {
 
     public unowned var _context: Context
     public var name: String
-    public var context: DeclContext? { nil }
+    public var context: (any DeclContext)? { nil }
 
     public var sources: [SourceFileDecl]
 
     public var interfaceType: any SType2 {
         ModuleType(decl: self)
+    }
+
+    public func findOwn(name: String, options: LookupOptions) -> (any Decl)? {
+        return nil
+    }
+
+    public var otherModules: [ModuleDecl] {
+        return []
+    }
+
+    public func findInSources(name: String, options: LookupOptions) -> (any Decl)? {
+        for source in sources {
+            if let decl = source.findOwn(name: name, options: options) {
+                return decl
+            }
+        }
+        return nil
     }
 }

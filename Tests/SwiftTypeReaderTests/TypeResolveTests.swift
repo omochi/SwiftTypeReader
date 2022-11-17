@@ -119,59 +119,59 @@ struct A {
         )
     }
 
-    func testCrossModuleResolve() throws {
-        let moduleX = context.getOrCreateModule(name: "X")
-        _ = try Reader(
-            context: context,
-            module: moduleX
-        ).read(
-            source: """
-struct Int {
-}
-""",
-            file: URL(fileURLWithPath: "x.swift")
-        )
-
-        let moduleY = context.getOrCreateModule(name: "Y")
-        _ = try Reader(
-            context: context,
-            module: moduleY
-        ).read(
-            source: """
-struct A {
-    struct Int {
-
-    }
-}
-""",
-            file: URL(fileURLWithPath: "y.swift")
-        )
-
-        XCTAssertEqual(
-            TypeSpecifier(
-                module: moduleY, file: nil,
-                location: Location(module: "Y"),
-                elements: [.init(name: "Int")]
-            ).resolve().asSpecifier().elements,
-            [.init(name: "Swift"), .init(name: "Int")]
-        )
-
-        XCTAssertEqual(
-            TypeSpecifier(
-                module: moduleX, file: nil,
-                location: Location(module: "X"),
-                elements: [.init(name: "Int")]
-            ).resolve().asSpecifier().elements,
-            [.init(name: "X"), .init(name: "Int")]
-        )
-
-        XCTAssertEqual(
-            TypeSpecifier(
-                module: moduleY, file: nil,
-                location: Location(module: "Y", elements: [.type(name: "A")]),
-                elements: [.init(name: "Int")]
-            ).resolve().asSpecifier().elements,
-            [.init(name: "Y"), .init(name: "A"), .init(name: "Int")]
-        )
-    }
+//    func testCrossModuleResolve() throws {
+//        let moduleX = context.getOrCreateModule(name: "X")
+//        _ = try Reader(
+//            context: context,
+//            module: moduleX
+//        ).read(
+//            source: """
+//struct Int {
+//}
+//""",
+//            file: URL(fileURLWithPath: "x.swift")
+//        )
+//
+//        let moduleY = context.getOrCreateModule(name: "Y")
+//        _ = try Reader(
+//            context: context,
+//            module: moduleY
+//        ).read(
+//            source: """
+//struct A {
+//    struct Int {
+//
+//    }
+//}
+//""",
+//            file: URL(fileURLWithPath: "y.swift")
+//        )
+//
+//        XCTAssertEqual(
+//            TypeSpecifier(
+//                module: moduleY, file: nil,
+//                location: Location(module: "Y"),
+//                elements: [.init(name: "Int")]
+//            ).resolve().asSpecifier().elements,
+//            [.init(name: "Swift"), .init(name: "Int")]
+//        )
+//
+//        XCTAssertEqual(
+//            TypeSpecifier(
+//                module: moduleX, file: nil,
+//                location: Location(module: "X"),
+//                elements: [.init(name: "Int")]
+//            ).resolve().asSpecifier().elements,
+//            [.init(name: "X"), .init(name: "Int")]
+//        )
+//
+//        XCTAssertEqual(
+//            TypeSpecifier(
+//                module: moduleY, file: nil,
+//                location: Location(module: "Y", elements: [.type(name: "A")]),
+//                elements: [.init(name: "Int")]
+//            ).resolve().asSpecifier().elements,
+//            [.init(name: "Y"), .init(name: "A"), .init(name: "Int")]
+//        )
+//    }
 }

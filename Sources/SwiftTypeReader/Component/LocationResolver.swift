@@ -6,7 +6,7 @@ struct LocationResolver {
 
     func resolve(module: Module?, location: Location) -> Element? {
         return resolve(
-            modules: module?.modulesForFind ?? context.modules,
+            modules: module?.modulesForFind ?? [],
             location: location
         )
     }

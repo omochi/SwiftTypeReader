@@ -20,32 +20,5 @@ public struct IdentTypeRepr: TypeRepr {
         return s
     }
 
-    public func resolve(from context: any DeclContext) -> any SType2 {
-        do {
-            return try context.rootContext.evaluator(
-                ResolveRequest(
-                    context: context.asAnyDeclContext(),
-                    repr: self
-                )
-            )
-        } catch {
-            return UnknownType(repr: self)
-        }
-    }
-
-    struct ResolveRequest: Request {
-        var context: AnyDeclContext
-        var repr: IdentTypeRepr
-
-        func evaluate(on evaluator: RequestEvaluator) throws -> any SType2 {
-            guard let decl = try evaluator(UnqualifiedLookup(
-                context: context,
-                name: name,
-                options: LookupOptions(value: false, type: true)
-            )) as? any ValueDecl else {
-                throw MessageError("not found: \(name)")
-            }
-            return try decl.interfaceType
-        }
-    }
+    public var switcher: TypeReprSwitcher { .ident(self) }
 }

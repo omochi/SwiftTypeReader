@@ -1,3 +1,3 @@
 public protocol TypeDecl: ValueDecl {
-//    var declaredInterfaceType: SType { get }
+    var declaredInterfaceType: any SType2 { get throws }
 }

@@ -26,7 +26,8 @@ public final class Module {
     }
 
     public var otherModules: [Module] {
-        return context.modules.filter { $0 !== self }
+        []
+//        return context.modules.filter { $0 !== self }
     }
 
     public func getModule(name: String) -> Module? {
