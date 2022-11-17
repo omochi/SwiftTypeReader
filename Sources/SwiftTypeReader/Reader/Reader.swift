@@ -14,8 +14,8 @@ public struct Reader {
         self.module = module ?? context.getOrCreateModule(name: "main")
     }
 
-    public func read(file: URL) throws -> [SourceFile] {
-        var sources: [SourceFile] = []
+    public func read(file: URL) throws -> [SourceFileDecl] {
+        var sources: [SourceFileDecl] = []
 
         for file in fm.directoryOrFileEnumerator(at: file) {
             let ext = file.pathExtension
@@ -32,35 +32,41 @@ public struct Reader {
         return sources
     }
 
-    public func read(source: String, file: URL) throws -> SourceFile {
+    public func read(source: String, file: URL) throws -> SourceFileDecl {
         return try readImpl(source: source, file: file)
     }
 
-    private func readImpl(source sourceString: String, file: URL) throws -> SourceFile {
-        fatalError()
+    private func readImpl(source sourceString: String, file: URL) throws -> SourceFileDecl {
+        let sourceSyntax: SourceFileSyntax = try SyntaxParser.parse(source: sourceString)
 
-//        let sourceSyntax: SourceFileSyntax = try SyntaxParser.parse(source: sourceString)
-//
-//        let statements = sourceSyntax.statements.map { $0.item }
-//        let context = Readers.Context(
-//            module: module,
-//            file: file,
-//            location: module.asLocation()
-//        )
-//
-//        var source = SourceFile(module: module, file: file)
-//
-//        for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
+        let statements = sourceSyntax.statements.map { $0.item }
+
+        var source = SourceFileDecl(module: module, file: file)
+
+        for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
+            if let type = readNominalTypeDecl(decl: decl, on: source) {
+                source.types.append(type)
+            }
+
 //            if let type = Readers.readTypeDeclaration(context: context, declaration: decl) {
 //                source.types.append(type)
 //            } else if let `import` = Readers.readImportDeclaration(context: context, declaration: decl) {
 //                source.imports.append(`import`)
 //            }
-//        }
-//
-//        module.sources.append(source)
-//
-//        return source
+        }
+
+        module.sources.append(source)
+
+        return source
+    }
+
+    private func readNominalTypeDecl(decl: DeclSyntax, on context: any DeclContext) -> (any NominalTypeDecl)? {
+        if let `struct` = decl.as(StructDeclSyntax.self) {
+            let reader = StructReader(reader: self)
+            return reader.read(struct: `struct`, on: context)
+        } else {
+            return nil
+        }
     }
 }
 

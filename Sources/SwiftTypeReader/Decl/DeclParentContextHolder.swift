@@ -3,15 +3,19 @@ public protocol _DeclParentContextHolder {
 }
 
 extension _DeclParentContextHolder {
-    var rootContext: Context {
-        if let parent = context {
-            return parent.rootContext
+    public var moduleContext: ModuleDecl {
+        if let module = self as? ModuleDecl {
+            return module
         }
 
-        if let module = self as? ModuleDecl {
-            return module._context
+        if let parent = context {
+            return parent.moduleContext
         }
 
         fatalError("invalid decl \(self)")
+    }
+
+    public var rootContext: Context {
+        moduleContext._context
     }
 }

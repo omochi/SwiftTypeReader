@@ -1,75 +1,52 @@
 import Foundation
 import SwiftSyntax
 
-final class StructReader {
-    private let module: Module
-    private let file: URL
-    private let location: Location
+struct StructReader {
+    var reader: Reader
 
-    init(
-        module: Module,
-        file: URL,
-        location: Location
-    ) {
-        self.module = module
-        self.file = file
-        self.location = location
+    init(reader: Reader) {
+        self.reader = reader
     }
 
-    func read(structDecl: StructDeclSyntax) -> StructType? {
-        let name = structDecl.identifier.text
+    func read(struct syntax: StructDeclSyntax, on context: any DeclContext) -> StructDecl? {
+        let name = syntax.identifier.text
 
-        let context = Readers.Context(
-            module: module,
-            file: file,
-            location: location.appending(.type(name: name))
-        )
+//        let genericParameter: [GenericParameterType]
+//        if let clause = syntax.genericParameterClause {
+//            genericParameter = Readers.readGenericParameters(
+//                context: context, clause: clause
+//            )
+//        } else {
+//            genericParameter = []
+//        }
 
-        let genericParameter: [GenericParameterType]
-        if let clause = structDecl.genericParameterClause {
-            genericParameter = Readers.readGenericParameters(
-                context: context, clause: clause
-            )
-        } else {
-            genericParameter = []
-        }
+//        let inheritedTypes: [TypeSpecifier]
+//        if let clause = syntax.inheritanceClause {
+//            inheritedTypes = Readers.readInheritedTypes(
+//                context: context,
+//                clause: clause
+//            )
+//        } else {
+//            inheritedTypes = []
+//        }
 
-        let inheritedTypes: [TypeSpecifier]
-        if let clause = structDecl.inheritanceClause {
-            inheritedTypes = Readers.readInheritedTypes(
-                context: context,
-                clause: clause
-            )
-        } else {
-            inheritedTypes = []
-        }
+//        var storedProperties: [StoredProperty] = []
+//        var nestedTypes: [SType] = []
+//        let decls = syntax.members.members.map { $0.decl }
+//        for decl in decls {
+//            storedProperties += readStoredProperties(
+//                context: context,
+//                decl: decl
+//            )
+//            if let nestedType = Readers.readTypeDeclaration(
+//                context: context,
+//                declaration: decl
+//            ) {
+//                nestedTypes.append(nestedType)
+//            }
+//        }
 
-        var storedProperties: [StoredProperty] = []
-        var nestedTypes: [SType] = []
-        let decls = structDecl.members.members.map { $0.decl }
-        for decl in decls {
-            storedProperties += readStoredProperties(
-                context: context,
-                decl: decl
-            )
-            if let nestedType = Readers.readTypeDeclaration(
-                context: context,
-                declaration: decl
-            ) {
-                nestedTypes.append(nestedType)
-            }
-        }
-
-        return StructType(
-            module: module,
-            file: file,
-            location: location,
-            name: name,
-            genericParameters: genericParameter,
-            inheritedTypes: inheritedTypes,
-            storedProperties: storedProperties,
-            types: nestedTypes
-        )
+        return StructDecl(context: context, name: name)
     }
 
     private func readStoredProperties(

@@ -62,15 +62,14 @@ private struct Evaluate {
         base: some DeclContext
     ) throws -> any SType2 {
         let name = items[index].name
-        guard let decl = try evaluator(
-            QualifiedLookupRequest(
-                base: base.asAnyDeclContext(),
-                name: name,
-                options: LookupOptions(value: false, type: true)
-            )
+
+        guard let decl = base.findOwn(
+            name: name,
+            options: LookupOptions(value: false, type: true)
         ) as? any TypeDecl else {
             throw MessageError("not found: \(name)")
         }
+        
         let type = try decl.declaredInterfaceType
 
         if index + 1 == items.count {

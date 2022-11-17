@@ -14,6 +14,10 @@ public final class ModuleDecl: ValueDecl & DeclContext {
 
     public var sources: [SourceFileDecl]
 
+    public var types: [any NominalTypeDecl] {
+        sources.flatMap { $0.types }
+    }
+
     public var interfaceType: any SType2 {
         ModuleType(decl: self)
     }

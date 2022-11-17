@@ -13,15 +13,16 @@ enum Readers {
         declaration: DeclSyntax
     ) -> SType? {
         if let decl = declaration.as(StructDeclSyntax.self) {
-            let reader = StructReader(
-                module: context.module,
-                file: context.file,
-                location: context.location
-            )
-            guard let type = reader.read(structDecl: decl) else {
-                return nil
-            }
-            return .struct(type)
+            fatalError()
+//            let reader = StructReader(
+//                module: context.module,
+//                file: context.file,
+//                location: context.location
+//            )
+//            guard let type = reader.read(structDecl: decl) else {
+//                return nil
+//            }
+//            return .struct(type)
         } else if let decl = declaration.as(EnumDeclSyntax.self) {
             let reader = EnumReader(
                 module: context.module,
