@@ -2,7 +2,7 @@ import XCTest
 import SwiftTypeReader
 
 final class SwiftTypeReaderTests: ReaderTestCaseBase {
-    func testSimple() throws {
+    func testSimpleStruct() throws {
         let module = try read("""
 struct S {
     var a: Int?
@@ -38,7 +38,7 @@ struct S {
         XCTAssertEqual(aWrappedType.decl.name, "Int")
     }
 
-    func testReader() throws {
+    func testTwoStruct() throws {
         let module = try read("""
 struct S1 {
     var a: Int
@@ -57,7 +57,7 @@ struct S2 {
 
             let a = try XCTUnwrap(s1.find(name: "a") as? VarDecl)
             XCTAssertEqual(a.name, "a")
-            XCTAssertEqual((a.interfaceType as? any NominalType)?.nominalTypeDecl.name, "Int")
+            XCTAssertEqual((a.interfaceType as? any NominalType)?.name, "Int")
 
             let b = try XCTUnwrap(s1.find(name: "b") as? VarDecl)
             XCTAssertEqual(b.name, "b")
@@ -73,12 +73,12 @@ struct S2 {
 
             let a = try XCTUnwrap(s2.find(name: "a") as? VarDecl)
             XCTAssertEqual(a.name, "a")
-            XCTAssertEqual((a.interfaceType as? any NominalType)?.nominalTypeDecl.name, "Int")
+            XCTAssertEqual((a.interfaceType as? any NominalType)?.name, "Int")
         }
 
     }
 
-    func testUnresolved() throws {
+    func testUnknown() throws {
         let module = try read("""
 struct S {
     var a: URL
@@ -94,45 +94,56 @@ struct S {
         XCTAssertEqual(aType.description, "URL")
     }
 
-//    func testEnum() throws {
-//        let module = try read("""
-//enum E {
-//    case a
-//    case b(Int)
-//    case c(x: Int, y: Int)
-//}
-//"""
-//        )
-//
-//        let e = try XCTUnwrap(module.types[safe: 0]?.enum)
-//
-//        do {
-//            let c = try XCTUnwrap(e.caseElements[safe: 0])
-//            XCTAssertEqual(c.name, "a")
-//        }
-//
-//        do {
-//            let c = try XCTUnwrap(e.caseElements[safe: 1])
-//            XCTAssertEqual(c.name, "b")
-//
-//            let x = try XCTUnwrap(c.associatedValues[safe: 0])
-//            XCTAssertNil(x.name)
-//            XCTAssertEqual(x.type().name, "Int")
-//        }
-//
-//        do {
-//            let c = try XCTUnwrap(e.caseElements[safe: 2])
-//            XCTAssertEqual(c.name, "c")
-//
-//            let x = try XCTUnwrap(c.associatedValues[safe: 0])
-//            XCTAssertEqual(x.name, "x")
-//            XCTAssertEqual(x.type().name, "Int")
-//
-//            let y = try XCTUnwrap(c.associatedValues[safe: 1])
-//            XCTAssertEqual(y.name, "y")
-//            XCTAssertEqual(y.type().name, "Int")
-//        }
-//    }
+    func testEnum() throws {
+        let module = try read("""
+enum E {
+    case a
+    case b(Int)
+    case c(x: Int, y: String)
+}
+"""
+        )
+
+        let e = try XCTUnwrap(module.find(name: "E") as? EnumDecl)
+        XCTAssertEqual(e.caseElements.count, 3)
+
+        do {
+            let c = try XCTUnwrap(e.find(name: "a") as? EnumCaseElementDecl)
+            XCTAssertIdentical(e.caseElements[safe: 0], c)
+            XCTAssertEqual(c.name, "a")
+            XCTAssertEqual(c.associatedValues.count, 0)
+        }
+
+        do {
+            let c = try XCTUnwrap(e.find(name: "b") as? EnumCaseElementDecl)
+            XCTAssertIdentical(e.caseElements[safe: 1], c)
+            XCTAssertEqual(c.name, "b")
+
+            XCTAssertEqual(c.associatedValues.count, 1)
+
+            let v = try XCTUnwrap(c.associatedValues[safe: 0])
+            XCTAssertNil(v.name)
+            XCTAssertEqual((v.interfaceType as? any NominalType)?.name, "Int")
+        }
+
+        do {
+            let c = try XCTUnwrap(e.find(name: "c") as? EnumCaseElementDecl)
+            XCTAssertIdentical(e.caseElements[safe: 2], c)
+            XCTAssertEqual(c.name, "c")
+
+            XCTAssertEqual(c.associatedValues.count, 2)
+
+            let x = try XCTUnwrap(c.find(name: "x") as? ParamDecl)
+            XCTAssertIdentical(c.associatedValues[safe: 0], x)
+            XCTAssertEqual(x.name, "x")
+            XCTAssertEqual((x.interfaceType as? any NominalType)?.name, "Int")
+
+            let y = try XCTUnwrap(c.find(name: "y") as? ParamDecl)
+            XCTAssertIdentical(c.associatedValues[safe: 1], y)
+            XCTAssertEqual(y.name, "y")
+            XCTAssertEqual((y.interfaceType as? any NominalType)?.name, "String")
+        }
+    }
 //
 //    func testProtocol() throws {
 //        let module = try read("""

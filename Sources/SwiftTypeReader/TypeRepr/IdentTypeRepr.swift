@@ -17,6 +17,4 @@ public struct IdentTypeRepr: TypeRepr {
         )
         return s
     }
-
-    public var switcher: TypeReprSwitcher { .ident(self) }
 }

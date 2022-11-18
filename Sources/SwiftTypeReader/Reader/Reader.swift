@@ -41,7 +41,7 @@ public struct Reader {
 
         let statements = sourceSyntax.statements.map { $0.item }
 
-        var source = SourceFileDecl(module: module, file: file)
+        let source = SourceFileDecl(module: module, file: file)
 
         for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
             if let type = readNominalTypeDecl(decl: decl, on: source) {
@@ -61,12 +61,60 @@ public struct Reader {
     }
 
     func readNominalTypeDecl(decl: DeclSyntax, on context: any DeclContext) -> (any NominalTypeDecl)? {
-        if let `struct` = decl.as(StructDeclSyntax.self) {
+        if let decl = decl.as(StructDeclSyntax.self) {
             let reader = StructReader(reader: self)
-            return reader.read(struct: `struct`, on: context)
+            return reader.read(struct: decl, on: context)
+        } else if let decl = decl.as(EnumDeclSyntax.self) {
+            let reader = EnumReader(reader: self)
+            return reader.read(enum: decl, on: context)
         } else {
             return nil
         }
+    }
+
+    static func readOptionalParamList(
+        paramList: FunctionParameterListSyntax?,
+        on context: any DeclContext
+    ) -> [ParamDecl] {
+        guard let paramList else { return [] }
+        return readParamList(paramList: paramList, on: context)
+    }
+
+    static func readParamList(
+        paramList paramListSyntax: FunctionParameterListSyntax,
+        on context: any DeclContext
+    ) -> [ParamDecl] {
+        return paramListSyntax.compactMap { (paramSyntax) in
+            readParam(param: paramSyntax, on: context)
+        }
+
+    }
+
+    static func readParam(
+        param paramSyntax: FunctionParameterSyntax,
+        on context: any DeclContext
+    ) -> ParamDecl? {
+        var interfaceName: String? = nil
+        var name: String? = nil
+
+        if let token = paramSyntax.firstName {
+            name = token.text
+        }
+        if let token = paramSyntax.secondName {
+            interfaceName = name
+            name = token.text
+        }
+
+        guard let typeSyntax = paramSyntax.type,
+              let typeRepr = Reader.readTypeRepr(type: typeSyntax)
+        else { return nil }
+
+        return ParamDecl(
+            context: context,
+            interfaceName: interfaceName,
+            name: name,
+            typeRepr: typeRepr
+        )
     }
 
     static func readTypeRepr(
@@ -160,16 +208,14 @@ public struct Reader {
         clause: GenericParameterClauseSyntax,
         on context: any DeclContext
     ) -> GenericParamList {
-        var params: [GenericParamDecl] = []
-        for paramSyntax in clause.genericParameterList {
-            let name = paramSyntax.name.text
-            let param = GenericParamDecl(
-                context: context,
-                name: name
-            )
-            params.append(param)
-        }
-        return GenericParamList(params)
+        return GenericParamList(
+            clause.genericParameterList.map { (paramSyntax) in
+                return GenericParamDecl(
+                    context: context,
+                    name: paramSyntax.name.text
+                )
+            }
+        )
     }
 
     static func readOptionalGenericArguments(
@@ -182,14 +228,9 @@ public struct Reader {
     static func readGenericArguments(
         clause: GenericArgumentClauseSyntax
     ) -> [any TypeRepr]? {
-        var args: [any TypeRepr] = []
-        for argSyntax in clause.arguments {
-            guard let arg = readTypeRepr(
-                type: argSyntax.argumentType
-            ) else { return nil }
-            args.append(arg)
+        return clause.arguments.compactMap {
+            readTypeRepr(type: $0.argumentType)
         }
-        return args
     }
 
     static func unescapeIdentifier(_ str: String) -> String {

@@ -1,5 +1,4 @@
 public protocol TypeRepr: Hashable & CustomStringConvertible {
-    var switcher: TypeReprSwitcher { get }
 }
 
 extension TypeRepr {

@@ -10,6 +10,7 @@ public final class ModuleDecl: ValueDecl & DeclContext {
 
     public unowned var context: Context
     public var name: String
+    public var valueName: String? { name }
     public var parentContext: (any DeclContext)? { nil }
 
     public var sources: [SourceFileDecl]

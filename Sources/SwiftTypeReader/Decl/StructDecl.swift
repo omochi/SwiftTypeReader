@@ -10,8 +10,8 @@ public final class StructDecl: NominalTypeDecl & DeclContext {
     }
 
     public unowned var context: any DeclContext
-    public var name: String
     public var parentContext: (any DeclContext)? { context }
+    public var name: String
     public var genericParams: GenericParamList
     public var storedProperties: [VarDecl]
 

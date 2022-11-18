@@ -12,7 +12,7 @@ enum Readers {
         context: Context,
         declaration: DeclSyntax
     ) -> SType? {
-        if let decl = declaration.as(StructDeclSyntax.self) {
+        if let _ = declaration.as(StructDeclSyntax.self) {
             fatalError()
 //            let reader = StructReader(
 //                module: context.module,
@@ -23,16 +23,17 @@ enum Readers {
 //                return nil
 //            }
 //            return .struct(type)
-        } else if let decl = declaration.as(EnumDeclSyntax.self) {
-            let reader = EnumReader(
-                module: context.module,
-                file: context.file,
-                location: context.location
-            )
-            guard let type = reader.read(enumDecl: decl) else {
-                return nil
-            }
-            return .enum(type)
+        } else if let _ = declaration.as(EnumDeclSyntax.self) {
+            fatalError()
+//            let reader = EnumReader(
+//                module: context.module,
+//                file: context.file,
+//                location: context.location
+//            )
+//            guard let type = reader.read(enumDecl: decl) else {
+//                return nil
+//            }
+//            return .enum(type)
         } else if let decl = declaration.as(ProtocolDeclSyntax.self) {
             let reader = ProtocolReader(
                 module: context.module,

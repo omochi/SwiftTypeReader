@@ -6,12 +6,14 @@ public final class EnumDecl: NominalTypeDecl & DeclContext {
         self.context = context
         self.name = name
         self.genericParams = .init()
+        self.caseElements = []
     }
 
     public unowned var context: any DeclContext
     public var name: String
     public var parentContext: (any DeclContext)? { context }
     public var genericParams: GenericParamList
+    public var caseElements: [EnumCaseElementDecl]
 
     public var declaredInterfaceType: any SType2 {
         EnumType2(
@@ -27,6 +29,11 @@ public final class EnumDecl: NominalTypeDecl & DeclContext {
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if let param = genericParams.find(name: name, options: options) {
             return param
+        }
+        if options.value {
+            if let decl = caseElements.first(where: { $0.name == name }) {
+                return decl
+            }
         }
         return nil
     }

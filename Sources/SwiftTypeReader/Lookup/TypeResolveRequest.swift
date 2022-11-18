@@ -17,11 +17,13 @@ private struct Evaluate {
     var repr: any TypeRepr
 
     func callAsFunction() throws -> any SType2 {
-        switch repr.switcher {
-        case .ident(let repr):
+        switch repr {
+        case let repr as IdentTypeRepr:
             return try resolve(items: [repr])
-        case .chained(let repr):
+        case let repr as ChainedTypeRepr:
             return try resolve(items: repr.items)
+        default:
+            throw MessageError("invalid repr: \(repr)")
         }
     }
 

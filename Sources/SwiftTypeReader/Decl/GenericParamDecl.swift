@@ -9,6 +9,7 @@ public final class GenericParamDecl: TypeDecl {
 
     public unowned var context: any DeclContext
     public var name: String
+    public var valueName: String? { name }
     public var parentContext: (any DeclContext)? { context }
 
     public var declaredInterfaceType: any SType2 {

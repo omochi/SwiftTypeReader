@@ -17,6 +17,7 @@ struct StructReader {
             clause: structSyntax.genericParameterClause, on: `struct`
         )
 
+        // TODO: add test case
 //        let inheritedTypes: [TypeSpecifier]
 //        if let clause = syntax.inheritanceClause {
 //            inheritedTypes = Readers.readInheritedTypes(
@@ -27,11 +28,11 @@ struct StructReader {
 //            inheritedTypes = []
 //        }
 
-        var storedProperties: [VarDecl] = []
+        // TODO: add test case
 //        var nestedTypes: [SType] = []
         let memberDecls = structSyntax.members.members.map { $0.decl }
         for memberDecl in memberDecls {
-            storedProperties += readStoredProperties(
+            `struct`.storedProperties += readStoredProperties(
                 decl: memberDecl,
                 on: `struct`
             )
@@ -43,8 +44,6 @@ struct StructReader {
 //            }
         }
 
-        `struct`.storedProperties = storedProperties
-
         return `struct`
     }
 
@@ -52,12 +51,12 @@ struct StructReader {
         decl: DeclSyntax,
         on context: any DeclContext
     ) -> [VarDecl] {
-        if let varDecl = decl.as(VariableDeclSyntax.self) {
-            return varDecl.bindings.compactMap {
-                readStoredProperty(binding: $0, on: context)
-            }
-        } else {
+        guard let varDecl = decl.as(VariableDeclSyntax.self) else {
             return []
+        }
+
+        return varDecl.bindings.compactMap {
+            readStoredProperty(binding: $0, on: context)
         }
     }
 

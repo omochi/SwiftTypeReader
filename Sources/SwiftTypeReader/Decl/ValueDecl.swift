@@ -1,5 +1,5 @@
 public protocol ValueDecl: Decl {
-    var name: String { get }
+    var valueName: String? { get }
 
     var interfaceType: any SType2 { get }
 }

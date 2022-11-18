@@ -1,126 +1,75 @@
 import Foundation
 import SwiftSyntax
 
-final class EnumReader {
-    private let module: Module
-    private let file: URL
-    private let location: Location
+struct EnumReader {
+    var reader: Reader
 
     init(
-        module: Module,
-        file: URL,
-        location: Location
+        reader: Reader
     ) {
-        self.module = module
-        self.file = file
-        self.location = location
+        self.reader = reader
     }
 
-    func read(enumDecl: EnumDeclSyntax) -> EnumType? {
-        let name = enumDecl.identifier.text
+    func read(enum enumSyntax: EnumDeclSyntax, on context: any DeclContext) -> EnumDecl? {
+        let name = enumSyntax.identifier.text
 
-        let context = Readers.Context(
-            module: module,
-            file: file,
-            location: location.appending(.type(name: name))
+        let `enum` = EnumDecl(context: context, name: name)
+
+        `enum`.genericParams = Reader.readOptionalGenericParamList(
+            clause: enumSyntax.genericParameters, on: `enum`
         )
+//        let inheritedTypes: [TypeSpecifier]
+//        if let clause = enumDecl.inheritanceClause {
+//            inheritedTypes = Readers.readInheritedTypes(
+//                context: context,
+//                clause: clause
+//            )
+//        } else {
+//            inheritedTypes = []
+//        }
 
-        var caseElements: [CaseElement] = []
-
-        let genericParameters: [GenericParameterType]
-        if let clause = enumDecl.genericParameters {
-            genericParameters = Readers.readGenericParameters(
-                context: context,
-                clause: clause
+        let memberDecls = enumSyntax.members.members.map { $0.decl }
+//        var nestedTypes: [SType] = []
+        for memberDecl in memberDecls {
+            `enum`.caseElements += readCaseElements(
+                decl: memberDecl,
+                on: `enum`
             )
-        } else {
-            genericParameters = []
+
+//            if let type = Readers.readTypeDeclaration(
+//                context: context,
+//                declaration: memberDecl
+//            ) {
+//                nestedTypes.append(type)
+//            }
         }
 
-        let inheritedTypes: [TypeSpecifier]
-        if let clause = enumDecl.inheritanceClause {
-            inheritedTypes = Readers.readInheritedTypes(
-                context: context,
-                clause: clause
-            )
-        } else {
-            inheritedTypes = []
-        }
-
-        let decls = enumDecl.members.members.map { $0.decl }
-        var nestedTypes: [SType] = []
-        for decl in decls {
-            caseElements += readCaseElements(context: context, decl: decl)
-            if let type = Readers.readTypeDeclaration(
-                context: context,
-                declaration: decl
-            ) {
-                nestedTypes.append(type)
-            }
-        }
-
-        return EnumType(
-            module: module,
-            file: file,
-            location: location,
-            name: name,
-            genericParameters: genericParameters,
-            inheritedTypes: inheritedTypes,
-            caseElements: caseElements,
-            types: nestedTypes
-        )
+        return `enum`
     }
 
     private func readCaseElements(
-        context: Readers.Context,
-        decl: DeclSyntax
-    ) -> [CaseElement] {
+        decl: DeclSyntax,
+        on enum: EnumDecl
+    ) -> [EnumCaseElementDecl] {
         guard let caseDecl = decl.as(EnumCaseDeclSyntax.self) else { return [] }
 
-        return caseDecl.elements.compactMap { (elem) in
-            readCaseElement(context: context, elem: elem)
+        return caseDecl.elements.map { (element) in
+            readCaseElement(element: element, on: `enum`)
         }
     }
 
     private func readCaseElement(
-        context: Readers.Context,
-        elem: EnumCaseElementSyntax
-    ) -> CaseElement? {
-        var assocValues: [AssociatedValue] = []
+        element elementSyntax: EnumCaseElementSyntax,
+        on enum: EnumDecl
+    ) -> EnumCaseElementDecl {
+        let name = elementSyntax.identifier.text
+        let element = EnumCaseElementDecl(enum: `enum`, name: name)
 
-        if let avSyntax = elem.associatedValue {
-            assocValues = avSyntax.parameterList.compactMap {
-                readAssociatedValue(context: context, paramSyntax: $0)
-            }
-
-            guard avSyntax.parameterList.count == assocValues.count else {
-                return nil
-            }
-        }
-
-        return CaseElement(
-            name: elem.identifier.text,
-            associatedValues: assocValues
+        element.associatedValues = Reader.readOptionalParamList(
+            paramList: elementSyntax.associatedValue?.parameterList,
+            on: element
         )
-    }
 
-    private func readAssociatedValue(
-        context: Readers.Context,
-        paramSyntax: FunctionParameterSyntax
-    ) -> AssociatedValue? {
-        let name: String? = (paramSyntax.firstName?.text).map {
-            Readers.unescapeIdentifier($0)
-        }
-
-        guard let typeSyntax = paramSyntax.type,
-              let typeSpec = Readers.readTypeSpecifier(
-                context: context,
-                typeSyntax: typeSyntax
-              ) else { return nil }
-
-        return AssociatedValue(
-            name: name,
-            typeSpecifier: typeSpec
-        )
+        return element
     }
 }

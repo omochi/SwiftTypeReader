@@ -13,27 +13,27 @@ struct StandardLibraryBuilder {
     }
 
     mutating func addStruct(name: String, genericParams: [String] = []) {
-        var decl = StructDecl(
+        let decl = StructDecl(
             context: source,
             name: name
         )
 
-        decl.genericParams.items = genericParams.map { (param) in
+        decl.genericParams = GenericParamList(genericParams.map { (param) in
             GenericParamDecl(context: decl, name: param)
-        }
+        })
 
         source.types.append(decl)
     }
 
     mutating func addEnum(name: String, genericParams: [String] = []) {
-        var decl = EnumDecl(
+        let decl = EnumDecl(
             context: source,
             name: name
         )
 
-        decl.genericParams.items = genericParams.map { (param) in
+        decl.genericParams = GenericParamList(genericParams.map { (param) in
             GenericParamDecl(context: decl, name: param)
-        }
+        })
 
         source.types.append(decl)
     }

@@ -12,6 +12,7 @@ public final class VarDecl: StorageDecl {
     public var parentContext: (any DeclContext)? { context }
 
     public var name: String
+    public var valueName: String? { name }
     public var typeRepr: any TypeRepr
 
     public var interfaceType: any SType2 {
