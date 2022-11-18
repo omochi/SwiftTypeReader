@@ -5,7 +5,7 @@ public struct GenericParamList {
 
     public var items: [GenericParamDecl]
 
-    public func findOwn(name: String, options: LookupOptions) -> (any Decl)? {
+    public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.type {
             if let param = items.first(where: { $0.name == name }) {
                 return param

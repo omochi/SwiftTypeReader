@@ -18,7 +18,7 @@ public final class SourceFileDecl: Decl & DeclContext {
     public var imports: [ImportDecl2]
     public var types: [any NominalTypeDecl]
 
-    public func findOwn(name: String, options: LookupOptions) -> (any Decl)? {
+    public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.type {
             if let type = types.first(where: { $0.name == name }) {
                 return type

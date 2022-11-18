@@ -22,7 +22,7 @@ struct TopLevelLookupRequest: Request {
         var visibleModules: [ModuleDecl] = []
 
         visibleModules.append(module)
-        if let decl = module.findInSources(name: name, options: options) {
+        if let decl = module.find(name: name, options: options) {
             return decl
         }
 
@@ -32,7 +32,7 @@ struct TopLevelLookupRequest: Request {
             for imp in source.imports {
                 if let module = root.getModule(name: imp.name) {
                     visibleModules.append(module)
-                    if let decl = module.findInSources(name: name, options: options) {
+                    if let decl = module.find(name: name, options: options) {
                         return decl
                     }
                 }
@@ -42,7 +42,7 @@ struct TopLevelLookupRequest: Request {
         for moduleName in root.implicitImportModuleNames {
             if let module = root.getModule(name: moduleName) {
                 visibleModules.append(module)
-                if let decl = module.findInSources(name: name, options: options) {
+                if let decl = module.find(name: name, options: options) {
                     return decl
                 }
             }

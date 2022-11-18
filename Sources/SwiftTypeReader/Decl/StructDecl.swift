@@ -26,8 +26,8 @@ public final class StructDecl: NominalTypeDecl & DeclContext {
         MetatypeType(instance: declaredInterfaceType)
     }
 
-    public func findOwn(name: String, options: LookupOptions) -> (any Decl)? {
-        if let param = genericParams.findOwn(name: name, options: options) {
+    public func find(name: String, options: LookupOptions) -> (any Decl)? {
+        if let param = genericParams.find(name: name, options: options) {
             return param
         }
         return nil

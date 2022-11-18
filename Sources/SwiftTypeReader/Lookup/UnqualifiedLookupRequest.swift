@@ -27,7 +27,7 @@ struct UnqualifiedLookupRequest: Request {
             default: break
             }
             
-            if let decl = context.findOwn(name: name, options: options) {
+            if let decl = context.find(name: name, options: options) {
                 return decl
             }
             

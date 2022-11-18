@@ -69,9 +69,8 @@ private struct Evaluate {
     ) throws -> any SType2 {
         let repr = items[index]
 
-        guard let decl = base.findOwn(
-            name: repr.name,
-            options: LookupOptions(value: false, type: true)
+        guard let decl = base.findType(
+            name: repr.name
         ) as? any TypeDecl else {
             throw MessageError("not found: \(repr.name)")
         }

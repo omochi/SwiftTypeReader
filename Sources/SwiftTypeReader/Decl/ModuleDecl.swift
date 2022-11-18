@@ -22,17 +22,9 @@ public final class ModuleDecl: ValueDecl & DeclContext {
         ModuleType(decl: self)
     }
 
-    public func findOwn(name: String, options: LookupOptions) -> (any Decl)? {
-        return nil
-    }
-
-    public var otherModules: [ModuleDecl] {
-        return []
-    }
-
-    public func findInSources(name: String, options: LookupOptions) -> (any Decl)? {
+    public func find(name: String, options: LookupOptions) -> (any Decl)? {
         for source in sources {
-            if let decl = source.findOwn(name: name, options: options) {
+            if let decl = source.find(name: name, options: options) {
                 return decl
             }
         }
