@@ -30,6 +30,11 @@ public final class StructDecl: NominalTypeDecl & DeclContext {
         if let param = genericParams.find(name: name, options: options) {
             return param
         }
+        if options.value {
+            if let prop = storedProperties.first(where: { $0.name == name }) {
+                return prop
+            }
+        }
         return nil
     }
 }

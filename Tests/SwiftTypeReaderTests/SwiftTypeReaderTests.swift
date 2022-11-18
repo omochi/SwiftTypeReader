@@ -10,14 +10,17 @@ struct S {
 """
         )
 
-        let s = try XCTUnwrap(module.findType(name: "S") as? StructDecl)
+        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
         XCTAssertEqual(s.name, "S")
 
         XCTAssertEqual(s.moduleContext.name, "main")
 
-        XCTAssertEqual(s.storedProperties.count, 1)
-        let a = try XCTUnwrap(s.storedProperties[safe: 0])
+
+        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
         XCTAssertEqual(a.name, "a")
+
+        XCTAssertEqual(s.storedProperties.count, 1)
+        XCTAssertIdentical(s.storedProperties[safe: 0], a)
 
         let aType = try XCTUnwrap(a.interfaceType as? any NominalType)
         XCTAssertEqual(aType.description, "Optional<Int>")
@@ -49,14 +52,14 @@ struct S2 {
         )
 
         do {
-            let s1 = try XCTUnwrap(module.findType(name: "S1") as? StructDecl)
+            let s1 = try XCTUnwrap(module.find(name: "S1") as? StructDecl)
             XCTAssertEqual(s1.name, "S1")
 
-            let a = try XCTUnwrap(s1.storedProperties[safe: 0])
+            let a = try XCTUnwrap(s1.find(name: "a") as? VarDecl)
             XCTAssertEqual(a.name, "a")
             XCTAssertEqual((a.interfaceType as? any NominalType)?.nominalTypeDecl.name, "Int")
 
-            let b = try XCTUnwrap(s1.storedProperties[safe: 1])
+            let b = try XCTUnwrap(s1.find(name: "b") as? VarDecl)
             XCTAssertEqual(b.name, "b")
 
             let s2 = try XCTUnwrap(b.interfaceType as? StructType2)
@@ -65,30 +68,32 @@ struct S2 {
         }
 
         do {
-            let s2 = try XCTUnwrap(module.findType(name: "S2") as? StructDecl)
+            let s2 = try XCTUnwrap(module.find(name: "S2") as? StructDecl)
             XCTAssertEqual(s2.name, "S2")
 
-            let a = try XCTUnwrap(s2.storedProperties[safe: 0])
+            let a = try XCTUnwrap(s2.find(name: "a") as? VarDecl)
             XCTAssertEqual(a.name, "a")
             XCTAssertEqual((a.interfaceType as? any NominalType)?.nominalTypeDecl.name, "Int")
         }
 
     }
-//
-//    func testUnresolved() throws {
-//        let module = try read("""
-//struct S {
-//    var a: URL
-//}
-//"""
-//        )
-//
-//        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
-//
-//        let a = try XCTUnwrap(s.storedProperties[safe: 0]?.type().unresolved)
-//        XCTAssertEqual(a.lastElement.name, "URL")
-//    }
-//
+
+    func testUnresolved() throws {
+        let module = try read("""
+struct S {
+    var a: URL
+}
+"""
+        )
+
+        let s = try XCTUnwrap(module.findType(name: "S") as? StructDecl)
+
+        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+
+        let aType = try XCTUnwrap(a.interfaceType as? UnknownType)
+        XCTAssertEqual(aType.description, "URL")
+    }
+
 //    func testEnum() throws {
 //        let module = try read("""
 //enum E {
