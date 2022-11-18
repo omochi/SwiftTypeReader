@@ -38,4 +38,9 @@ public final class ModuleDecl: ValueDecl & DeclContext {
         }
         return nil
     }
+
+    static func swiftStandardLibrary(context: Context) -> ModuleDecl {
+        var builder = StandardLibraryBuilder(context: context)
+        return builder.build()
+    }
 }

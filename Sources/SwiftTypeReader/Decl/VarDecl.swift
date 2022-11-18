@@ -15,13 +15,6 @@ public final class VarDecl: StorageDecl {
     public var typeRepr: any TypeRepr
 
     public var interfaceType: any SType2 {
-        get throws {
-            try context.rootContext.evaluator(
-                TypeResolveRequest(
-                    context: context,
-                    repr: typeRepr
-                )
-            )
-        }
+        typeRepr.resolve(from: context)
     }
 }

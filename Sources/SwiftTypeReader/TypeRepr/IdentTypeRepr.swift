@@ -12,11 +12,9 @@ public struct IdentTypeRepr: TypeRepr {
 
     public var description: String {
         var s = name
-        if !genericArgs.isEmpty {
-            s += "<"
-            s += genericArgs.map { $0.description }.joined(separator: ", ")
-            s += ">"
-        }
+        s += Printer.genericClause(
+            genericArgs.map { $0.description }
+        )
         return s
     }
 

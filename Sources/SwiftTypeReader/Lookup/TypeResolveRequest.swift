@@ -26,20 +26,24 @@ private struct Evaluate {
     }
 
     private func resolve(items: [IdentTypeRepr]) throws -> any SType2 {
-        let name = items[0].name
+        let repr = items[0]
         guard let decl = try evaluator(
             UnqualifiedLookupRequest(
                 context: context,
-                name: name,
+                name: repr.name,
                 options: LookupOptions(value: false, type: true)
             )
         ) as? any ValueDecl else {
-            throw MessageError("not found: \(name)")
+            throw MessageError("not found: \(repr.name)")
         }
-        var type = try decl.interfaceType
+
+        var type = decl.interfaceType
         if let decl = decl as? any TypeDecl {
-            type = try decl.declaredInterfaceType
+            type = decl.declaredInterfaceType
         }
+
+        let genericArgs = resolveGenericArgs(reprs: repr.genericArgs)
+        type = applyGenericArgs(type: type, args: genericArgs)
 
         if items.count == 1 {
             return type
@@ -52,25 +56,29 @@ private struct Evaluate {
         return try resolve(
             items: items,
             index: 1,
-            base: base
+            base: base,
+            genericArgs: genericArgs
         )
     }
 
     private func resolve(
         items: [IdentTypeRepr],
         index: Int,
-        base: some DeclContext
+        base: some DeclContext,
+        genericArgs: [any SType2]
     ) throws -> any SType2 {
-        let name = items[index].name
+        let repr = items[index]
 
         guard let decl = base.findOwn(
-            name: name,
+            name: repr.name,
             options: LookupOptions(value: false, type: true)
         ) as? any TypeDecl else {
-            throw MessageError("not found: \(name)")
+            throw MessageError("not found: \(repr.name)")
         }
         
-        let type = try decl.declaredInterfaceType
+        var type = decl.declaredInterfaceType
+        let genericArgs = genericArgs + resolveGenericArgs(reprs: repr.genericArgs)
+        type = applyGenericArgs(type: type, args: genericArgs)
 
         if index + 1 == items.count {
             return type
@@ -83,7 +91,21 @@ private struct Evaluate {
         return try resolve(
             items: items,
             index: index + 1,
-            base: base
+            base: base,
+            genericArgs: genericArgs
         )
+    }
+
+    private func resolveGenericArgs(reprs: [any TypeRepr]) -> [any SType2] {
+        reprs.map { $0.resolve(from: context) }
+    }
+
+    private func applyGenericArgs(type: any SType2, args: [any SType2]) -> any SType2 {
+        switch type {
+        case var type as any NominalType:
+            type.genericArgs = args
+            return type
+        default: return type
+        }
     }
 }

@@ -12,6 +12,10 @@ public final class GenericParamDecl: TypeDecl {
     public var parentContext: (any DeclContext)? { context }
 
     public var declaredInterfaceType: any SType2 {
+        typeDeclaredInterfaceType
+    }
+
+    public var typeDeclaredInterfaceType: GenericParamType2 {
         GenericParamType2(decl: self)
     }
 

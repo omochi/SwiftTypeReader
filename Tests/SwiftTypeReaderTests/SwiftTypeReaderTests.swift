@@ -15,18 +15,24 @@ struct S {
 
         XCTAssertEqual(s.moduleContext.name, "main")
 
-//        XCTAssertEqual(s.storedProperties.count, 1)
-//        let a = try XCTUnwrap(s.storedProperties[safe: 0])
-//        XCTAssertEqual(a.name, "a")
-//
-//        let aType = try XCTUnwrap(a.type().struct)
-//        XCTAssertEqual(aType.module.name, "Swift")
-//        XCTAssertEqual(aType.name, "Optional")
-//        XCTAssertEqual(aType.genericArguments().count, 1)
-//
-//        let aWrappedType = try XCTUnwrap(aType.genericArguments()[safe: 0]?.struct)
-//        XCTAssertEqual(aWrappedType.module.name, "Swift")
-//        XCTAssertEqual(aWrappedType.name, "Int")
+        XCTAssertEqual(s.storedProperties.count, 1)
+        let a = try XCTUnwrap(s.storedProperties[safe: 0])
+        XCTAssertEqual(a.name, "a")
+
+        let aType = try XCTUnwrap(a.interfaceType as? any NominalType)
+        XCTAssertEqual(aType.description, "Optional<Int>")
+
+        let aTypeDecl = aType.nominalTypeDecl
+
+        XCTAssertEqual(aTypeDecl.moduleContext.name, "Swift")
+        XCTAssertEqual(aTypeDecl.name, "Optional")
+        XCTAssertEqual(aTypeDecl.declaredInterfaceType.description, "Optional<Wrapped>")
+
+        XCTAssertEqual(aType.genericArgs.count, 1)
+
+        let aWrappedType = try XCTUnwrap(aType.genericArgs[safe: 0] as? StructType2)
+        XCTAssertEqual(aWrappedType.decl.moduleContext.name, "Swift")
+        XCTAssertEqual(aWrappedType.decl.name, "Int")
     }
 
 //    func testReader() throws {

@@ -1,5 +1,5 @@
-public struct StructType2: NominalType {
-    public var decl: StructDecl
+public struct EnumType2: NominalType {
+    public var decl: EnumDecl
     @AnyTypeArrayStorage public var genericArgs: [any SType2]
 
     public var nominalTypeDecl: any NominalTypeDecl { decl }

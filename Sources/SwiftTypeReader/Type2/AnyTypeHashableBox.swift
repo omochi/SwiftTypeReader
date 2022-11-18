@@ -19,3 +19,4 @@ public struct AnyTypeHashableBox: HashableBoxProtocol {
 }
 
 public typealias AnyTypeStorage = GenericHashableStorage<AnyTypeHashableBox>
+public typealias AnyTypeArrayStorage = GenericHashableArrayStorage<AnyTypeHashableBox>

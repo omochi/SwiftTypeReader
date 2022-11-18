@@ -68,12 +68,12 @@ public final class Module {
     }
 
     static func swiftStandardLibrary(context: Context) -> Module {
-        var builder = StandardLibraryBuilder(context: context)
+        var builder = _StandardLibraryBuilder(context: context)
         return builder.build()
     }
 }
 
-private struct StandardLibraryBuilder {
+private struct _StandardLibraryBuilder {
     var module: Module
     var source: SourceFile
 

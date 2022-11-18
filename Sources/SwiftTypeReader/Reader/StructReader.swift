@@ -8,17 +8,14 @@ struct StructReader {
         self.reader = reader
     }
 
-    func read(struct syntax: StructDeclSyntax, on context: any DeclContext) -> StructDecl? {
-        let name = syntax.identifier.text
+    func read(struct structSyntax: StructDeclSyntax, on context: any DeclContext) -> StructDecl? {
+        let name = structSyntax.identifier.text
 
-//        let genericParameter: [GenericParameterType]
-//        if let clause = syntax.genericParameterClause {
-//            genericParameter = Readers.readGenericParameters(
-//                context: context, clause: clause
-//            )
-//        } else {
-//            genericParameter = []
-//        }
+        let `struct` = StructDecl(context: context, name: name)
+
+        `struct`.genericParams = Reader.readOptionalGenericParamList(
+            clause: structSyntax.genericParameterClause, on: `struct`
+        )
 
 //        let inheritedTypes: [TypeSpecifier]
 //        if let clause = syntax.inheritanceClause {
@@ -30,32 +27,34 @@ struct StructReader {
 //            inheritedTypes = []
 //        }
 
-//        var storedProperties: [StoredProperty] = []
+        var storedProperties: [VarDecl] = []
 //        var nestedTypes: [SType] = []
-//        let decls = syntax.members.members.map { $0.decl }
-//        for decl in decls {
-//            storedProperties += readStoredProperties(
-//                context: context,
-//                decl: decl
-//            )
+        let memberDecls = structSyntax.members.members.map { $0.decl }
+        for memberDecl in memberDecls {
+            storedProperties += readStoredProperties(
+                decl: memberDecl,
+                on: `struct`
+            )
 //            if let nestedType = Readers.readTypeDeclaration(
 //                context: context,
 //                declaration: decl
 //            ) {
 //                nestedTypes.append(nestedType)
 //            }
-//        }
+        }
 
-        return StructDecl(context: context, name: name)
+        `struct`.storedProperties = storedProperties
+
+        return `struct`
     }
 
     private func readStoredProperties(
-        context: Readers.Context,
-        decl: DeclSyntax
-    ) -> [StoredProperty] {
+        decl: DeclSyntax,
+        on context: any DeclContext
+    ) -> [VarDecl] {
         if let varDecl = decl.as(VariableDeclSyntax.self) {
             return varDecl.bindings.compactMap {
-                readStoredProperty(context: context, binding: $0)
+                readStoredProperty(binding: $0, on: context)
             }
         } else {
             return []
@@ -63,11 +62,11 @@ struct StructReader {
     }
 
     private func readStoredProperty(
-        context: Readers.Context,
-        binding: PatternBindingSyntax
-    ) -> StoredProperty? {
-        if let accSyntax = binding.accessor {
-            guard Readers.isStoredPropertyAccessor(accessor: accSyntax) else {
+        binding: PatternBindingSyntax,
+        on context: any DeclContext
+    ) -> VarDecl? {
+        if let accessorSyntax = binding.accessor {
+            guard Reader.isStoredPropertyAccessor(accessor: accessorSyntax) else {
                 return nil
             }
         }
@@ -76,20 +75,20 @@ struct StructReader {
             return nil
         }
 
-        let name = Readers.unescapeIdentifier(ident.identifier.text)
+        let name = Reader.unescapeIdentifier(ident.identifier.text)
 
         guard let typeAnno = binding.typeAnnotation,
-              let typeSpec = Readers.readTypeSpecifier(
-                context: context,
-                typeSyntax: typeAnno.type
+              let typeRepr = Reader.readTypeRepr(
+                type: typeAnno.type
               ) else
         {
             return nil
         }
 
-        return StoredProperty(
+        return VarDecl(
+            context: context,
             name: name,
-            typeSpecifier: typeSpec
+            typeRepr: typeRepr
         )
     }
 

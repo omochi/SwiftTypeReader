@@ -2,13 +2,11 @@ public final class Context {
     public init() {
         self.evaluator = RequestEvaluator()
         self.modules = []
-
-        // TODO
-//        modules.append(
-//            .swiftStandardLibrary(context: self)
-//        )
-
         self.implicitImportModuleNames = ["Swift"]
+
+        modules.append(
+            .swiftStandardLibrary(context: self)
+        )
     }
 
     let evaluator: RequestEvaluator

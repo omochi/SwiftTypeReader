@@ -16,8 +16,10 @@ public final class RequestEvaluator {
     public func evaluate<Q: Request>(_ request: Q) throws -> Q.Result {
         let key = AnyKey(request)
 
-        if let result = resultCache[key] as? Q.Result {
-            return result
+        if let anyResult = resultCache[key],
+           let typedResult = anyResult as? Q.Result
+        {
+            return typedResult
         }
 
         if activeRequests.contains(key) {
