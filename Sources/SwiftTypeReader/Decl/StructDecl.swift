@@ -1,6 +1,6 @@
 public final class StructDecl: NominalTypeDecl {
     public init(
-        context: some DeclContext,
+        context: any DeclContext,
         name: String
     ) {
         self.context = context
@@ -29,5 +29,11 @@ public final class StructDecl: NominalTypeDecl {
             }
         }
         return nil
+    }
+
+    public func makeNominalDeclaredInterfaceType(
+        parent: (any SType2)?, genericArgs: [any SType2]
+    ) -> any NominalType {
+        StructType2(decl: self, parent: parent, genericArgs: genericArgs)
     }
 }

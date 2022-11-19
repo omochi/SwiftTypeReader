@@ -5,6 +5,6 @@ public struct ProtocolType2: NominalType {
 
     public var decl: ProtocolDecl
     public var nominalTypeDecl: any NominalTypeDecl { decl }
-    @AnyTypeOptionalStorage public var parent: (any SType2)?
-    @AnyTypeArrayStorage public var genericArgs: [any SType2] = []
+    public var parent: (any SType2)? { nil }
+    public var genericArgs: [any SType2] { [] }
 }

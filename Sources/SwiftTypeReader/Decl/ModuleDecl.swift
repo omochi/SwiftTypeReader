@@ -1,4 +1,4 @@
-public final class ModuleDecl: ValueDecl & DeclContext {
+public final class ModuleDecl: TypeDecl & DeclContext {
     public init(
         context: Context,
         name: String

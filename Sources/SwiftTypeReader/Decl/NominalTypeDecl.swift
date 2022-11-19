@@ -2,6 +2,11 @@ public protocol NominalTypeDecl: GenericTypeDecl {
     var name: String { get }
     var inheritedTypeReprs: [any TypeRepr] { get }
     var types: [any GenericTypeDecl] { get }
+
+    func makeNominalDeclaredInterfaceType(
+        parent: (any SType2)?,
+        genericArgs: [any SType2]
+    ) -> any NominalType
 }
 
 extension NominalTypeDecl {

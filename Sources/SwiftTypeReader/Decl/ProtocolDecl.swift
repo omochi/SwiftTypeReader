@@ -1,6 +1,6 @@
 public final class ProtocolDecl: NominalTypeDecl {
     public init(
-        context: some DeclContext,
+        context: any DeclContext,
         name: String
     ) {
         self.context = context
@@ -17,5 +17,11 @@ public final class ProtocolDecl: NominalTypeDecl {
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         return nil
+    }
+
+    public func makeNominalDeclaredInterfaceType(
+        parent: (any SType2)?, genericArgs: [any SType2]
+    ) -> any NominalType {
+        ProtocolType2(decl: self)
     }
 }

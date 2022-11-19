@@ -3,20 +3,18 @@ struct TypeResolveRequest: Request {
     @AnyTypeReprStorage var repr: any TypeRepr
 
     func evaluate(on evaluator: RequestEvaluator) throws -> any SType2 {
-        return try Evaluate(
+        return try Impl(
             evaluator: evaluator,
-            context: context,
-            repr: repr
-        )()
+            context: context
+        ).resolve(repr: repr)
     }
 }
 
-private struct Evaluate {
+private struct Impl {
     var evaluator: RequestEvaluator
     var context: any DeclContext
-    var repr: any TypeRepr
 
-    func callAsFunction() throws -> any SType2 {
+    func resolve(repr: any TypeRepr) throws -> any SType2 {
         switch repr {
         case let repr as IdentTypeRepr:
             return try resolve(repr: repr)
@@ -26,98 +24,84 @@ private struct Evaluate {
     }
 
     private func resolve(repr: IdentTypeRepr) throws -> any SType2 {
-        let element = repr.elements[0]
+        var type = try resolveHeadType(element: repr.elements[0])
+
+        var index = 1
+        while index < repr.elements.count {
+            type = try resolveNestedType(parent: type, element: repr.elements[index])
+            index += 1
+        }
+
+        return type
+    }
+
+    private func resolveHeadType(element: IdentTypeRepr.Element) throws -> any SType2 {
         guard let decl = try evaluator(
             UnqualifiedLookupRequest(
                 context: context,
                 name: element.name,
                 options: LookupOptions(value: false, type: true)
             )
-        ) as? any ValueDecl else {
-            throw MessageError("not found: \(element.name)")
-        }
-
-        var type = decl.interfaceType
-        if let decl = decl as? any TypeDecl {
-            type = decl.declaredInterfaceType
-        }
-        let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
-        type = try applyGenericArgs(type: type, args: genericArgs)
-
-        if repr.elements.count == 1 {
-            return type
-        }
-
-        guard let base = decl as? any DeclContext else {
-            throw MessageError("invalid base decl: \(decl)")
-        }
-
-        return try resolve(
-            repr: repr,
-            index: 1,
-            base: base,
-            parent: type
-        )
-    }
-
-    private func resolve(
-        repr: IdentTypeRepr,
-        index: Int,
-        base: any DeclContext,
-        parent: any SType2
-    ) throws -> any SType2 {
-        let element = repr.elements[index]
-
-        guard let decl = base.findType(
-            name: element.name
         ) as? any TypeDecl else {
             throw MessageError("not found: \(element.name)")
         }
 
-        let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
+        let parent = parentType(from: decl)
 
-        var type = decl.declaredInterfaceType
-        type = setParent(type: type, parent: parent)
-        type = try applyGenericArgs(type: type, args: genericArgs)
+        return try resolveTypeDecl(decl: decl, parent: parent, element: element)
+    }
 
-        if index + 1 == repr.elements.count {
-            return type
+    private func resolveNestedType(parent: any SType2, element: IdentTypeRepr.Element) throws -> any SType2 {
+        let parentContext = try self.context(from: parent)
+        guard let decl = parentContext.findType(name: element.name) as? any TypeDecl else {
+            throw MessageError("not found: \(element.name)")
+        }
+        return try resolveTypeDecl(decl: decl, parent: parent, element: element)
+    }
+
+    private func parentType(from decl: any TypeDecl) -> (any SType2)? {
+        guard let parentDecl = decl.parentContext as? any TypeDecl else { return nil }
+        return parentDecl.declaredInterfaceType
+    }
+
+    private func context(from type: any SType2) throws -> any DeclContext {
+        switch type {
+        case let type as ModuleType:
+            return type.decl
+        case let type as any NominalType:
+            return type.nominalTypeDecl
+        default:
+            throw MessageError("invalid type: \(type)")
+        }
+    }
+
+    private func resolveTypeDecl(
+        decl: any TypeDecl,
+        parent: (any SType2)?,
+        element: IdentTypeRepr.Element
+    ) throws -> any SType2 {
+        var parent = parent
+        if parent is ModuleType {
+            parent = nil
         }
 
-        guard let base = decl as? any DeclContext else {
-            throw MessageError("invalid base decl: \(decl)")
-        }
+        let declType = decl.declaredInterfaceType
 
-        return try resolve(
-            repr: repr,
-            index: index + 1,
-            base: base,
-            parent: type
-        )
+        switch declType {
+        case let declType as any NominalType:
+            let decl = declType.nominalTypeDecl
+            let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
+            return decl.makeNominalDeclaredInterfaceType(
+                parent: parent,
+                genericArgs: genericArgs
+            )
+        default: return declType
+        }
     }
 
     private func resolveGenericArgs(reprs: [any TypeRepr]) -> [any SType2] {
-        reprs.map { $0.resolve(from: context) }
-    }
-
-    private func setParent(type: any SType2, parent: any SType2) -> any SType2 {
-        switch type {
-        case var type as any NominalType:
-            type.parent = parent
-            return type
-        default: return type
-        }
-    }
-
-    private func applyGenericArgs(type: any SType2, args: [any SType2]) throws -> any SType2 {
-        switch type {
-        case var type as any NominalType:
-            guard type.nominalTypeDecl.genericParams.items.count == args.count else {
-                throw MessageError("mismatch generic arguments")
-            }
-            type.genericArgs = args
-            return type
-        default: return type
+        return reprs.map { (repr) in
+            repr.resolve(from: self.context)
         }
     }
 }

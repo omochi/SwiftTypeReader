@@ -1,6 +1,6 @@
 public final class GenericParamDecl: TypeDecl {
     public init(
-        context: some DeclContext,
+        context: any DeclContext,
         name: String
     ) {
         self.context = context

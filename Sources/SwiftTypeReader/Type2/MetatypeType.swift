@@ -1,6 +1,6 @@
 public struct MetatypeType: SType2 {
     public init(
-        instance: some SType2
+        instance: any SType2
     ) {
         self.instance = instance
     }
