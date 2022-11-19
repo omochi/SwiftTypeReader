@@ -37,14 +37,14 @@ private struct Evaluate {
             throw MessageError("not found: \(element.name)")
         }
 
+        var type = decl.interfaceType
+        if let decl = decl as? any TypeDecl {
+            type = decl.declaredInterfaceType
+        }
         let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
+        type = try applyGenericArgs(type: type, args: genericArgs)
 
         if repr.elements.count == 1 {
-            var type = decl.interfaceType
-            if let decl = decl as? any TypeDecl {
-                type = decl.declaredInterfaceType
-            }
-            type = try applyGenericArgs(type: type, args: genericArgs)
             return type
         }
 
@@ -56,15 +56,15 @@ private struct Evaluate {
             repr: repr,
             index: 1,
             base: base,
-            genericArgs: genericArgs
+            parent: type
         )
     }
 
     private func resolve(
         repr: IdentTypeRepr,
         index: Int,
-        base: some DeclContext,
-        genericArgs: [any SType2]
+        base: any DeclContext,
+        parent: any SType2
     ) throws -> any SType2 {
         let element = repr.elements[index]
 
@@ -74,11 +74,13 @@ private struct Evaluate {
             throw MessageError("not found: \(element.name)")
         }
 
-        let genericArgs = genericArgs + resolveGenericArgs(reprs: element.genericArgs)
+        let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
+
+        var type = decl.declaredInterfaceType
+        type = setParent(type: type, parent: parent)
+        type = try applyGenericArgs(type: type, args: genericArgs)
 
         if index + 1 == repr.elements.count {
-            var type = decl.declaredInterfaceType
-            type = try applyGenericArgs(type: type, args: genericArgs)
             return type
         }
 
@@ -90,12 +92,21 @@ private struct Evaluate {
             repr: repr,
             index: index + 1,
             base: base,
-            genericArgs: genericArgs
+            parent: type
         )
     }
 
     private func resolveGenericArgs(reprs: [any TypeRepr]) -> [any SType2] {
         reprs.map { $0.resolve(from: context) }
+    }
+
+    private func setParent(type: any SType2, parent: any SType2) -> any SType2 {
+        switch type {
+        case var type as any NominalType:
+            type.parent = parent
+            return type
+        default: return type
+        }
     }
 
     private func applyGenericArgs(type: any SType2, args: [any SType2]) throws -> any SType2 {

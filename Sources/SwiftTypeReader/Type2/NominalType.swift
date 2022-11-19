@@ -1,6 +1,6 @@
 public protocol NominalType: SType2 {
     var nominalTypeDecl: any NominalTypeDecl { get }
-    var parent: (any SType2)? { get }
+    var parent: (any SType2)? { get set }
     var genericArgs: [any SType2] { get set }
 }
 
