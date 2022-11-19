@@ -63,6 +63,9 @@ public struct Reader {
         } else if let decl = decl.as(EnumDeclSyntax.self) {
             let reader = EnumReader(reader: self)
             return reader.read(enum: decl, on: context)
+        } else if let decl = decl.as(ProtocolDeclSyntax.self) {
+            let reader = ProtocolReader(reader: self)
+            return reader.read(protocol: decl, on: context)
         } else {
             return nil
         }
@@ -92,7 +95,6 @@ public struct Reader {
         return paramListSyntax.compactMap { (paramSyntax) in
             readParam(param: paramSyntax, on: context)
         }
-
     }
 
     static func readParam(
@@ -120,6 +122,110 @@ public struct Reader {
             name: name,
             typeRepr: typeRepr
         )
+    }
+
+    static func readVars(
+        `var`: VariableDeclSyntax,
+        on context: any DeclContext
+    ) -> [VarDecl] {
+        return `var`.bindings.compactMap { (binding) in
+            readVar(var: `var`, binding: binding, on: context)
+        }
+    }
+
+    static func readVar(
+        `var` varSyntax: VariableDeclSyntax,
+        binding: PatternBindingSyntax,
+        on context: any DeclContext
+    ) -> VarDecl? {
+        guard let ident = binding.pattern.as(IdentifierPatternSyntax.self) else {
+            return nil
+        }
+
+        guard let kind = VarKind(rawValue: varSyntax.letOrVarKeyword.text) else {
+            return nil
+        }
+
+        let name = Reader.unescapeIdentifier(ident.identifier.text)
+
+        guard let typeAnno = binding.typeAnnotation,
+              let typeRepr = Reader.readTypeRepr(
+                type: typeAnno.type
+              ) else
+        {
+            return nil
+        }
+
+        var modifiers: [DeclModifier] = []
+
+        if let modifiersSyntax = varSyntax.modifiers {
+            for modifierSyntax in modifiersSyntax {
+                if let modifier = DeclModifier(rawValue: modifierSyntax.name.text) {
+                    modifiers.append(modifier)
+                }
+            }
+        }
+
+        let `var` = VarDecl(
+            context: context,
+            modifiers: modifiers,
+            kind: kind,
+            name: name,
+            typeRepr: typeRepr
+        )
+
+        if let accessor = binding.accessor {
+            `var`.accessors += readVarAccessor(accessor: accessor, on: `var`)
+        }
+
+        return `var`
+    }
+
+    static func readVarAccessor(
+        accessor: Syntax,
+        on `var`: VarDecl
+    ) -> [AccessorDecl] {
+        if accessor.is(CodeBlockSyntax.self) {
+            let accessor = AccessorDecl(var: `var`, modifiers: [], kind: .get)
+            return [accessor]
+        } else if let accessorsSyntax = accessor.as(AccessorBlockSyntax.self) {
+            return accessorsSyntax.accessors.compactMap {
+                readAccessor(accessor: $0, on: `var`)
+            }
+        } else {
+            return []
+        }
+    }
+
+    static func readAccessor(
+        accessor accessorSyntax: AccessorDeclSyntax,
+        on `var`: VarDecl
+    ) -> AccessorDecl? {
+        guard let kind = AccessorKind(rawValue: accessorSyntax.accessorKind.text) else {
+            return nil
+        }
+
+        var modifiers: [DeclModifier] = []
+
+        if let modifierSyntax = accessorSyntax.modifier {
+            if let modifier = DeclModifier(rawValue: modifierSyntax.name.text) {
+                modifiers.append(modifier)
+            }
+        }
+
+        if let asyncSyntax = accessorSyntax.asyncKeyword {
+            if let modifier = DeclModifier(rawValue: asyncSyntax.text) {
+                modifiers.append(modifier)
+            }
+        }
+
+        if let throwsSyntax = accessorSyntax.throwsKeyword {
+            if let modifier = DeclModifier(rawValue: throwsSyntax.text) {
+                modifiers.append(modifier)
+            }
+        }
+
+        return AccessorDecl(var: `var`, modifiers: modifiers, kind: kind)
     }
 
     static func readTypeRepr(
@@ -239,22 +345,6 @@ public struct Reader {
 
     static func unescapeIdentifier(_ str: String) -> String {
         return str.trimmingCharacters(in: ["`"])
-    }
-
-    static func isStoredPropertyAccessor(accessor: Syntax) -> Bool {
-        if let _ = accessor.as(CodeBlockSyntax.self) {
-            return false
-        } else if let accessors = accessor.as(AccessorBlockSyntax.self) {
-            return accessors.accessors.allSatisfy { (accsessor) in
-                isStoredPropertyAccessor(name: accsessor.accessorKind.text)
-            }
-        } else {
-            return false
-        }
-    }
-
-    static func isStoredPropertyAccessor(name: String) -> Bool {
-        return name == "willSet" || name == "didSet"
     }
 
     static func readOptionalInheritedTypes(

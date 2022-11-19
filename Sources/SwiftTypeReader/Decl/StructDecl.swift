@@ -8,7 +8,7 @@ public final class StructDecl: NominalTypeDecl {
         self.genericParams = .init()
         self.inheritedTypeReprs = []
         self.types = []
-        self.storedProperties = []
+        self.properties = []
     }
 
     public unowned var context: any DeclContext
@@ -17,14 +17,21 @@ public final class StructDecl: NominalTypeDecl {
     public var genericParams: GenericParamList
     public var inheritedTypeReprs: [any TypeRepr]
     public var types: [any GenericTypeDecl]
-    public var storedProperties: [VarDecl]
+    public var properties: [VarDecl]
+
+    public var storedProperties: [VarDecl] {
+        properties.filter { $0.propertyKind == .stored }
+    }
+    public var computedProperties: [VarDecl] {
+        properties.filter { $0.propertyKind == .computed }
+    }
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if let decl = findInNominalTypeDecl(name: name, options: options) {
             return decl
         }
         if options.value {
-            if let decl = storedProperties.first(where: { $0.name == name }) {
+            if let decl = properties.first(where: { $0.name == name }) {
                 return decl
             }
         }

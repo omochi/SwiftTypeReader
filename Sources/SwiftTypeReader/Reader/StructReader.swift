@@ -22,63 +22,23 @@ struct StructReader {
         )
 
         let memberDecls = structSyntax.members.members.map { $0.decl }
-        for memberDecl in memberDecls {
-            `struct`.storedProperties += readStoredProperties(
-                decl: memberDecl, on: `struct`
-            )
-            if let nestedType = reader.readNominalTypeDecl(
-                decl: memberDecl, on: `struct`
-            ) {
-                `struct`.types.append(nestedType)
-            }
+
+        `struct`.properties = memberDecls.flatMap { (memberDecl) in
+            readProperties(decl: memberDecl, on: `struct`)
+        }
+
+        `struct`.types = memberDecls.compactMap { (memberDecl) in
+            reader.readNominalTypeDecl(decl: memberDecl, on: `struct`)
         }
 
         return `struct`
     }
 
-    private func readStoredProperties(
+    private func readProperties(
         decl: DeclSyntax,
-        on context: any DeclContext
+        on `struct`: StructDecl
     ) -> [VarDecl] {
-        guard let varDecl = decl.as(VariableDeclSyntax.self) else {
-            return []
-        }
-
-        return varDecl.bindings.compactMap {
-            readStoredProperty(binding: $0, on: context)
-        }
+        guard let varDecl = decl.as(VariableDeclSyntax.self) else { return [] }
+        return Reader.readVars(var: varDecl, on: `struct`)
     }
-
-    private func readStoredProperty(
-        binding: PatternBindingSyntax,
-        on context: any DeclContext
-    ) -> VarDecl? {
-        if let accessorSyntax = binding.accessor {
-            guard Reader.isStoredPropertyAccessor(accessor: accessorSyntax) else {
-                return nil
-            }
-        }
-
-        guard let ident = binding.pattern.as(IdentifierPatternSyntax.self) else {
-            return nil
-        }
-
-        let name = Reader.unescapeIdentifier(ident.identifier.text)
-
-        guard let typeAnno = binding.typeAnnotation,
-              let typeRepr = Reader.readTypeRepr(
-                type: typeAnno.type
-              ) else
-        {
-            return nil
-        }
-
-        return VarDecl(
-            context: context,
-            name: name,
-            typeRepr: typeRepr
-        )
-    }
-
-
 }

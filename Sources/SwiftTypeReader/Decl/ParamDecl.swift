@@ -1,4 +1,4 @@
-public final class ParamDecl: StorageDecl {
+public final class ParamDecl: ValueDecl {
     public init(
         context: any DeclContext,
         interfaceName: String?,

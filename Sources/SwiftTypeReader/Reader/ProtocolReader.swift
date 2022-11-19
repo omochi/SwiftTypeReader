@@ -1,82 +1,48 @@
 import Foundation
 import SwiftSyntax
 
-final class ProtocolReader {
-    private let module: Module
-    private let file: URL
-    private let location: Location
+struct ProtocolReader {
+    var reader: Reader
 
-    init(
-        module: Module,
-        file: URL,
-        location: Location
-    ) {
-        self.module = module
-        self.file = file
-        self.location = location
+    init(reader: Reader) {
+        self.reader = reader
     }
 
-    func read(protocolDecl: ProtocolDeclSyntax) -> ProtocolType? {
-        let name = protocolDecl.identifier.text
+    func read(
+        `protocol` protocolSyntax: ProtocolDeclSyntax,
+        on context: any DeclContext
+    ) -> ProtocolDecl? {
+        let name = protocolSyntax.identifier.text
 
-        let context = Readers.Context(
-            module: module,
-            file: file,
-            location: location.appending(.type(name: name))
+        let `protocol` = ProtocolDecl(context: context, name: name)
+
+        `protocol`.inheritedTypeReprs = Reader.readOptionalInheritedTypes(
+            inheritance: protocolSyntax.inheritanceClause
         )
 
-        let inheritedTypes: [TypeSpecifier]
-        if let clause = protocolDecl.inheritanceClause {
-            inheritedTypes = Readers.readInheritedTypes(
-                context: context,
-                clause: clause
-            )
-        } else {
-            inheritedTypes = []
+        let memberDecls = protocolSyntax.members.members.map { $0.decl }
+
+        `protocol`.propertyRequirements = memberDecls.flatMap { (memberDecl) in
+            readPropertyRequirements(decl: memberDecl, on: `protocol`)
         }
 
-        let decls = protocolDecl.members.members.map { $0.decl }
-        
-        let propertyRequirements: [PropertyRequirement] = decls.flatMap { decl in
-            readPropertyRequirements(
-                context: context,
-                decl: decl
-            )
-        }
+//        let functionRequirements: [FunctionRequirement] = memberDecls.compactMap { decl in
+//            readFunctionRequirement(context: context, decl: decl)
+//        }
+//
+//        let associatedTypes = memberDecls.compactMap { decl in
+//            readAssociatedType(context: context, decl: decl)
+//        }
 
-        let functionRequirements: [FunctionRequirement] = decls.compactMap { decl in
-            readFunctionRequirement(context: context, decl: decl)
-        }
-
-        let associatedTypes = decls.compactMap { decl in
-            readAssociatedType(context: context, decl: decl)
-        }
-
-        return ProtocolType(
-            module: module,
-            file: file,
-            location: location,
-            name: name,
-            inheritedTypes: inheritedTypes,
-            propertyRequirements: propertyRequirements,
-            functionRequirements: functionRequirements,
-            associatedTypes: associatedTypes
-        )
+        return `protocol`
     }
 
     private func readPropertyRequirements(
-        context: Readers.Context,
-        decl: DeclSyntax
-    ) -> [PropertyRequirement] {
-        if let varDecl = decl.as(VariableDeclSyntax.self) {
-
-            let isStatic = varDecl.modifiers?.contains(where: { $0.name.text == "static" }) ?? false
-            return varDecl.bindings.compactMap {
-                readPropertyRequirement(context: context, binding: $0, isStatic: isStatic)
-            }
-        } else {
-            return []
-        }
+        decl: DeclSyntax,
+        on `protocol`: ProtocolDecl
+    ) -> [VarDecl] {
+        guard let decl = decl.as(VariableDeclSyntax.self) else { return [] }
+        return Reader.readVars(var: decl, on: `protocol`)
     }
 
     private func readPropertyRequirement(

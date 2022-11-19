@@ -144,29 +144,57 @@ enum E {
             XCTAssertEqual((y.interfaceType as? any NominalType)?.name, "String")
         }
     }
-// TODO: protocol
-//    func testProtocol() throws {
-//        let module = try read("""
-//protocol P: Encodable {
-//    associatedtype T: Decodable
-//    var a: String { mutating get async throws }
-//    func b(x: Int) async throws -> Double
-//    static var c: Int { get nonmutating set }
-//    static func d(_ x: Int, for y: Int)
-//}
-//""")
-//        let p = try XCTUnwrap(module.types[safe: 0]?.protocol)
-//
-//        XCTAssertEqual(p.inheritedTypes().first?.name, "Encodable")
+
+    func testProtocol() throws {
+        let module = try read("""
+protocol P: Encodable {
+    associatedtype T: Decodable
+
+    var a: String { mutating get async throws }
+    static var b: Int { get nonmutating set }
+
+    func c(x: Int) async throws -> Double
+    static func d(_ x: Int, for y: Int)
+}
+""")
+        let p = try XCTUnwrap(module.find(name: "P") as? ProtocolDecl)
+
+        XCTAssertEqual(p.inheritedTypes.count, 1)
+        let encodable = try XCTUnwrap(p.inheritedTypes[safe: 0] as? ProtocolType2)
+        XCTAssertEqual(encodable.name, "Encodable")
+
+        // TODO
 //        XCTAssertEqual(p.associatedTypes, ["T"])
-//
-//        do {
-//            let a = try XCTUnwrap(p.propertyRequirements[safe: 0])
-//            XCTAssertEqual(a.name, "a")
-//            XCTAssertEqual(a.unresolvedType.name, "String")
-//            XCTAssertEqual(a.accessors, [.get(mutating: true, async: true, throws: true)])
-//            XCTAssertEqual(a.isStatic, false)
-//        }
+
+        XCTAssertEqual(p.propertyRequirements.count, 2)
+
+
+        let a = try XCTUnwrap(p.find(name: "a") as? VarDecl)
+        XCTAssertIdentical(p.propertyRequirements[safe: 0], a)
+        XCTAssertFalse(a.modifiers.contains(.static))
+        XCTAssertEqual(a.name, "a")
+        XCTAssertEqual(a.interfaceType.description, "String")
+
+        XCTAssertEqual(a.accessors.count, 1)
+        let ag = try XCTUnwrap(a.accessors[safe: 0])
+        XCTAssertEqual(ag.kind, .get)
+        XCTAssertTrue(ag.modifiers.contains(.mutating))
+        XCTAssertTrue(ag.modifiers.contains(.async))
+        XCTAssertTrue(ag.modifiers.contains(.throws))
+
+        let b = try XCTUnwrap(p.find(name: "b") as? VarDecl)
+        XCTAssertIdentical(p.propertyRequirements[safe: 1], b)
+        XCTAssertTrue(b.modifiers.contains(.static))
+        XCTAssertEqual(b.name, "b")
+        XCTAssertEqual(b.interfaceType.description, "Int")
+
+        XCTAssertEqual(b.accessors.count, 2)
+        let bg = try XCTUnwrap(b.accessors[safe: 0])
+        XCTAssertEqual(bg.kind, .get)
+        let bs = try XCTUnwrap(b.accessors[safe: 1])
+        XCTAssertEqual(bs.kind, .set)
+        XCTAssertTrue(bs.modifiers.contains(.nonmutating))
+
 //
 //        do {
 //            let b = try XCTUnwrap(p.functionRequirements[safe: 0])
@@ -179,14 +207,7 @@ enum E {
 //            XCTAssertEqual(b.isThrows, true)
 //            XCTAssertEqual(b.isStatic, false)
 //        }
-//
-//        do {
-//            let c = try XCTUnwrap(p.propertyRequirements[safe: 1])
-//            XCTAssertEqual(c.name, "c")
-//            XCTAssertEqual(c.unresolvedType.name, "Int")
-//            XCTAssertEqual(c.accessors, [.get(), .set(nonmutating: true)])
-//            XCTAssertEqual(c.isStatic, true)
-//        }
+
 //
 //        do {
 //            let d = try XCTUnwrap(p.functionRequirements[safe: 1])
@@ -202,8 +223,8 @@ enum E {
 //            XCTAssertEqual(d.isThrows, false)
 //            XCTAssertEqual(d.isStatic, true)
 //        }
-//    }
-//
+    }
+
     func testObservedStoredProperty() throws {
         let module = try read("""
 struct S {
