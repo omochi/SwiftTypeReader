@@ -1,4 +1,10 @@
 public struct GenericParamType2: SType2 {
+    public init(
+        decl: GenericParamDecl
+    ) {
+        self.decl = decl
+    }
+
     public var decl: GenericParamDecl
 
     public var description: String {

@@ -1,7 +1,7 @@
 public struct IdentTypeRepr: TypeRepr {
     public init(
         name: String,
-        genericArgs: [any TypeRepr]
+        genericArgs: [any TypeRepr] = []
     ) {
         self.name = name
         self.genericArgs = genericArgs

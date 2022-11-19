@@ -1,4 +1,4 @@
-public final class EnumDecl: NominalTypeDecl & DeclContext {
+public final class EnumDecl: NominalTypeDecl {
     public init(
         context: some DeclContext,
         name: String
@@ -6,6 +6,8 @@ public final class EnumDecl: NominalTypeDecl & DeclContext {
         self.context = context
         self.name = name
         self.genericParams = .init()
+        self.inheritedTypeReprs = []
+        self.types = []
         self.caseElements = []
     }
 
@@ -13,22 +15,13 @@ public final class EnumDecl: NominalTypeDecl & DeclContext {
     public var name: String
     public var parentContext: (any DeclContext)? { context }
     public var genericParams: GenericParamList
+    public var inheritedTypeReprs: [any TypeRepr]
+    public var types: [any GenericTypeDecl]
     public var caseElements: [EnumCaseElementDecl]
 
-    public var declaredInterfaceType: any SType2 {
-        EnumType2(
-            decl: self,
-            genericArgs: genericParams.asDeclaredInterfaceTypeArgs()
-        )
-    }
-
-    public var interfaceType: any SType2 {
-        MetatypeType(instance: declaredInterfaceType)
-    }
-
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
-        if let param = genericParams.find(name: name, options: options) {
-            return param
+        if let decl = findInNominalTypeDecl(name: name, options: options) {
+            return decl
         }
         if options.value {
             if let decl = caseElements.first(where: { $0.name == name }) {

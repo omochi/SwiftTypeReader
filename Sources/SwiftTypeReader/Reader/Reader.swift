@@ -46,13 +46,9 @@ public struct Reader {
         for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
             if let type = readNominalTypeDecl(decl: decl, on: source) {
                 source.types.append(type)
+            } else if let `import` = readImportDecl(decl: decl, on: source) {
+                source.imports.append(`import`)
             }
-
-//            if let type = Readers.readTypeDeclaration(context: context, declaration: decl) {
-//                source.types.append(type)
-//            } else if let `import` = Readers.readImportDeclaration(context: context, declaration: decl) {
-//                source.imports.append(`import`)
-//            }
         }
 
         module.sources.append(source)
@@ -67,6 +63,15 @@ public struct Reader {
         } else if let decl = decl.as(EnumDeclSyntax.self) {
             let reader = EnumReader(reader: self)
             return reader.read(enum: decl, on: context)
+        } else {
+            return nil
+        }
+    }
+
+    func readImportDecl(decl: DeclSyntax, on source: SourceFileDecl) -> ImportDecl2? {
+        if let decl = decl.as(ImportDeclSyntax.self) {
+            let reader = ImportReader(reader: self)
+            return reader.read(import: decl, on: source)
         } else {
             return nil
         }
@@ -251,6 +256,21 @@ public struct Reader {
 
     static func isStoredPropertyAccessor(name: String) -> Bool {
         return name == "willSet" || name == "didSet"
+    }
+
+    static func readOptionalInheritedTypes(
+        inheritance: TypeInheritanceClauseSyntax?
+    ) -> [any TypeRepr] {
+        guard let inheritance else { return [] }
+        return readInheritedTypes(inheritance: inheritance)
+    }
+
+    static func readInheritedTypes(
+        inheritance: TypeInheritanceClauseSyntax
+    ) -> [any TypeRepr] {
+        return inheritance.inheritedTypeCollection.compactMap { (type) in
+            readTypeRepr(type: type.typeName)
+        }
     }
 }
 

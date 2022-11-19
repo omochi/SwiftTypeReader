@@ -15,6 +15,22 @@ public struct GenericHashableStorage<Box>: Hashable where
 }
 
 @propertyWrapper
+public struct GenericHashableOptionalStorage<Box>: Hashable where
+    Box: HashableBoxProtocol
+{
+    public init(wrappedValue: Box.Value?) {
+        self.storage = wrappedValue.map { Box($0) }
+    }
+
+    public var wrappedValue: Box.Value? {
+        get { storage?.value }
+        set { storage = newValue.map { Box($0) }}
+    }
+
+    private var storage: Box?
+}
+
+@propertyWrapper
 public struct GenericHashableArrayStorage<Box>: Hashable where
     Box: HashableBoxProtocol
 {

@@ -2,32 +2,30 @@ import XCTest
 import SwiftTypeReader
 
 final class LocationResolveTests: ReaderTestCaseBase {
-//    func testLocationResolve() throws {
-//        _ = try read("""
-//struct G<T> {}
-//
-//struct A {
-//    struct B {
-//        struct C {}
-//    }
-//
-//    struct G<T> {}
-//}
-//""")
-//
-//        XCTAssertEqual(
-//            context.resolve(
-//                location: Location(module: "Swift")
-//            )?.module?.name,
-//            "Swift"
-//        )
-//
-//        XCTAssertEqual(
-//            context.resolve(
-//                location: Location(module: "Swift", elements: [.type(name: "Int")])
-//            )?.type?.asSpecifier().elements,
-//            [.init(name: "Swift"), .init(name: "Int")]
-//        )
+    func testLocationResolve() throws {
+        let module = try read("""
+struct G<T> {}
+
+struct A {
+    struct B {
+        struct C {}
+    }
+
+    struct G<T> {}
+}
+""")
+
+        do {
+            let repr = IdentTypeRepr(name: "Swift")
+            let t = try XCTUnwrap(repr.resolve(from: module) as? ModuleType)
+            XCTAssertEqual(t.description, "Swift")
+        }
+
+        do {
+            let repr = ChainedTypeRepr([IdentTypeRepr(name: "Swift"), IdentTypeRepr(name: "Int")])
+            let t = try XCTUnwrap(repr.resolve(from: module) as? StructType2)
+            XCTAssertEqual(t.description, "Int")
+        }
 //
 //        XCTAssertEqual(
 //            context.resolve(
@@ -100,5 +98,5 @@ final class LocationResolveTests: ReaderTestCaseBase {
 //                [.init(name: "T")]
 //            )
 //        }
-//    }
+    }
 }

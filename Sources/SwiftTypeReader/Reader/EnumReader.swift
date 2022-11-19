@@ -18,30 +18,22 @@ struct EnumReader {
         `enum`.genericParams = Reader.readOptionalGenericParamList(
             clause: enumSyntax.genericParameters, on: `enum`
         )
-//        let inheritedTypes: [TypeSpecifier]
-//        if let clause = enumDecl.inheritanceClause {
-//            inheritedTypes = Readers.readInheritedTypes(
-//                context: context,
-//                clause: clause
-//            )
-//        } else {
-//            inheritedTypes = []
-//        }
+
+        `enum`.inheritedTypeReprs = Reader.readOptionalInheritedTypes(
+            inheritance: enumSyntax.inheritanceClause
+        )
 
         let memberDecls = enumSyntax.members.members.map { $0.decl }
-//        var nestedTypes: [SType] = []
         for memberDecl in memberDecls {
             `enum`.caseElements += readCaseElements(
-                decl: memberDecl,
-                on: `enum`
+                decl: memberDecl, on: `enum`
             )
 
-//            if let type = Readers.readTypeDeclaration(
-//                context: context,
-//                declaration: memberDecl
-//            ) {
-//                nestedTypes.append(type)
-//            }
+            if let nestedType = reader.readNominalTypeDecl(
+                decl: memberDecl, on: `enum`
+            ) {
+                `enum`.types.append(nestedType)
+            }
         }
 
         return `enum`

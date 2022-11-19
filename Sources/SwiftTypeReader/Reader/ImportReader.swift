@@ -1,27 +1,22 @@
 import Foundation
 import SwiftSyntax
 
-final class ImportReader {
-    private let module: Module
-    private let file: URL?
-    private let location: Location
-
+struct ImportReader {
+    var reader: Reader
     init(
-        module: Module,
-        file: URL?,
-        location: Location
+        reader: Reader
     ) {
-        self.module = module
-        self.file = file
-        self.location = location
+        self.reader = reader
     }
 
-    func read(importDecl: ImportDeclSyntax) -> ImportDecl {
-        return ImportDecl(
-            module: module,
-            file: file,
-            location: location,
-            target: .module(name: importDecl.path.description)
+    func read(
+        `import`: ImportDeclSyntax,
+        on source: SourceFileDecl
+    ) -> ImportDecl2 {
+        let name = `import`.path.description
+        return ImportDecl2(
+            source: source,
+            name: name
         )
     }
 }

@@ -19,10 +19,6 @@ public final class ModuleDecl: ValueDecl & DeclContext {
         sources.flatMap { $0.types }
     }
 
-    public var interfaceType: any SType2 {
-        ModuleType(decl: self)
-    }
-
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         for source in sources {
             if let decl = source.find(name: name, options: options) {

@@ -39,14 +39,12 @@ struct StandardLibraryBuilder {
     }
 
     mutating func addProtocol(name: String) {
-//        let t = ProtocolType(
-//            module: module,
-//            file: source.file,
-//            location: location,
-//            name: name
-//        )
-//
-//        source.types.append(.protocol(t))
+        let decl = ProtocolDecl(
+            context: source,
+            name: name
+        )
+
+        source.types.append(decl)
     }
 
     mutating func build() -> ModuleDecl {

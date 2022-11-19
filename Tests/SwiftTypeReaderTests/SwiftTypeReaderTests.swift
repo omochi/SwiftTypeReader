@@ -90,7 +90,7 @@ struct S {
 
         let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
 
-        let aType = try XCTUnwrap(a.interfaceType as? UnknownType)
+        let aType = try XCTUnwrap(a.interfaceType as? ErrorType)
         XCTAssertEqual(aType.description, "URL")
     }
 
@@ -144,7 +144,7 @@ enum E {
             XCTAssertEqual((y.interfaceType as? any NominalType)?.name, "String")
         }
     }
-//
+// TODO: protocol
 //    func testProtocol() throws {
 //        let module = try read("""
 //protocol P: Encodable {
@@ -204,163 +204,275 @@ enum E {
 //        }
 //    }
 //
-//    func testObservedStoredProperty() throws {
-//        let module = try read("""
-//struct S {
-//    var a: Int { 0 }
-//    var b: Int = 0 {
-//        willSet {}
-//        didSet {}
-//    }
-//    var c: Int {
-//        get { 0 }
-//    }
-//"""
-//        )
-//
-//        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
-//
-//        XCTAssertEqual(s.storedProperties.count, 1)
-//
-//        let b = try XCTUnwrap(s.storedProperties[safe: 0])
-//        XCTAssertEqual(b.name, "b")
-//        XCTAssertEqual(b.type().name, "Int")
-//    }
-//
-//    func testInheritanceClause() throws {
-//        let module = try read("""
-//enum E: Codable {
-//    case a
-//}
-//""")
-//        let e = try XCTUnwrap(module.types[safe: 0]?.enum)
-//
-//        XCTAssertEqual(e.inheritedTypes().count, 1)
-//
-//        let c = try XCTUnwrap(e.inheritedTypes()[safe: 0])
-//        XCTAssertNotNil(c.protocol)
-//        XCTAssertEqual(c.protocol?.module.name, "Swift")
-//        XCTAssertEqual(c.name, "Codable")
-//    }
-//
-//    func testGenericParameter() throws {
-//        let module = try read("""
-//struct S<T> {
-//    var a: T
-//}
-//"""
-//        )
-//
-//        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
-//        XCTAssertEqual(s.name, "S")
-//
-//        XCTAssertEqual(s.genericParameters.count, 1)
-//        let t = try XCTUnwrap(s.genericParameters[safe: 0])
-//        XCTAssertEqual(t.name, "T")
-//
-//        XCTAssertEqual(s.storedProperties.count, 1)
-//        let a = try XCTUnwrap(s.storedProperties[safe: 0])
-//        XCTAssertEqual(a.name, "a")
-//
-//        let at = try XCTUnwrap(a.type().genericParameter)
-//        XCTAssertEqual(
-//            at.location,
-//            Location(module: "main", elements: [.type(name: "S")])
-//        )
-//    }
-//
-//    func testNestedTypeProperty() throws {
-//        let module = try read("""
-//struct S {
-//    var x: A.B
-//    var y: A.B.C
-//}
-//"""
-//        )
-//
-//        let s = try XCTUnwrap(module.types[safe: 0]?.struct)
-//        XCTAssertEqual(s.name, "S")
-//
-//        XCTAssertEqual(s.storedProperties.count, 2)
-//
-//        let x = try XCTUnwrap(s.storedProperties[safe: 0])
-//        XCTAssertEqual(x.name, "x")
-//        XCTAssertEqual(x.type().description, "A.B")
-//
-//        let y = try XCTUnwrap(s.storedProperties[safe: 1])
-//        XCTAssertEqual(y.name, "y")
-//        XCTAssertEqual(y.type().description, "A.B.C")
-//    }
-//
-//    func testNestedTypeInStruct() throws {
-//        let module = try read("""
-//struct A {
-//    struct B {}
-//}
-//"""
-//        )
-//
-//        XCTAssertEqual(module.types.count, 1)
-//        let a = try XCTUnwrap(module.types[safe: 0]?.struct)
-//        XCTAssertEqual(a.name, "A")
-//
-//        XCTAssertEqual(a.types.count, 1)
-//        let b = try XCTUnwrap(a.types[safe: 0]?.struct)
-//        XCTAssertEqual(b.name, "B")
-//        XCTAssertEqual(
-//            b.location,
-//            Location(module: "main", elements: [.type(name: "A")])
-//        )
-//    }
-//
-//    func testNestedTypeInEnum() throws {
-//        let module = try read("""
-//enum A {
-//    struct B {}
-//}
-//"""
-//        )
-//
-//        let a = try XCTUnwrap(module.types[safe: 0]?.enum)
-//        XCTAssertEqual(a.name, "A")
-//
-//        let b = try XCTUnwrap(a.types[safe: 0]?.struct)
-//        XCTAssertEqual(b.name, "B")
-//        XCTAssertEqual(
-//            b.location,
-//            Location(module: "main", elements: [.type(name: "A")])
-//        )
-//    }
-//
-//    func testResolveNestedTypes() throws {
-//        let module = try read("""
-//struct A {
-//    struct B {
-//        var b1: Int = 0
-//    }
-//
-//    var x: B
-//}
-//
-//struct B {
-//    var b2: Int = 0
-//}
-//
-//struct C {
-//    var y: B
-//}
-//""")
-//        let a = try XCTUnwrap(module.getType(name: "A")?.struct)
-//
-//        let xb = try XCTUnwrap(a.storedProperties[safe: 0]?.type().struct)
-//        XCTAssertEqual(xb.storedProperties[safe: 0]?.name, "b1")
-//
-//        let c = try XCTUnwrap(module.getType(name: "C")?.struct)
-//
-//        let yb = try XCTUnwrap(c.storedProperties[safe: 0]?.type().struct)
-//        XCTAssertEqual(yb.storedProperties[safe: 0]?.name, "b2")
-//    }
-//
+    func testObservedStoredProperty() throws {
+        let module = try read("""
+struct S {
+    var a: Int { 0 }
+    var b: Int = 0 {
+        willSet {}
+        didSet {}
+    }
+    var c: Int {
+        get { 0 }
+    }
+"""
+        )
+
+        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+
+        XCTAssertEqual(s.storedProperties.count, 1)
+
+        let b = try XCTUnwrap(s.storedProperties[safe: 0])
+        XCTAssertEqual(b.name, "b")
+        XCTAssertEqual((b.interfaceType as? any NominalType)?.name, "Int")
+    }
+
+    func testInheritanceClause() throws {
+        let module = try read("""
+struct S: Encodable {}
+
+enum E: Decodable {
+    case a
+}
+""")
+
+        do{
+            let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+            XCTAssertEqual(s.inheritedTypes.count, 1)
+            let e = try XCTUnwrap(s.inheritedTypes[safe: 0] as? ProtocolType2)
+            XCTAssertEqual(e.decl.moduleContext.name, "Swift")
+            XCTAssertEqual(e.name, "Encodable")
+        }
+
+        do {
+            let e = try XCTUnwrap(module.find(name: "E") as? EnumDecl)
+            XCTAssertEqual(e.inheritedTypes.count, 1)
+            let d = try XCTUnwrap(e.inheritedTypes[safe: 0] as? ProtocolType2)
+            XCTAssertEqual(d.decl.moduleContext.name, "Swift")
+            XCTAssertEqual(d.name, "Decodable")
+        }
+    }
+
+    func testGenericParameter() throws {
+        let module = try read("""
+struct S<T> {
+    var a: T
+}
+"""
+        )
+
+        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+        XCTAssertEqual(s.name, "S")
+
+        XCTAssertEqual(s.genericParams.items.count, 1)
+        let t = try XCTUnwrap(s.genericParams.items[safe: 0])
+        XCTAssertIdentical(s.find(name: "T"), t)
+        XCTAssertEqual(t.name, "T")
+
+        XCTAssertEqual(s.storedProperties.count, 1)
+        let a = try XCTUnwrap(s.storedProperties[safe: 0])
+        XCTAssertIdentical(s.find(name: "a"), a)
+        XCTAssertEqual(a.name, "a")
+
+        let aT = try XCTUnwrap(a.interfaceType as? GenericParamType2)
+        XCTAssertIdentical(aT.decl, t)
+    }
+
+    func testChainedTypeRepr() throws {
+        let module = try read("""
+struct S {
+    var a: A.B
+    var b: A.B.C
+    var c: main.K
+}
+
+struct K {}
+"""
+        )
+
+        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+        XCTAssertEqual(s.name, "S")
+
+        XCTAssertEqual(s.storedProperties.count, 3)
+
+        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+        XCTAssertEqual(a.name, "a")
+        let aTypeRepr = try XCTUnwrap(a.typeRepr as? ChainedTypeRepr)
+        XCTAssertEqual(aTypeRepr.items, [IdentTypeRepr(name: "A"), IdentTypeRepr(name: "B")])
+        let aType = try XCTUnwrap(a.interfaceType as? ErrorType)
+        XCTAssertEqual(aType.description, "A.B")
+
+        let b = try XCTUnwrap(s.find(name: "b") as? VarDecl)
+        XCTAssertEqual(b.name, "b")
+        let bTypeRepr = try XCTUnwrap(b.typeRepr as? ChainedTypeRepr)
+        XCTAssertEqual(bTypeRepr.items, [IdentTypeRepr(name: "A"), IdentTypeRepr(name: "B"), IdentTypeRepr(name: "C")])
+        let bType = try XCTUnwrap(b.interfaceType as? ErrorType)
+        XCTAssertEqual(bType.description, "A.B.C")
+
+        let c = try XCTUnwrap(s.find(name: "c") as? VarDecl)
+        XCTAssertEqual(c.name, "c")
+        let cTypeRepr = try XCTUnwrap(c.typeRepr as? ChainedTypeRepr)
+        XCTAssertEqual(cTypeRepr.items, [IdentTypeRepr(name: "main"), IdentTypeRepr(name: "K")])
+        let cType = try XCTUnwrap(c.interfaceType as? StructType2)
+        XCTAssertIdentical(module.find(name: "K"), cType.decl)
+    }
+
+    func testNestedTypeInStruct() throws {
+        let module = try read("""
+struct A {
+    struct B {}
+}
+"""
+        )
+
+        XCTAssertEqual(module.types.count, 1)
+        let a = try XCTUnwrap(module.find(name: "A") as? StructDecl)
+        XCTAssertEqual(a.name, "A")
+        let aType = try XCTUnwrap(a.declaredInterfaceType as? StructType2)
+        XCTAssertNil(aType.parent)
+
+        XCTAssertEqual(a.types.count, 1)
+        let b = try XCTUnwrap(a.find(name: "B") as? StructDecl)
+        XCTAssertEqual(b.name, "B")
+        XCTAssertIdentical(b.parentContext, a)
+        let bType = try XCTUnwrap(b.declaredInterfaceType as? StructType2)
+        XCTAssertEqual(bType.description, "A.B")
+        XCTAssertEqual(bType.parent?.description, "A")
+    }
+
+    func testNestedTypeInEnum() throws {
+        let module = try read("""
+enum A {
+    struct B {}
+}
+"""
+        )
+
+        let a = try XCTUnwrap(module.find(name: "A") as? EnumDecl)
+        XCTAssertEqual(a.name, "A")
+
+        let b = try XCTUnwrap(a.find(name: "B") as? StructDecl)
+        XCTAssertEqual(b.name, "B")
+        XCTAssertIdentical(b.parentContext, a)
+
+        let bType = try XCTUnwrap(b.declaredInterfaceType as? StructType2)
+        XCTAssertEqual(bType.description, "A.B")
+        XCTAssertEqual(bType.parent?.description, "A")
+    }
+
+    func testResolveNestedTypes() throws {
+        let module = try read("""
+struct A {
+    struct B {}
+
+    var x: B
+}
+
+struct B {}
+
+struct C {
+    var y: B
+}
+""")
+        let a = try XCTUnwrap(module.find(name: "A") as? StructDecl)
+        let b = try XCTUnwrap(module.find(name: "B") as? StructDecl)
+        let aB = try XCTUnwrap(a.find(name: "B") as? StructDecl)
+        XCTAssertNotIdentical(b, aB)
+
+        let xb = try XCTUnwrap(((a.find(name: "x") as? VarDecl)?.interfaceType as? StructType2)?.decl)
+        XCTAssertIdentical(xb, aB)
+
+        let c = try XCTUnwrap(module.find(name: "C") as? StructDecl)
+
+        let yb = try XCTUnwrap(((c.find(name: "y") as? VarDecl)?.interfaceType as? StructType2)?.decl)
+        XCTAssertIdentical(yb, b)
+    }
+
+    func testImportDecl() throws {
+        let source = try Reader(
+            context: context
+        ).read(
+            source: """
+import Foo
+@preconcurrency import Bar
+import struct Baz.S
+""",
+            file: URL(fileURLWithPath: "main.swift")
+        )
+
+        let i0 = try XCTUnwrap(source.imports[safe: 0])
+        XCTAssertEqual(i0.name, "Foo")
+        let i1 = try XCTUnwrap(source.imports[safe: 1])
+        XCTAssertEqual(i1.name, "Bar")
+        let i2 = try XCTUnwrap(source.imports[safe: 2])
+        XCTAssertEqual(i2.name, "Baz.S") // INFO: type importing is not supported yet. this should be treated as TypeSpecifier.
+        // INFO: importKind is not supported yet.
+    }
+
+    func testImportResolution() throws {
+        let moduleA = context.getOrCreateModule(name: "A")
+        _ = try Reader(
+            context: context,
+            module: moduleA
+        ).read(
+            source: """
+public struct X {}
+""",
+            file: URL(fileURLWithPath: "X.swift")
+        )
+
+        let moduleB = context.getOrCreateModule(name: "B")
+        _ = try Reader(
+            context: context,
+            module: moduleB
+        ).read(
+            source: """
+public enum X {}
+""",
+            file: URL(fileURLWithPath: "X.swift")
+        )
+
+        let moduleC = context.getOrCreateModule(name: "C")
+        let reader = Reader(
+            context: context,
+            module: moduleC
+        )
+
+        _ = try reader.read(
+            source: """
+import A
+
+struct S {
+    var x: X
+}
+""",
+            file: URL(fileURLWithPath: "S.swift")
+        )
+
+        _ = try reader.read(
+            source: """
+import B
+
+struct K {
+    var x: X
+}
+""",
+            file: URL(fileURLWithPath: "K.swift")
+        )
+
+        let aX = try XCTUnwrap(moduleA.find(name: "X") as? StructDecl)
+        let bX = try XCTUnwrap(moduleB.find(name: "X") as? EnumDecl)
+        let s = try XCTUnwrap(moduleC.find(name: "S") as? StructDecl)
+        let sX = try XCTUnwrap(s.find(name: "x") as? VarDecl)
+        let sXType = try XCTUnwrap(sX.interfaceType as? any NominalType)
+        XCTAssertIdentical(sXType.nominalTypeDecl, aX)
+        let k = try XCTUnwrap(moduleC.find(name: "K") as? StructDecl)
+        let kX = try XCTUnwrap(k.find(name: "x") as? VarDecl)
+        let kXType = try XCTUnwrap(kX.interfaceType as? any NominalType)
+        XCTAssertIdentical(kXType.nominalTypeDecl, bX)
+    }
+
+    // TODO: enable test
 //    func testModules() throws {
 //        _ = try Reader(
 //            context: context,
@@ -387,7 +499,7 @@ enum E {
 //            file: URL(fileURLWithPath: "main.swift")
 //        )
 //
-//        let p = try XCTUnwrap(module.types[safe: 0]?.protocol)
+//        let p = try XCTUnwrap(module.find(name: "P") as? ProtocolDecl)
 //        XCTAssertEqual(p.name, "P")
 //        let f = try XCTUnwrap(p.functionRequirements[safe: 0])
 //        XCTAssertEqual(f.name, "f")
@@ -397,24 +509,4 @@ enum E {
 //        XCTAssertEqual(module.imports[safe: 0]?.name, "MyLib")
 //    }
 //
-//    func testImports() throws {
-//        let source = try Reader(
-//            context: context
-//        ).read(
-//            source: """
-//import Foo
-//@preconcurrency import Bar
-//import struct Baz.S
-//""",
-//            file: URL(fileURLWithPath: "main.swift")
-//        )
-//
-//        let i0 = try XCTUnwrap(source.imports[safe: 0])
-//        XCTAssertEqual(i0.name, "Foo")
-//        let i1 = try XCTUnwrap(source.imports[safe: 1])
-//        XCTAssertEqual(i1.name, "Bar")
-//        let i2 = try XCTUnwrap(source.imports[safe: 2])
-//        XCTAssertEqual(i2.name, "Baz.S") // INFO: type importing is not supported yet. this should be treated as TypeSpecifier.
-//        // INFO: importKind is not supported yet.
-//    }
 }

@@ -17,31 +17,20 @@ struct StructReader {
             clause: structSyntax.genericParameterClause, on: `struct`
         )
 
-        // TODO: add test case
-//        let inheritedTypes: [TypeSpecifier]
-//        if let clause = syntax.inheritanceClause {
-//            inheritedTypes = Readers.readInheritedTypes(
-//                context: context,
-//                clause: clause
-//            )
-//        } else {
-//            inheritedTypes = []
-//        }
+        `struct`.inheritedTypeReprs = Reader.readOptionalInheritedTypes(
+            inheritance: structSyntax.inheritanceClause
+        )
 
-        // TODO: add test case
-//        var nestedTypes: [SType] = []
         let memberDecls = structSyntax.members.members.map { $0.decl }
         for memberDecl in memberDecls {
             `struct`.storedProperties += readStoredProperties(
-                decl: memberDecl,
-                on: `struct`
+                decl: memberDecl, on: `struct`
             )
-//            if let nestedType = Readers.readTypeDeclaration(
-//                context: context,
-//                declaration: decl
-//            ) {
-//                nestedTypes.append(nestedType)
-//            }
+            if let nestedType = reader.readNominalTypeDecl(
+                decl: memberDecl, on: `struct`
+            ) {
+                `struct`.types.append(nestedType)
+            }
         }
 
         return `struct`

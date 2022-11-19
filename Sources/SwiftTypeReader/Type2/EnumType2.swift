@@ -1,14 +1,16 @@
 public struct EnumType2: NominalType {
-    public var decl: EnumDecl
-    @AnyTypeArrayStorage public var genericArgs: [any SType2]
-
-    public var nominalTypeDecl: any NominalTypeDecl { decl }
-
-    public var description: String {
-        var s = decl.name
-        s += Printer.genericClause(
-            genericArgs.map { $0.description }
-        )
-        return s
+    public init(
+        decl: EnumDecl,
+        parent: (any SType2)? = nil,
+        genericArgs: [any SType2] = []
+    ) {
+        self.decl = decl
+        self.parent = parent
+        self.genericArgs = genericArgs
     }
+
+    public var decl: EnumDecl
+    public var nominalTypeDecl: any NominalTypeDecl { decl }
+    @AnyTypeOptionalStorage public var parent: (any SType2)?
+    @AnyTypeArrayStorage public var genericArgs: [any SType2]
 }

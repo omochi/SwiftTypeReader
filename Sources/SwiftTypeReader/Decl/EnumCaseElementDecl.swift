@@ -12,10 +12,6 @@ public final class EnumCaseElementDecl: ValueDecl & DeclContext {
     public var valueName: String? { name }
     public var associatedValues: [ParamDecl]
 
-    public var interfaceType: any SType2 {
-        `enum`.declaredInterfaceType
-    }
-
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.value {
             if let decl = associatedValues.first(where: { $0.name == name }) {

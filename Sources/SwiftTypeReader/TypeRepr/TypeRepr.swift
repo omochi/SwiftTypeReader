@@ -11,7 +11,7 @@ extension TypeRepr {
                 )
             )
         } catch {
-            return UnknownType(repr: self)
+            return ErrorType(repr: self)
         }
     }
 }
