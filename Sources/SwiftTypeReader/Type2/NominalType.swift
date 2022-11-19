@@ -10,19 +10,6 @@ extension NominalType {
     }
 
     public var description: String {
-        var s = ""
-
-        if let parent {
-            s += parent.description
-        }
-
-        if !s.isEmpty {
-            s += "."
-        }
-
-        s += name
-        s += Printer.genericClause(genericArgs.map { $0.description })
-
-        return s
+        toTypeRepr(containsModule: false).description
     }
 }

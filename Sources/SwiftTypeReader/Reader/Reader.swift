@@ -126,23 +126,22 @@ public struct Reader {
         type: TypeSyntax
     ) -> (any TypeRepr)? {
         if let member = type.as(MemberTypeIdentifierSyntax.self) {
-            guard let base = readTypeRepr(
+            guard var repr = readTypeRepr(
                 type: member.baseType
-            ),
+            ) as? IdentTypeRepr,
                   let args = readOptionalGenericArguments(
                     clause: member.genericArgumentClause
-                  ),
-                  var idents = decomposeTypeReprToIdents(typeRepr: base)
+                  )
             else { return nil }
 
-            idents.append(
-                IdentTypeRepr(
+            repr.elements.append(
+                .init(
                     name: member.name.text,
                     genericArgs: args
                 )
             )
 
-            return ChainedTypeRepr(idents)
+            return repr
         }
 
         if let simple = type.as(SimpleTypeIdentifierSyntax.self) {
@@ -150,10 +149,12 @@ public struct Reader {
                 clause: simple.genericArgumentClause
             ) else { return nil }
 
-            return IdentTypeRepr(
-                name: simple.name.text,
-                genericArgs: args
-            )
+            return IdentTypeRepr([
+                .init(
+                    name: simple.name.text,
+                    genericArgs: args
+                )
+            ])
         }
 
         if let optional = type.as(OptionalTypeSyntax.self) {
@@ -161,19 +162,23 @@ public struct Reader {
                 type: optional.wrappedType
             ) else { return nil }
 
-            return IdentTypeRepr(
-                name: "Optional",
-                genericArgs: [wrapped]
-            )
+            return IdentTypeRepr([
+                .init(
+                    name: "Optional",
+                    genericArgs: [wrapped]
+                )
+            ])
         } else if let array = type.as(ArrayTypeSyntax.self) {
             guard let element = readTypeRepr(
                 type: array.elementType
             ) else { return nil }
 
-            return IdentTypeRepr(
-                name: "Array",
-                genericArgs: [element]
-            )
+            return IdentTypeRepr([
+                .init(
+                    name: "Array",
+                    genericArgs: [element]
+                )
+            ])
         } else if let dictionary = type.as(DictionaryTypeSyntax.self) {
             guard let key = readTypeRepr(
                 type: dictionary.keyType
@@ -182,20 +187,14 @@ public struct Reader {
                     type: dictionary.valueType
                   ) else { return nil }
 
-            return IdentTypeRepr(
-                name: "Dictionary",
-                genericArgs: [key, value]
-            )
+            return IdentTypeRepr([
+                .init(
+                    name: "Dictionary",
+                    genericArgs: [key, value]
+                )
+            ])
         } else {
             return nil
-        }
-    }
-
-    static func decomposeTypeReprToIdents(typeRepr: any TypeRepr) -> [IdentTypeRepr]? {
-        switch typeRepr {
-        case let repr as IdentTypeRepr: return [repr]
-        case let repr as ChainedTypeRepr: return repr.items
-        default: return nil
         }
     }
 

@@ -4,4 +4,16 @@
 
  S means Swift.
  */
-public protocol SType2: Hashable & CustomStringConvertible {}
+public protocol SType2: Hashable & CustomStringConvertible {
+}
+
+extension SType2 {
+    public func toTypeRepr(
+        containsModule: Bool
+    ) -> any TypeRepr {
+        return TypeToTypeReprImpl(
+            type: self,
+            containsModule: containsModule
+        ).convert()
+    }
+}

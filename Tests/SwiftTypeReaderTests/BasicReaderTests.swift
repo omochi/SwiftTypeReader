@@ -1,7 +1,7 @@
 import XCTest
 import SwiftTypeReader
 
-final class SwiftTypeReaderTests: ReaderTestCaseBase {
+final class BasicReaderTests: ReaderTestCaseBase {
     func testSimpleStruct() throws {
         let module = try read("""
 struct S {
@@ -297,22 +297,22 @@ struct K {}
 
         let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
         XCTAssertEqual(a.name, "a")
-        let aTypeRepr = try XCTUnwrap(a.typeRepr as? ChainedTypeRepr)
-        XCTAssertEqual(aTypeRepr.items, [IdentTypeRepr(name: "A"), IdentTypeRepr(name: "B")])
+        let aTypeRepr = try XCTUnwrap(a.typeRepr as? IdentTypeRepr)
+        XCTAssertEqual(aTypeRepr.elements, [.init(name: "A"), .init(name: "B")])
         let aType = try XCTUnwrap(a.interfaceType as? ErrorType)
         XCTAssertEqual(aType.description, "A.B")
 
         let b = try XCTUnwrap(s.find(name: "b") as? VarDecl)
         XCTAssertEqual(b.name, "b")
-        let bTypeRepr = try XCTUnwrap(b.typeRepr as? ChainedTypeRepr)
-        XCTAssertEqual(bTypeRepr.items, [IdentTypeRepr(name: "A"), IdentTypeRepr(name: "B"), IdentTypeRepr(name: "C")])
+        let bTypeRepr = try XCTUnwrap(b.typeRepr as? IdentTypeRepr)
+        XCTAssertEqual(bTypeRepr.elements, [.init(name: "A"), .init(name: "B"), .init(name: "C")])
         let bType = try XCTUnwrap(b.interfaceType as? ErrorType)
         XCTAssertEqual(bType.description, "A.B.C")
 
         let c = try XCTUnwrap(s.find(name: "c") as? VarDecl)
         XCTAssertEqual(c.name, "c")
-        let cTypeRepr = try XCTUnwrap(c.typeRepr as? ChainedTypeRepr)
-        XCTAssertEqual(cTypeRepr.items, [IdentTypeRepr(name: "main"), IdentTypeRepr(name: "K")])
+        let cTypeRepr = try XCTUnwrap(c.typeRepr as? IdentTypeRepr)
+        XCTAssertEqual(cTypeRepr.elements, [.init(name: "main"), .init(name: "K")])
         let cType = try XCTUnwrap(c.interfaceType as? StructType2)
         XCTAssertIdentical(module.find(name: "K"), cType.decl)
     }

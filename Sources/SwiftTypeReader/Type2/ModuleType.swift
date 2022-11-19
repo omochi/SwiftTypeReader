@@ -5,7 +5,7 @@ public struct ModuleType: SType2 {
 
     public var decl: ModuleDecl
 
-    public var description: String {
-        decl.name
-    }
+    public var name: String { decl.name }
+
+    public var description: String { name }
 }

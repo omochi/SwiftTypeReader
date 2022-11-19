@@ -20,10 +20,6 @@ public final class ParamDecl: StorageDecl {
     public var argumentName: String? { interfaceName ?? name }
 
     public var typeRepr: any TypeRepr
-
-    public var interfaceType: any SType2 {
-        typeRepr.resolve(from: context)
-    }
 }
 
 extension [ParamDecl] {

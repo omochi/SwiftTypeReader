@@ -30,6 +30,14 @@ struct UnqualifiedLookupRequest: Request {
             if let decl = context.find(name: name, options: options) {
                 return decl
             }
+
+            if let decl = context as? any NominalTypeDecl {
+                if options.type {
+                    if decl.name == self.name {
+                        return decl
+                    }
+                }
+            }
             
             guard let parent = context.parentContext else {
                 return nil

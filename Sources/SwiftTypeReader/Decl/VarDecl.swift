@@ -14,8 +14,4 @@ public final class VarDecl: StorageDecl {
     public var name: String
     public var valueName: String? { name }
     public var typeRepr: any TypeRepr
-
-    public var interfaceType: any SType2 {
-        typeRepr.resolve(from: context)
-    }
 }

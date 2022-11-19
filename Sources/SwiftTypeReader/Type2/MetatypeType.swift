@@ -8,6 +8,6 @@ public struct MetatypeType: SType2 {
     @AnyTypeStorage public var instance: any SType2
 
     public var description: String {
-        "\(instance).Type"
+        toTypeRepr(containsModule: false).description
     }
 }
