@@ -466,12 +466,12 @@ import struct Baz.S
         )
 
         let i0 = try XCTUnwrap(source.imports[safe: 0])
-        XCTAssertEqual(i0.name, "Foo")
+        XCTAssertEqual(i0.moduleName, "Foo")
         let i1 = try XCTUnwrap(source.imports[safe: 1])
-        XCTAssertEqual(i1.name, "Bar")
+        XCTAssertEqual(i1.moduleName, "Bar")
         let i2 = try XCTUnwrap(source.imports[safe: 2])
-        XCTAssertEqual(i2.name, "Baz.S") // INFO: type importing is not supported yet. this should be treated as TypeSpecifier.
-        // INFO: importKind is not supported yet.
+        XCTAssertEqual(i2.moduleName, "Baz")
+        XCTAssertEqual(i2.declName, "S")
     }
 
     func testImportResolution() throws {
@@ -537,6 +537,52 @@ struct K {
         XCTAssertIdentical(kXType.nominalTypeDecl, bX)
     }
 
+    func testScopedImport() throws {
+        let a = context.getOrCreateModule(name: "A")
+        _ = try Reader(context: context, module: a).read(
+            source: """
+struct S {}
+struct K {}
+""",
+            file: URL(fileURLWithPath: "a.swift")
+        )
+
+        let aS = try XCTUnwrap(a.find(name: "S") as? StructDecl)
+        let aK = try XCTUnwrap(a.find(name: "K") as? StructDecl)
+
+        let main = context.getOrCreateModule(name: "main")
+        let mainSource = try Reader(context: context, module: main).read(
+            source: """
+import struct A.S
+""",
+            file: URL(fileURLWithPath: "main.swift")
+        )
+
+        let mS1 = try XCTUnwrap(
+            IdentTypeRepr([.init(name: "S")])
+                .resolve(from: mainSource) as? StructType
+        )
+        XCTAssertIdentical(mS1.decl, aS)
+
+        let mK1 = try XCTUnwrap(
+            IdentTypeRepr([.init(name: "K")])
+                .resolve(from: mainSource) as? ErrorType
+        )
+        _ = mK1
+
+        let mS2 = try XCTUnwrap(
+            IdentTypeRepr([.init(name: "A"), .init(name: "S")])
+                .resolve(from: mainSource) as? StructType
+        )
+        XCTAssertIdentical(mS2.decl, aS)
+
+        let mK2 = try XCTUnwrap(
+            IdentTypeRepr([.init(name: "A"), .init(name: "K")])
+                .resolve(from: mainSource) as? StructType
+        )
+        XCTAssertIdentical(mK2.decl, aK)
+    }
+
     func testModules() throws {
         let myLib = context.getOrCreateModule(name: "MyLib")
         _ = try Reader(
@@ -575,6 +621,6 @@ protocol P {
         let ea = try XCTUnwrap(e.caseElements[safe: 0])
         XCTAssertEqual(ea.name, "a")
 
-        XCTAssertEqual(mainSource.imports[safe: 0]?.name, "MyLib")
+        XCTAssertEqual(mainSource.imports[safe: 0]?.moduleName, "MyLib")
     }
 }

@@ -29,6 +29,16 @@ public final class Module: TypeDecl & DeclContext {
         return nil
     }
 
+    public var importedModules: [ImportedModule] {
+        do {
+            return try rootContext.evaluator(
+                ImportedModulesRequest(module: self)
+            )
+        } catch {
+            return []
+        }
+    }
+
     static func swiftStandardLibrary(context: Context) -> Module {
         var builder = StandardLibraryBuilder(context: context)
         return builder.build()

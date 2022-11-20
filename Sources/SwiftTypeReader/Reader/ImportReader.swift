@@ -3,13 +3,27 @@ import SwiftSyntax
 
 struct ImportReader {
     static func read(
-        `import`: ImportDeclSyntax,
+        `import` importSyntax: ImportDeclSyntax,
         on source: SourceFile
-    ) -> ImportDecl2 {
-        let name = `import`.path.description
-        return ImportDecl2(
+    ) -> ImportDecl {
+        let isScoped = importSyntax.importKind != nil
+
+        let path = importSyntax.path.map { $0.name.text }
+
+        let moduleName: String
+        let declName: String?
+        if isScoped && path.count >= 2 {
+            moduleName = path.dropLast().joined(separator: ".")
+            declName = path.last
+        } else {
+            moduleName = path.joined(separator: ".")
+            declName = nil
+        }
+
+        return ImportDecl(
             source: source,
-            name: name
+            moduleName: moduleName,
+            declName: declName
         )
     }
 }

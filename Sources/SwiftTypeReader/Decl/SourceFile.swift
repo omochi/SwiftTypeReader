@@ -15,7 +15,7 @@ public final class SourceFile: Decl & DeclContext {
     public var file: URL
     public var parentContext: (any DeclContext)? { module }
 
-    public var imports: [ImportDecl2]
+    public var imports: [ImportDecl]
     public var types: [any NominalTypeDecl]
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
@@ -25,5 +25,15 @@ public final class SourceFile: Decl & DeclContext {
             }
         }
         return nil
+    }
+
+    public var importedModules: [ImportedModule] {
+        do {
+            return try rootContext.evaluator(
+                ImportedModulesRequest(module: module, source: self)
+            )
+        } catch {
+            return []
+        }
     }
 }

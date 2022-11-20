@@ -19,39 +19,33 @@ struct TopLevelLookupRequest: Request {
     }
 
     func evaluate(on evaluator: RequestEvaluator) throws -> (any Decl)? {
-        var visibleModules: [Module] = []
+        let modules = importedModules()
 
-        visibleModules.append(module)
-        if let decl = module.find(name: name, options: options) {
-            return decl
-        }
-
-        let root = module.rootContext
-
-        if let source = self.source {
-            for imp in source.imports {
-                if let module = root.getModule(name: imp.name) {
-                    visibleModules.append(module)
-                    if let decl = module.find(name: name, options: options) {
-                        return decl
-                    }
-                }
+        for module in modules {
+            if let decl = find(in: module) {
+                return decl
             }
         }
 
-        for moduleName in root.implicitImportModuleNames {
-            if let module = root.getModule(name: moduleName) {
-                visibleModules.append(module)
-                if let decl = module.find(name: name, options: options) {
-                    return decl
-                }
-            }
-        }
-
-        if let module = visibleModules.first(where: { $0.name == name }) {
-            return module
+        if let module = modules.first(where: { $0.module.name == name }) {
+            return module.module
         }
 
         return nil
     }
+
+    private func find(in module: ImportedModule) -> (any Decl)? {
+        if let declName = module.declName {
+            guard declName == name else { return nil }
+        }
+        return module.module.find(name: name, options: options)
+    }
+
+    private func importedModules() -> [ImportedModule] {
+        if let source = self.source {
+            return source.importedModules
+        }
+        return module.importedModules
+    }
+
 }

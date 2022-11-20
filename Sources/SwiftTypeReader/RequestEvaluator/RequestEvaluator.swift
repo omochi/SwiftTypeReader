@@ -6,7 +6,7 @@ public final class RequestEvaluator {
         activeRequests = .init()
     }
 
-    private var resultCache: Dictionary<AnyKey, Any>
+    private var resultCache: Dictionary<AnyKey, Result<Any, Swift.Error>>
     private var activeRequests: OrderedSet<AnyKey>
 
     public func callAsFunction<Q: Request>(_ request: Q) throws -> Q.Result {
@@ -16,7 +16,8 @@ public final class RequestEvaluator {
     public func evaluate<Q: Request>(_ request: Q) throws -> Q.Result {
         let key = AnyKey(request)
 
-        if let anyResult = resultCache[key],
+        if let cacheEntry = resultCache[key],
+           case let anyResult = try cacheEntry.get(),
            let typedResult = anyResult as? Q.Result
         {
             return typedResult
@@ -27,12 +28,11 @@ public final class RequestEvaluator {
         }
 
         activeRequests.append(key)
-        let result = Result<Q.Result, _> {
-            let result = try request.evaluate(on: self)
-            self.resultCache[key] = result
-            return result
+        let typedResult = Result<Q.Result, Swift.Error> {
+            try request.evaluate(on: self)
         }
+        self.resultCache[key] = typedResult.map { $0 as Any }
         activeRequests.remove(key)
-        return try result.get()
+        return try typedResult.get()
     }
 }

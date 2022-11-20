@@ -71,7 +71,7 @@ public struct Reader {
         }
     }
 
-    static func readImportDecl(decl: DeclSyntax, on source: SourceFile) -> ImportDecl2? {
+    static func readImportDecl(decl: DeclSyntax, on source: SourceFile) -> ImportDecl? {
         if let decl = decl.as(ImportDeclSyntax.self) {
             return ImportReader.read(import: decl, on: source)
         } else {
