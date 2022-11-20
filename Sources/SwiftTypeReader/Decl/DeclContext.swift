@@ -15,7 +15,7 @@ extension DeclContext {
         return (decl as! any TypeDecl)
     }
 
-    public var selfInterfaceType: (any SType2)? {
+    public var selfInterfaceType: (any SType)? {
         switch self {
         case let self as ProtocolDecl:
             return self.protocolSelfType

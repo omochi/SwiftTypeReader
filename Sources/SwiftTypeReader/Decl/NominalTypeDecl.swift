@@ -3,8 +3,8 @@ public protocol NominalTypeDecl: GenericTypeDecl {
     var types: [any GenericTypeDecl] { get }
 
     func makeNominalDeclaredInterfaceType(
-        parent: (any SType2)?,
-        genericArgs: [any SType2]
+        parent: (any SType)?,
+        genericArgs: [any SType]
     ) -> any NominalType
 }
 

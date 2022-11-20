@@ -1,9 +1,9 @@
 public struct AnyTypeHashableBox: HashableBoxProtocol {
-    public init(_ value: any SType2) {
+    public init(_ value: any SType) {
         self.value = value
     }
 
-    public var value: any SType2
+    public var value: any SType
 
     public static func == (lhs: AnyTypeHashableBox, rhs: AnyTypeHashableBox) -> Bool {
         AnyKey(lhs.value) == AnyKey(rhs.value)

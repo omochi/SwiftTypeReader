@@ -1,12 +1,12 @@
 struct TypeToTypeReprImpl {
-    var type: any SType2
+    var type: any SType
     var containsModule: Bool
 
     func convert() throws -> any TypeRepr {
         switch type {
         case let type as ErrorType:
             return ErrorTypeRepr(text: type.description)
-        case let type as GenericParamType2:
+        case let type as GenericParamType:
             return IdentTypeRepr(name: type.name)
         case let type as MetatypeType:
             return MetatypeTypeRepr(

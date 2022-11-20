@@ -1,14 +1,14 @@
 struct InterfaceTypeRequest: Request {
     @AnyDeclStorage var decl: any Decl
 
-    func evaluate(on evaluator: RequestEvaluator) throws -> any SType2 {
+    func evaluate(on evaluator: RequestEvaluator) throws -> any SType {
         switch decl {
         case is EnumCaseElementDecl,
             is AccessorDecl,
             is FuncDecl:
             // FIXME: unimplemented
             throw MessageError("unimplemented")
-        case let decl as ModuleDecl:
+        case let decl as Module:
             return ModuleType(decl: decl)
         case let decl as VarDecl:
             return decl.typeRepr.resolve(from: decl.context)
@@ -22,10 +22,10 @@ struct InterfaceTypeRequest: Request {
         throw MessageError("invalid decl: \(decl)")
     }
 
-    private func declaredInterfaceType(decl: any TypeDecl) throws -> any SType2 {
+    private func declaredInterfaceType(decl: any TypeDecl) throws -> any SType {
         switch decl {
         case let decl as any NominalTypeDecl:
-            var parent: (any SType2)? = nil
+            var parent: (any SType)? = nil
             if let parentDecl = decl.parentContext as? any TypeDecl {
                 parent = parentDecl.declaredInterfaceType
             }
@@ -36,7 +36,7 @@ struct InterfaceTypeRequest: Request {
                 genericArgs: genericArgs
             )
         case let decl as GenericParamDecl:
-            return GenericParamType2(decl: decl)
+            return GenericParamType(decl: decl)
         case let decl as AssociatedTypeDecl:
             guard let selfType = decl.protocol.selfInterfaceType else {
                 throw MessageError("no self interface type")

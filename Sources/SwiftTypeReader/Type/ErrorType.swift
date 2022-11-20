@@ -1,4 +1,4 @@
-public final class ErrorType: SType2 & HashableFromIdentity {
+public final class ErrorType: SType & HashableFromIdentity {
     public init(
         repr: (any TypeRepr)? = nil,
         error: Swift.Error? = nil

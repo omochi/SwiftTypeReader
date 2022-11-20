@@ -21,8 +21,8 @@ public final class ProtocolDecl: NominalTypeDecl {
     public var propertyRequirements: [VarDecl]
     public var functionRequirements: [FuncDecl]
 
-    public var typedDeclaredInterfaceType: ProtocolType2 {
-        declaredInterfaceType as! ProtocolType2
+    public var typedDeclaredInterfaceType: ProtocolType {
+        declaredInterfaceType as! ProtocolType
     }
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
@@ -46,12 +46,12 @@ public final class ProtocolDecl: NominalTypeDecl {
     }
 
     public func makeNominalDeclaredInterfaceType(
-        parent: (any SType2)?, genericArgs: [any SType2]
+        parent: (any SType)?, genericArgs: [any SType]
     ) -> any NominalType {
-        ProtocolType2(decl: self)
+        ProtocolType(decl: self)
     }
 
-    public var protocolSelfType: GenericParamType2 {
+    public var protocolSelfType: GenericParamType {
         genericParams.items[0].typedDeclaredInterfaceType
     }
 }

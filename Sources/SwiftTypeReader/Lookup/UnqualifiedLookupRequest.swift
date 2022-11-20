@@ -8,7 +8,7 @@ struct UnqualifiedLookupRequest: Request {
         
         while true {
             switch context {
-            case let module as ModuleDecl:
+            case let module as Module:
                 return try evaluator(
                     TopLevelLookupRequest(
                         module: module,
@@ -16,7 +16,7 @@ struct UnqualifiedLookupRequest: Request {
                         options: options
                     )
                 )
-            case let source as SourceFileDecl:
+            case let source as SourceFile:
                 return try evaluator(
                     TopLevelLookupRequest(
                         source: source,

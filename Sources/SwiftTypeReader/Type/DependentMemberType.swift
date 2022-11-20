@@ -1,12 +1,12 @@
-public struct DependentMemberType: SType2 {
+public struct DependentMemberType: SType {
     public init(
-        base: any SType2,
+        base: any SType,
         decl: AssociatedTypeDecl
     ) {
         self.base = base
         self.decl = decl
     }
 
-    @AnyTypeStorage public var base: any SType2
+    @AnyTypeStorage public var base: any SType
     public var decl: AssociatedTypeDecl
 }

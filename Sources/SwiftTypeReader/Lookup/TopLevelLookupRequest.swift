@@ -1,17 +1,17 @@
 struct TopLevelLookupRequest: Request {
-    var source: SourceFileDecl?
-    var module: ModuleDecl
+    var source: SourceFile?
+    var module: Module
     var name: String
     var options: LookupOptions
 
-    init(source: SourceFileDecl, name: String, options: LookupOptions) {
+    init(source: SourceFile, name: String, options: LookupOptions) {
         self.source = source
         self.module = source.module
         self.name = name
         self.options = options
     }
 
-    init(module: ModuleDecl, name: String, options: LookupOptions) {
+    init(module: Module, name: String, options: LookupOptions) {
         self.source = nil
         self.module = module
         self.name = name
@@ -19,7 +19,7 @@ struct TopLevelLookupRequest: Request {
     }
 
     func evaluate(on evaluator: RequestEvaluator) throws -> (any Decl)? {
-        var visibleModules: [ModuleDecl] = []
+        var visibleModules: [Module] = []
 
         visibleModules.append(module)
         if let decl = module.find(name: name, options: options) {

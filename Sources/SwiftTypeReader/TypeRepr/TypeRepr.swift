@@ -2,7 +2,7 @@ public protocol TypeRepr: Hashable & CustomStringConvertible {
 }
 
 extension TypeRepr {
-    public func resolve(from context: any DeclContext) -> any SType2 {
+    public func resolve(from context: any DeclContext) -> any SType {
         do {
             return try context.rootContext.evaluator(
                 TypeResolveRequest(

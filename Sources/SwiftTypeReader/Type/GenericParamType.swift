@@ -1,4 +1,4 @@
-public struct GenericParamType2: SType2 {
+public struct GenericParamType: SType {
     public init(
         decl: GenericParamDecl
     ) {
@@ -10,7 +10,7 @@ public struct GenericParamType2: SType2 {
     public var name: String { decl.name }
 }
 
-public struct CanGenericParamType: SType2 {
+public struct CanGenericParamType: SType {
     public init(depth: Int, index: Int) {
         self.depth = depth
         self.index = index

@@ -19,7 +19,7 @@ public final class FuncDecl: ValueDecl & DeclContext {
     public var parameters: [ParamDecl]
     @AnyTypeReprOptionalStorage public var resultTypeRepr: (any TypeRepr)?
 
-    public var resultInterfaceType: any SType2 {
+    public var resultInterfaceType: any SType {
         guard let repr = resultTypeRepr else {
             return rootContext.voidType
         }

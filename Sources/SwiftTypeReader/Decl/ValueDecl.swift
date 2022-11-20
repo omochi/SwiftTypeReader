@@ -3,7 +3,7 @@ public protocol ValueDecl: Decl {
 }
 
 extension ValueDecl {
-    public var interfaceType: any SType2 {
+    public var interfaceType: any SType {
         do {
             return try rootContext.evaluator(
                 InterfaceTypeRequest(decl: self)

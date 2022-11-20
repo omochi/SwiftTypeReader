@@ -1,4 +1,4 @@
-public final class ModuleDecl: TypeDecl & DeclContext {
+public final class Module: TypeDecl & DeclContext {
     public init(
         context: Context,
         name: String
@@ -14,7 +14,7 @@ public final class ModuleDecl: TypeDecl & DeclContext {
     public var valueName: String? { name }
     public var inheritedTypeLocs: [TypeLoc] { [] }
 
-    public var sources: [SourceFileDecl]
+    public var sources: [SourceFile]
 
     public var types: [any NominalTypeDecl] {
         sources.flatMap { $0.types }
@@ -29,7 +29,7 @@ public final class ModuleDecl: TypeDecl & DeclContext {
         return nil
     }
 
-    static func swiftStandardLibrary(context: Context) -> ModuleDecl {
+    static func swiftStandardLibrary(context: Context) -> Module {
         var builder = StandardLibraryBuilder(context: context)
         return builder.build()
     }

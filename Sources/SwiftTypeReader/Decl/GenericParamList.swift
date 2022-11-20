@@ -14,7 +14,7 @@ public struct GenericParamList {
         return nil
     }
 
-    public func asDeclaredInterfaceTypeArgs() -> [GenericParamType2] {
+    public func asDeclaredInterfaceTypeArgs() -> [GenericParamType] {
         items.map { $0.typedDeclaredInterfaceType }
     }
 }

@@ -1,6 +1,6 @@
 public struct TypeLoc {
     public init(
-        type: (any SType2)? = nil,
+        type: (any SType)? = nil,
         repr: (any TypeRepr)? = nil
     ) {
         precondition(type != nil || repr != nil)
@@ -9,10 +9,10 @@ public struct TypeLoc {
         self.repr = repr
     }
 
-    public var type: (any SType2)?
+    public var type: (any SType)?
     public var repr: (any TypeRepr)?
 
-    public func resolve(from context: any DeclContext) -> any SType2 {
+    public func resolve(from context: any DeclContext) -> any SType {
         if let type { return type }
         if let repr { return repr.resolve(from: context) }
         preconditionFailure()

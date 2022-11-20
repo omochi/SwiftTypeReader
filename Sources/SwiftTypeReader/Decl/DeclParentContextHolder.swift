@@ -3,8 +3,8 @@ public protocol _DeclParentContextHolder {
 }
 
 extension _DeclParentContextHolder {
-    public var moduleContext: ModuleDecl {
-        if let module = self as? ModuleDecl {
+    public var moduleContext: Module {
+        if let module = self as? Module {
             return module
         }
 

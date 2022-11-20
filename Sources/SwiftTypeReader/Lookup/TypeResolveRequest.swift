@@ -2,7 +2,7 @@ struct TypeResolveRequest: Request {
     @AnyDeclContextStorage var context: any DeclContext
     @AnyTypeReprStorage var repr: any TypeRepr
 
-    func evaluate(on evaluator: RequestEvaluator) throws -> any SType2 {
+    func evaluate(on evaluator: RequestEvaluator) throws -> any SType {
         return try Impl(
             evaluator: evaluator,
             context: context
@@ -14,7 +14,7 @@ private struct Impl {
     var evaluator: RequestEvaluator
     var context: any DeclContext
 
-    func resolve(repr: any TypeRepr) throws -> any SType2 {
+    func resolve(repr: any TypeRepr) throws -> any SType {
         switch repr {
         case let repr as IdentTypeRepr:
             return try resolve(repr: repr)
@@ -23,7 +23,7 @@ private struct Impl {
         }
     }
 
-    private func resolve(repr: IdentTypeRepr) throws -> any SType2 {
+    private func resolve(repr: IdentTypeRepr) throws -> any SType {
         var type = try resolveHeadType(element: repr.elements[0])
 
         var index = 1
@@ -35,7 +35,7 @@ private struct Impl {
         return type
     }
 
-    private func resolveHeadType(element: IdentTypeRepr.Element) throws -> any SType2 {
+    private func resolveHeadType(element: IdentTypeRepr.Element) throws -> any SType {
         guard let decl = try evaluator(
             UnqualifiedLookupRequest(
                 context: context,
@@ -51,7 +51,7 @@ private struct Impl {
         return try resolveTypeDecl(decl: decl, parent: parent, element: element)
     }
 
-    private func resolveNestedType(parent: any SType2, element: IdentTypeRepr.Element) throws -> any SType2 {
+    private func resolveNestedType(parent: any SType, element: IdentTypeRepr.Element) throws -> any SType {
         let parentContext = try self.context(from: parent)
         guard let decl = parentContext.findType(name: element.name) else {
             throw MessageError("not found: \(element.name)")
@@ -59,12 +59,12 @@ private struct Impl {
         return try resolveTypeDecl(decl: decl, parent: parent, element: element)
     }
 
-    private func parentType(from decl: any TypeDecl) -> (any SType2)? {
+    private func parentType(from decl: any TypeDecl) -> (any SType)? {
         guard let parentDecl = decl.parentContext as? any TypeDecl else { return nil }
         return parentDecl.declaredInterfaceType
     }
 
-    private func context(from type: any SType2) throws -> any DeclContext {
+    private func context(from type: any SType) throws -> any DeclContext {
         switch type {
         case let type as ModuleType:
             return type.decl
@@ -77,9 +77,9 @@ private struct Impl {
 
     private func resolveTypeDecl(
         decl: any TypeDecl,
-        parent: (any SType2)?,
+        parent: (any SType)?,
         element: IdentTypeRepr.Element
-    ) throws -> any SType2 {
+    ) throws -> any SType {
         var parent = parent
         if parent is ModuleType {
             parent = nil
@@ -99,7 +99,7 @@ private struct Impl {
         }
     }
 
-    private func resolveGenericArgs(reprs: [any TypeRepr]) -> [any SType2] {
+    private func resolveGenericArgs(reprs: [any TypeRepr]) -> [any SType] {
         return reprs.map { (repr) in
             repr.resolve(from: self.context)
         }

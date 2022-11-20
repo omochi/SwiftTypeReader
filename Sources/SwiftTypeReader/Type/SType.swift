@@ -4,10 +4,10 @@
 
  S means Swift.
  */
-public protocol SType2: Hashable & CustomStringConvertible {
+public protocol SType: Hashable & CustomStringConvertible {
 }
 
-extension SType2 {
+extension SType {
     public var description: String {
         switch self {
         case let self as ErrorType:

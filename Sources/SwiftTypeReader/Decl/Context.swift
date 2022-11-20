@@ -10,28 +10,28 @@ public final class Context {
     }
 
     let evaluator: RequestEvaluator
-    public var modules: [ModuleDecl]
+    public var modules: [Module]
     public var implicitImportModuleNames: [String]
 
-    public var swiftModule: ModuleDecl {
+    public var swiftModule: Module {
         getModule(name: "Swift")!
     }
 
-    public func getModule(name: String) -> ModuleDecl? {
+    public func getModule(name: String) -> Module? {
         modules.first { $0.name == name }
     }
 
-    public func getOrCreateModule(name: String) -> ModuleDecl {
+    public func getOrCreateModule(name: String) -> Module {
         if let module = getModule(name: name) {
             return module
         }
 
-        let module = ModuleDecl(context: self, name: name)
+        let module = Module(context: self, name: name)
         modules.append(module)
         return module
     }
 
-    public var voidType: StructType2 {
+    public var voidType: StructType {
         (swiftModule.findType(name: "Void") as! StructDecl).typedDeclaredInterfaceType
     }
 }

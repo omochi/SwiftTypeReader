@@ -19,8 +19,8 @@ public final class EnumDecl: NominalTypeDecl {
     public var types: [any GenericTypeDecl]
     public var caseElements: [EnumCaseElementDecl]
 
-    public var typedDeclaredInterfaceType: EnumType2 {
-        declaredInterfaceType as! EnumType2
+    public var typedDeclaredInterfaceType: EnumType {
+        declaredInterfaceType as! EnumType
     }
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
@@ -36,8 +36,8 @@ public final class EnumDecl: NominalTypeDecl {
     }
 
     public func makeNominalDeclaredInterfaceType(
-        parent: (any SType2)?, genericArgs: [any SType2]
+        parent: (any SType)?, genericArgs: [any SType]
     ) -> any NominalType {
-        EnumType2(decl: self, parent: parent, genericArgs: genericArgs)
+        EnumType(decl: self, parent: parent, genericArgs: genericArgs)
     }
 }

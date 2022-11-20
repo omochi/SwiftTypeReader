@@ -4,18 +4,18 @@ import SwiftSyntaxParser
 
 public struct Reader {
     public var context: Context
-    public var module: ModuleDecl
+    public var module: Module
 
     public init(
         context: Context,
-        module: ModuleDecl? = nil
+        module: Module? = nil
     ) {
         self.context = context
         self.module = module ?? context.getOrCreateModule(name: "main")
     }
 
-    public func read(file: URL) throws -> [SourceFileDecl] {
-        var sources: [SourceFileDecl] = []
+    public func read(file: URL) throws -> [SourceFile] {
+        var sources: [SourceFile] = []
 
         for file in fileManager.directoryOrFileEnumerator(at: file) {
             let ext = file.pathExtension
@@ -32,19 +32,19 @@ public struct Reader {
         return sources
     }
 
-    public func read(source: String, file: URL) throws -> SourceFileDecl {
+    public func read(source: String, file: URL) throws -> SourceFile {
         return try Reader.read(source: source, file: file, on: module)
     }
 
     static func read(
         source sourceString: String, file: URL,
-        on module: ModuleDecl
-    ) throws -> SourceFileDecl {
+        on module: Module
+    ) throws -> SourceFile {
         let sourceSyntax: SourceFileSyntax = try SyntaxParser.parse(source: sourceString)
 
         let statements = sourceSyntax.statements.map { $0.item }
 
-        let source = SourceFileDecl(module: module, file: file)
+        let source = SourceFile(module: module, file: file)
 
         for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
             if let type = readNominalTypeDecl(decl: decl, on: source) {
@@ -71,7 +71,7 @@ public struct Reader {
         }
     }
 
-    static func readImportDecl(decl: DeclSyntax, on source: SourceFileDecl) -> ImportDecl2? {
+    static func readImportDecl(decl: DeclSyntax, on source: SourceFile) -> ImportDecl2? {
         if let decl = decl.as(ImportDeclSyntax.self) {
             return ImportReader.read(import: decl, on: source)
         } else {

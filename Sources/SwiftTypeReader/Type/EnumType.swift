@@ -1,8 +1,8 @@
-public struct EnumType2: NominalType {
+public struct EnumType: NominalType {
     public init(
         decl: EnumDecl,
-        parent: (any SType2)? = nil,
-        genericArgs: [any SType2] = []
+        parent: (any SType)? = nil,
+        genericArgs: [any SType] = []
     ) {
         self.decl = decl
         self.parent = parent
@@ -11,6 +11,6 @@ public struct EnumType2: NominalType {
 
     public var decl: EnumDecl
     public var nominalTypeDecl: any NominalTypeDecl { decl }
-    @AnyTypeOptionalStorage public var parent: (any SType2)?
-    @AnyTypeArrayStorage public var genericArgs: [any SType2]
+    @AnyTypeOptionalStorage public var parent: (any SType)?
+    @AnyTypeArrayStorage public var genericArgs: [any SType]
 }

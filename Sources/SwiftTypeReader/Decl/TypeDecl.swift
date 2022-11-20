@@ -3,11 +3,11 @@ public protocol TypeDecl: ValueDecl {
 }
 
 extension TypeDecl {
-    public var inheritedTypes: [any SType2] {
+    public var inheritedTypes: [any SType] {
         inheritedTypeLocs.map { $0.resolve(from: innermostContext) }
     }
 
-    public var declaredInterfaceType: any SType2 {
+    public var declaredInterfaceType: any SType {
         switch interfaceType {
         case let metatype as MetatypeType:
             return metatype.instance

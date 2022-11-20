@@ -1,12 +1,12 @@
 import Foundation
 
 struct StandardLibraryBuilder {
-    var module: ModuleDecl
-    var source: SourceFileDecl
+    var module: Module
+    var source: SourceFile
 
     init(context: Context) {
-        module = ModuleDecl(context: context, name: "Swift")
-        source = SourceFileDecl(
+        module = Module(context: context, name: "Swift")
+        source = SourceFile(
             module: module,
             file: URL(fileURLWithPath: "stdlib.swift")
         )
@@ -47,7 +47,7 @@ struct StandardLibraryBuilder {
         source.types.append(decl)
     }
 
-    mutating func build() -> ModuleDecl {
+    mutating func build() -> Module {
         addStruct(name: "Void")
         addStruct(name: "Bool")
         addStruct(name: "Int")

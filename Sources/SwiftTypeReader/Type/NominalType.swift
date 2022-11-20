@@ -1,7 +1,7 @@
-public protocol NominalType: SType2 {
+public protocol NominalType: SType {
     var nominalTypeDecl: any NominalTypeDecl { get }
-    var parent: (any SType2)? { get }
-    var genericArgs: [any SType2] { get }
+    var parent: (any SType)? { get }
+    var genericArgs: [any SType] { get }
 }
 
 extension NominalType {

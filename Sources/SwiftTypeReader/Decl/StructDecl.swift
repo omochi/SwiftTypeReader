@@ -26,8 +26,8 @@ public final class StructDecl: NominalTypeDecl {
         properties.filter { $0.propertyKind == .computed }
     }
 
-    public var typedDeclaredInterfaceType: StructType2 {
-        declaredInterfaceType as! StructType2
+    public var typedDeclaredInterfaceType: StructType {
+        declaredInterfaceType as! StructType
     }
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
@@ -43,8 +43,8 @@ public final class StructDecl: NominalTypeDecl {
     }
 
     public func makeNominalDeclaredInterfaceType(
-        parent: (any SType2)?, genericArgs: [any SType2]
+        parent: (any SType)?, genericArgs: [any SType]
     ) -> any NominalType {
-        StructType2(decl: self, parent: parent, genericArgs: genericArgs)
+        StructType(decl: self, parent: parent, genericArgs: genericArgs)
     }
 }

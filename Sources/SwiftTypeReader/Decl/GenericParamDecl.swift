@@ -14,7 +14,7 @@ public final class GenericParamDecl: TypeDecl {
     public var valueName: String? { name }
     public var inheritedTypeLocs: [TypeLoc]
 
-    public var typedDeclaredInterfaceType: GenericParamType2 {
-        declaredInterfaceType as! GenericParamType2
+    public var typedDeclaredInterfaceType: GenericParamType {
+        declaredInterfaceType as! GenericParamType
     }
 }

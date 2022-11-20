@@ -1,8 +1,8 @@
 import Foundation
 
-public final class SourceFileDecl: Decl & DeclContext {
+public final class SourceFile: Decl & DeclContext {
     public init(
-        module: ModuleDecl,
+        module: Module,
         file: URL
     ) {
         self.module = module
@@ -11,7 +11,7 @@ public final class SourceFileDecl: Decl & DeclContext {
         self.types = []
     }
 
-    public unowned var module: ModuleDecl
+    public unowned var module: Module
     public var file: URL
     public var parentContext: (any DeclContext)? { module }
 

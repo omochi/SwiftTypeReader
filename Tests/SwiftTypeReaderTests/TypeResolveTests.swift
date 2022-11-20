@@ -371,12 +371,12 @@ import X
     func resolve(
         repr: IdentTypeRepr, from: any DeclContext,
         file: StaticString = #file, line: UInt = #line
-    ) -> any SType2 {
+    ) -> any SType {
         repr.resolve(from: from)
     }
 
     func assertFullPath(
-        _ type: any SType2, _ expected: String,
+        _ type: any SType, _ expected: String,
         file: StaticString = #file, line: UInt = #line
     ) {
         XCTAssertEqual(
