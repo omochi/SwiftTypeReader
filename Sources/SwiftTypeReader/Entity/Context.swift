@@ -31,11 +31,6 @@ public final class Context {
         return module
     }
 
-    public func resolve(location: Location) -> Element? {
-        return LocationResolver(context: self)
-            .resolve(module: nil, location: location)
-    }
-
     public var voidType: StructType2 {
         (swiftModule.findType(name: "Void") as! StructDecl).typedDeclaredInterfaceType
     }

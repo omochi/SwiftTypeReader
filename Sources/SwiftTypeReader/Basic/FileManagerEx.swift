@@ -1,5 +1,7 @@
 import Foundation
 
+let fileManager: FileManager = FileManager()
+
 extension FileManager {
     // This iterator builds nice URL.relativePath
 

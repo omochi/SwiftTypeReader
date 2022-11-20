@@ -17,7 +17,7 @@ public struct Reader {
     public func read(file: URL) throws -> [SourceFileDecl] {
         var sources: [SourceFileDecl] = []
 
-        for file in fm.directoryOrFileEnumerator(at: file) {
+        for file in fileManager.directoryOrFileEnumerator(at: file) {
             let ext = file.pathExtension
             guard ext == "swift" else {
                 continue

@@ -51,15 +51,4 @@ struct ProtocolReader {
         )
         return associatedType
     }
-
-    private func readAssociatedType(
-        context: Readers.Context,
-        decl: DeclSyntax
-    ) -> String? {
-        guard let assocDecl = decl.as(AssociatedtypeDeclSyntax.self) else { return nil }
-
-        let typeName = assocDecl.identifier.text
-        // TODO: inheritanceClause, genericWhereClause are not supported yet.
-        return typeName
-    }
 }
