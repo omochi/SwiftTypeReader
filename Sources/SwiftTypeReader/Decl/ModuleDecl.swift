@@ -9,9 +9,10 @@ public final class ModuleDecl: TypeDecl & DeclContext {
     }
 
     public unowned var context: Context
+    public var parentContext: (any DeclContext)? { nil }
     public var name: String
     public var valueName: String? { name }
-    public var parentContext: (any DeclContext)? { nil }
+    public var inheritedTypeLocs: [TypeLoc] { [] }
 
     public var sources: [SourceFileDecl]
 

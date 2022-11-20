@@ -2,12 +2,6 @@ import Foundation
 import SwiftSyntax
 
 struct ProtocolReader {
-    var reader: Reader
-
-    init(reader: Reader) {
-        self.reader = reader
-    }
-
     func read(
         `protocol` protocolSyntax: ProtocolDeclSyntax,
         on context: any DeclContext
@@ -16,80 +10,25 @@ struct ProtocolReader {
 
         let `protocol` = ProtocolDecl(context: context, name: name)
 
-        `protocol`.inheritedTypeReprs = Reader.readOptionalInheritedTypes(
+        `protocol`.inheritedTypeLocs = Reader.readInheritedTypes(
             inheritance: protocolSyntax.inheritanceClause
         )
 
         let memberDecls = protocolSyntax.members.members.map { $0.decl }
 
         `protocol`.propertyRequirements = memberDecls.flatMap { (memberDecl) in
-            readPropertyRequirements(decl: memberDecl, on: `protocol`)
+            Reader.readVars(decl: memberDecl, on: `protocol`)
         }
 
-//        let functionRequirements: [FunctionRequirement] = memberDecls.compactMap { decl in
-//            readFunctionRequirement(context: context, decl: decl)
-//        }
+        `protocol`.functionRequirements = memberDecls.compactMap { (memberDecl) in
+            Reader.readFunction(decl: memberDecl, on: `protocol`)
+        }
 //
 //        let associatedTypes = memberDecls.compactMap { decl in
 //            readAssociatedType(context: context, decl: decl)
 //        }
 
         return `protocol`
-    }
-
-    private func readPropertyRequirements(
-        decl: DeclSyntax,
-        on `protocol`: ProtocolDecl
-    ) -> [VarDecl] {
-        guard let decl = decl.as(VariableDeclSyntax.self) else { return [] }
-        return Reader.readVars(var: decl, on: `protocol`)
-    }
-
-    private func readPropertyRequirement(
-        context: Readers.Context,
-        binding: PatternBindingSyntax,
-        isStatic: Bool
-    ) -> PropertyRequirement? {
-        guard let ident = binding.pattern.as(IdentifierPatternSyntax.self) else {
-            return nil
-        }
-
-        let name = Readers.unescapeIdentifier(ident.identifier.text)
-
-        guard let typeAnno = binding.typeAnnotation,
-              let typeSpec = Readers.readTypeSpecifier(
-                context: context,
-                typeSyntax: typeAnno.type
-              ) else
-        {
-            return nil
-        }
-
-        guard let rawAccessors = binding.accessor?.as(AccessorBlockSyntax.self)?.accessors else {
-            return nil
-        }
-
-        let accessors = rawAccessors.compactMap { accessor -> PropertyRequirement.Accessor? in
-            switch accessor.accessorKind.text {
-            case "get":
-                return .get(
-                    mutating: accessor.modifier?.name.text == "mutating",
-                    async: accessor.asyncKeyword != nil,
-                    throws: accessor.throwsKeyword != nil
-                )
-            case "set":
-                return .set(nonmutating: accessor.modifier?.name.text == "nonmutating")
-            default:
-                return nil
-            }
-        }
-
-        return PropertyRequirement(
-            name: name,
-            typeSpecifier: typeSpec,
-            accessors: accessors,
-            isStatic: isStatic
-        )
     }
 
     private func readFunctionRequirement(

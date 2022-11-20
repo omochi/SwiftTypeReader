@@ -2,14 +2,7 @@ import Foundation
 import SwiftSyntax
 
 struct ImportReader {
-    var reader: Reader
-    init(
-        reader: Reader
-    ) {
-        self.reader = reader
-    }
-
-    func read(
+    static func read(
         `import`: ImportDeclSyntax,
         on source: SourceFileDecl
     ) -> ImportDecl2 {

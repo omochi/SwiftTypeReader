@@ -1,3 +1,3 @@
-public protocol GenericTypeDecl: TypeDecl & DeclContext {
-    var genericParams: GenericParamList { get }
+public protocol GenericTypeDecl: TypeDecl & GenericContext {
 }
+

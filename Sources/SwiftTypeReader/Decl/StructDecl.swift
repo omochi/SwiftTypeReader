@@ -5,8 +5,8 @@ public final class StructDecl: NominalTypeDecl {
     ) {
         self.context = context
         self.name = name
-        self.genericParams = .init()
-        self.inheritedTypeReprs = []
+        self.syntaxGenericParams = .init()
+        self.inheritedTypeLocs = []
         self.types = []
         self.properties = []
     }
@@ -14,8 +14,8 @@ public final class StructDecl: NominalTypeDecl {
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
     public var name: String
-    public var genericParams: GenericParamList
-    public var inheritedTypeReprs: [any TypeRepr]
+    public var syntaxGenericParams: GenericParamList
+    public var inheritedTypeLocs: [TypeLoc]
     public var types: [any GenericTypeDecl]
     public var properties: [VarDecl]
 
@@ -24,6 +24,10 @@ public final class StructDecl: NominalTypeDecl {
     }
     public var computedProperties: [VarDecl] {
         properties.filter { $0.propertyKind == .computed }
+    }
+
+    public var typedDeclaredInterfaceType: StructType2 {
+        declaredInterfaceType as! StructType2
     }
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {

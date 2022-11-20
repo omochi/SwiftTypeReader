@@ -53,7 +53,7 @@ private struct Impl {
 
     private func resolveNestedType(parent: any SType2, element: IdentTypeRepr.Element) throws -> any SType2 {
         let parentContext = try self.context(from: parent)
-        guard let decl = parentContext.findType(name: element.name) as? any TypeDecl else {
+        guard let decl = parentContext.findType(name: element.name) else {
             throw MessageError("not found: \(element.name)")
         }
         return try resolveTypeDecl(decl: decl, parent: parent, element: element)

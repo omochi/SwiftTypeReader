@@ -13,6 +13,10 @@ public final class Context {
     public var modules: [ModuleDecl]
     public var implicitImportModuleNames: [String]
 
+    public var swiftModule: ModuleDecl {
+        getModule(name: "Swift")!
+    }
+
     public func getModule(name: String) -> ModuleDecl? {
         modules.first { $0.name == name }
     }
@@ -32,4 +36,7 @@ public final class Context {
             .resolve(module: nil, location: location)
     }
 
+    public var voidType: StructType2 {
+        (swiftModule.findType(name: "Void") as! StructDecl).typedDeclaredInterfaceType
+    }
 }

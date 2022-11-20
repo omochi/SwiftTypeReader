@@ -5,21 +5,30 @@ public final class ProtocolDecl: NominalTypeDecl {
     ) {
         self.context = context
         self.name = name
-        self.inheritedTypeReprs = []
+        self.inheritedTypeLocs = []
         self.propertyRequirements = []
+        self.functionRequirements = []
     }
 
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
     public var name: String
-    public var genericParams: GenericParamList { GenericParamList() }
-    public var inheritedTypeReprs: [any TypeRepr]
+    public var syntaxGenericParams: GenericParamList { .init() }
+    public var inheritedTypeLocs: [TypeLoc]
     public var types: [any GenericTypeDecl] { [] }
     public var propertyRequirements: [VarDecl]
+    public var functionRequirements: [FuncDecl]
+
+    public var typedDeclaredInterfaceType: ProtocolType2 {
+        declaredInterfaceType as! ProtocolType2
+    }
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.value {
             if let decl = propertyRequirements.first(where: { $0.name == name }) {
+                return decl
+            }
+            if let decl = functionRequirements.first(where: { $0.name == name }) {
                 return decl
             }
         }
@@ -30,5 +39,9 @@ public final class ProtocolDecl: NominalTypeDecl {
         parent: (any SType2)?, genericArgs: [any SType2]
     ) -> any NominalType {
         ProtocolType2(decl: self)
+    }
+
+    public var protocolSelfType: GenericParamType2 {
+        genericParams.items[0].typedDeclaredInterfaceType
     }
 }

@@ -2,44 +2,37 @@ import Foundation
 import SwiftSyntax
 
 struct EnumReader {
-    var reader: Reader
-
-    init(
-        reader: Reader
-    ) {
-        self.reader = reader
-    }
-
-    func read(enum enumSyntax: EnumDeclSyntax, on context: any DeclContext) -> EnumDecl? {
+    static func read(enum enumSyntax: EnumDeclSyntax, on context: any DeclContext) -> EnumDecl? {
         let name = enumSyntax.identifier.text
 
         let `enum` = EnumDecl(context: context, name: name)
 
-        `enum`.genericParams = Reader.readOptionalGenericParamList(
+        `enum`.syntaxGenericParams = Reader.readGenericParamList(
             clause: enumSyntax.genericParameters, on: `enum`
         )
 
-        `enum`.inheritedTypeReprs = Reader.readOptionalInheritedTypes(
+        `enum`.inheritedTypeLocs = Reader.readInheritedTypes(
             inheritance: enumSyntax.inheritanceClause
         )
 
         let memberDecls = enumSyntax.members.members.map { $0.decl }
-        for memberDecl in memberDecls {
-            `enum`.caseElements += readCaseElements(
+
+        `enum`.caseElements += memberDecls.flatMap { (memberDecl) in
+            readCaseElements(
                 decl: memberDecl, on: `enum`
             )
-
-            if let nestedType = reader.readNominalTypeDecl(
-                decl: memberDecl, on: `enum`
-            ) {
-                `enum`.types.append(nestedType)
-            }
         }
 
+        `enum`.types += memberDecls.compactMap { (memberDecl) in
+            Reader.readNominalTypeDecl(
+                decl: memberDecl, on: `enum`
+            )
+        }
+        
         return `enum`
     }
 
-    private func readCaseElements(
+    private static func readCaseElements(
         decl: DeclSyntax,
         on enum: EnumDecl
     ) -> [EnumCaseElementDecl] {
@@ -50,14 +43,14 @@ struct EnumReader {
         }
     }
 
-    private func readCaseElement(
+    private static func readCaseElement(
         element elementSyntax: EnumCaseElementSyntax,
         on enum: EnumDecl
     ) -> EnumCaseElementDecl {
         let name = elementSyntax.identifier.text
         let element = EnumCaseElementDecl(enum: `enum`, name: name)
 
-        element.associatedValues = Reader.readOptionalParamList(
+        element.associatedValues = Reader.readParamList(
             paramList: elementSyntax.associatedValue?.parameterList,
             on: element
         )

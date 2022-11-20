@@ -5,14 +5,16 @@ public final class GenericParamDecl: TypeDecl {
     ) {
         self.context = context
         self.name = name
+        self.inheritedTypeLocs = []
     }
 
     public unowned var context: any DeclContext
+    public var parentContext: (any DeclContext)? { context }
     public var name: String
     public var valueName: String? { name }
-    public var parentContext: (any DeclContext)? { context }
+    public var inheritedTypeLocs: [TypeLoc]
 
     public var typedDeclaredInterfaceType: GenericParamType2 {
-        GenericParamType2(decl: self)
+        declaredInterfaceType as! GenericParamType2
     }
 }

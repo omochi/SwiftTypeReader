@@ -18,7 +18,7 @@ struct StandardLibraryBuilder {
             name: name
         )
 
-        decl.genericParams = GenericParamList(genericParams.map { (param) in
+        decl.syntaxGenericParams = GenericParamList(genericParams.map { (param) in
             GenericParamDecl(context: decl, name: param)
         })
 
@@ -31,7 +31,7 @@ struct StandardLibraryBuilder {
             name: name
         )
 
-        decl.genericParams = GenericParamList(genericParams.map { (param) in
+        decl.syntaxGenericParams = GenericParamList(genericParams.map { (param) in
             GenericParamDecl(context: decl, name: param)
         })
 

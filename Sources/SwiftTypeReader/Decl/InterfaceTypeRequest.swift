@@ -3,15 +3,17 @@ struct InterfaceTypeRequest: Request {
 
     func evaluate(on evaluator: RequestEvaluator) throws -> any SType2 {
         switch decl {
+        case is EnumCaseElementDecl,
+            is AccessorDecl,
+            is FuncDecl:
+            // FIXME: unimplemented
+            throw MessageError("unimplemented")
         case let decl as ModuleDecl:
             return ModuleType(decl: decl)
         case let decl as VarDecl:
             return decl.typeRepr.resolve(from: decl.context)
         case let decl as ParamDecl:
             return decl.typeRepr.resolve(from: decl.context)
-        case is EnumCaseElementDecl:
-            // it should be case constructor function type
-            throw MessageError("unimplemented")
         case let decl as any TypeDecl:
             let instance = try declaredInterfaceType(decl: decl)
             return MetatypeType(instance: instance)

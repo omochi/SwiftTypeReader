@@ -16,7 +16,7 @@ Declという概念を導入しました。
 ## VarDeclの導入
 
 Stored property は `VarDecl` で表現する事にしました。
-これはローカル変数やcomputed propertyなどの `var` と共通化された表現です。
+これはローカル変数やcomputed property、プロトコル要求に出現する様々な `var` と共通化された表現です。
 
 ## interface type と declared interface type
 
@@ -98,4 +98,9 @@ declared interface typeは、`TypeDecl` が定義する型です。
 場所の同一性判定も、単に `Decl` を同値比較する事で行なえます。
 
 以上のように `Location` の必要性が解消したので廃止しました。
+
+# Import文の解釈の導入
+
+`import` 文はそれが書かれたファイルでのみ、外部モジュールのシンボルを読み込み可能にします。
+この挙動を実装しました。
 

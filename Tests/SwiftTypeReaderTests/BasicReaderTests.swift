@@ -168,7 +168,6 @@ protocol P: Encodable {
 
         XCTAssertEqual(p.propertyRequirements.count, 2)
 
-
         let a = try XCTUnwrap(p.find(name: "a") as? VarDecl)
         XCTAssertIdentical(p.propertyRequirements[safe: 0], a)
         XCTAssertFalse(a.modifiers.contains(.static))
@@ -195,34 +194,33 @@ protocol P: Encodable {
         XCTAssertEqual(bs.kind, .set)
         XCTAssertTrue(bs.modifiers.contains(.nonmutating))
 
-//
-//        do {
-//            let b = try XCTUnwrap(p.functionRequirements[safe: 0])
-//            XCTAssertEqual(b.name, "b")
-//            XCTAssertEqual(b.parameters.first?.label, nil)
-//            XCTAssertEqual(b.parameters.first?.name, "x")
-//            XCTAssertEqual(b.parameters.first?.unresolvedType.name, "Int")
-//            XCTAssertEqual(b.unresolvedOutputType?.name, "Double")
-//            XCTAssertEqual(b.isAsync, true)
-//            XCTAssertEqual(b.isThrows, true)
-//            XCTAssertEqual(b.isStatic, false)
-//        }
+        XCTAssertEqual(p.functionRequirements.count, 2)
+        let c = try XCTUnwrap(p.find(name: "c") as? FuncDecl)
+        XCTAssertIdentical(p.functionRequirements[safe: 0], c)
+        XCTAssertFalse(c.modifiers.contains(.static))
+        XCTAssertEqual(c.name, "c")
+        XCTAssertEqual(c.parameters.count, 1)
+        XCTAssertEqual(c.parameters[safe: 0]?.interfaceName, "x")
+        XCTAssertEqual(c.parameters[safe: 0]?.name, "x")
+        XCTAssertEqual(c.parameters[safe: 0]?.interfaceType.description, "Int")
+        XCTAssertEqual(c.resultInterfaceType.description, "Double")
+        XCTAssertTrue(c.modifiers.contains(.async))
+        XCTAssertTrue(c.modifiers.contains(.throws))
 
-//
-//        do {
-//            let d = try XCTUnwrap(p.functionRequirements[safe: 1])
-//            XCTAssertEqual(d.name, "d")
-//            XCTAssertEqual(d.parameters.first?.label, "_")
-//            XCTAssertEqual(d.parameters.first?.name, "x")
-//            XCTAssertEqual(d.parameters.first?.unresolvedType.name, "Int")
-//            XCTAssertEqual(d.parameters[safe: 1]?.label, "for")
-//            XCTAssertEqual(d.parameters[safe: 1]?.name, "y")
-//            XCTAssertEqual(d.parameters[safe: 1]?.unresolvedType.name, "Int")
-//            XCTAssertEqual(d.unresolvedOutputType?.name, nil)
-//            XCTAssertEqual(d.isAsync, false)
-//            XCTAssertEqual(d.isThrows, false)
-//            XCTAssertEqual(d.isStatic, true)
-//        }
+        let d = try XCTUnwrap(p.find(name: "d") as? FuncDecl)
+        XCTAssertIdentical(p.functionRequirements[safe: 1], d)
+        XCTAssertTrue(d.modifiers.contains(.static))
+        XCTAssertEqual(d.parameters.count, 2)
+        XCTAssertEqual(d.parameters[safe: 0]?.interfaceName, "_")
+        XCTAssertEqual(d.parameters[safe: 0]?.name, "x")
+        XCTAssertEqual(d.parameters[safe: 0]?.interfaceType.description, "Int")
+        XCTAssertEqual(d.parameters[safe: 1]?.interfaceName, "for")
+        XCTAssertEqual(d.parameters[safe: 1]?.name, "y")
+        XCTAssertEqual(d.parameters[safe: 1]?.interfaceType.description, "Int")
+        XCTAssertNil(d.resultTypeRepr)
+        XCTAssertEqual(d.resultInterfaceType.description, "Void")
+        XCTAssertFalse(d.modifiers.contains(.async))
+        XCTAssertFalse(d.modifiers.contains(.throws))
     }
 
     func testObservedStoredProperty() throws {
