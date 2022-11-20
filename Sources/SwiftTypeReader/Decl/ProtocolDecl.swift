@@ -6,6 +6,7 @@ public final class ProtocolDecl: NominalTypeDecl {
         self.context = context
         self.name = name
         self.inheritedTypeLocs = []
+        self.associatedTypes = []
         self.propertyRequirements = []
         self.functionRequirements = []
     }
@@ -15,6 +16,7 @@ public final class ProtocolDecl: NominalTypeDecl {
     public var name: String
     public var syntaxGenericParams: GenericParamList { .init() }
     public var inheritedTypeLocs: [TypeLoc]
+    public var associatedTypes: [AssociatedTypeDecl]
     public var types: [any GenericTypeDecl] { [] }
     public var propertyRequirements: [VarDecl]
     public var functionRequirements: [FuncDecl]
@@ -24,6 +26,14 @@ public final class ProtocolDecl: NominalTypeDecl {
     }
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
+        if let decl = genericParams.find(name: name, options: options) {
+            return decl
+        }
+        if options.type {
+            if let decl = associatedTypes.first(where: { $0.name == name }) {
+                return decl
+            }
+        }
         if options.value {
             if let decl = propertyRequirements.first(where: { $0.name == name }) {
                 return decl

@@ -8,8 +8,6 @@ public struct GenericParamType2: SType2 {
     public var decl: GenericParamDecl
 
     public var name: String { decl.name }
-
-    public var description: String { name }
 }
 
 public struct CanGenericParamType: SType2 {

@@ -27,6 +27,15 @@ public struct IdentTypeRepr: TypeRepr {
     public init(_ elements: Element...) {
         self.init(elements)
     }
+
+    public init(
+        name: String,
+        genericArgs: [any TypeRepr] = []
+    ) {
+        self.init([
+            Element(name: name, genericArgs: genericArgs)
+        ])
+    }
     
     public var elements: [Element]
 

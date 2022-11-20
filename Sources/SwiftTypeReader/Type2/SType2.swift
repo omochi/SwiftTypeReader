@@ -8,12 +8,25 @@ public protocol SType2: Hashable & CustomStringConvertible {
 }
 
 extension SType2 {
+    public var description: String {
+        switch self {
+        case let self as ErrorType:
+            return self.errorTypeDescription
+        default:
+            return toTypeRepr(containsModule: false).description
+        }
+    }
+
     public func toTypeRepr(
         containsModule: Bool
     ) -> any TypeRepr {
-        return TypeToTypeReprImpl(
-            type: self,
-            containsModule: containsModule
-        ).convert()
+        do {
+            return try TypeToTypeReprImpl(
+                type: self,
+                containsModule: containsModule
+            ).convert()
+        } catch {
+            return ErrorTypeRepr(text: "\(error)")
+        }
     }
 }

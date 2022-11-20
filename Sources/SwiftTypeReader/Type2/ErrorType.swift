@@ -10,7 +10,7 @@ public final class ErrorType: SType2 & HashableFromIdentity {
     public var repr: (any TypeRepr)?
     public var error: Swift.Error?
 
-    public var description: String {
+    public var errorTypeDescription: String {
         if let repr {
             return repr.description
         }

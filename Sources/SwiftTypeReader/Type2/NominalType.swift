@@ -8,8 +8,4 @@ extension NominalType {
     public var name: String {
         nominalTypeDecl.name
     }
-
-    public var description: String {
-        toTypeRepr(containsModule: false).description
-    }
 }

@@ -2,22 +2,31 @@ struct TypeToTypeReprImpl {
     var type: any SType2
     var containsModule: Bool
 
-    func convert() -> any TypeRepr {
+    func convert() throws -> any TypeRepr {
         switch type {
         case let type as ErrorType:
             return ErrorTypeRepr(text: type.description)
         case let type as GenericParamType2:
-            return IdentTypeRepr([.init(name: type.name)])
+            return IdentTypeRepr(name: type.name)
         case let type as MetatypeType:
             return MetatypeTypeRepr(
                 instance: type.instance.toTypeRepr(containsModule: containsModule)
             )
         case let type as ModuleType:
-            return IdentTypeRepr([.init(name: type.name)])
+            return IdentTypeRepr(name: type.name)
+        case let type as DependentMemberType:
+            guard var repr = type.base.toTypeRepr(
+                containsModule: containsModule
+            ) as? IdentTypeRepr else {
+                throw MessageError("invalid base repr")
+            }
+            let name = type.decl.name
+            repr.elements.append(.init(name: name))
+            return repr
         case let type as any NominalType:
             return convert(type: type)
         default:
-            return ErrorTypeRepr(text: "(ERROR)")
+            throw MessageError("unimplemented")
         }
     }
 

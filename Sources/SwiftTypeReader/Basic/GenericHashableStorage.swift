@@ -2,6 +2,10 @@
 public struct GenericHashableStorage<Box>: Hashable where
     Box: HashableBoxProtocol
 {
+    public init(_ wrappedValue: Box.Value) {
+        self.init(wrappedValue: wrappedValue)
+    }
+
     public init(wrappedValue: Box.Value) {
         self.storage = Box(wrappedValue)
     }
@@ -18,6 +22,10 @@ public struct GenericHashableStorage<Box>: Hashable where
 public struct GenericHashableOptionalStorage<Box>: Hashable where
     Box: HashableBoxProtocol
 {
+    public init(_ wrappedValue: Box.Value?) {
+        self.init(wrappedValue: wrappedValue)
+    }
+
     public init(wrappedValue: Box.Value?) {
         self.storage = wrappedValue.map { Box($0) }
     }
@@ -34,6 +42,10 @@ public struct GenericHashableOptionalStorage<Box>: Hashable where
 public struct GenericHashableArrayStorage<Box>: Hashable where
     Box: HashableBoxProtocol
 {
+    public init(_ wrappedValue: [Box.Value]) {
+        self.init(wrappedValue: wrappedValue)
+    }
+
     public init(wrappedValue: [Box.Value]) {
         self.wrappedValue = wrappedValue
     }

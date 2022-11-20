@@ -37,6 +37,14 @@ struct InterfaceTypeRequest: Request {
             )
         case let decl as GenericParamDecl:
             return GenericParamType2(decl: decl)
+        case let decl as AssociatedTypeDecl:
+            guard let selfType = decl.protocol.selfInterfaceType else {
+                throw MessageError("no self interface type")
+            }
+            return DependentMemberType(
+                base: selfType,
+                decl: decl
+            )
         default:
             throw MessageError("invalid decl: \(decl)")
         }

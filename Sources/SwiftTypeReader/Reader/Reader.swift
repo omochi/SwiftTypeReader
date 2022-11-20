@@ -65,8 +65,7 @@ public struct Reader {
         } else if let decl = decl.as(EnumDeclSyntax.self) {
             return EnumReader.read(enum: decl, on: context)
         } else if let decl = decl.as(ProtocolDeclSyntax.self) {
-            let reader = ProtocolReader()
-            return reader.read(protocol: decl, on: context)
+            return ProtocolReader.read(protocol: decl, on: context)
         } else {
             return nil
         }
