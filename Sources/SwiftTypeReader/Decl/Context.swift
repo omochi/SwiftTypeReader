@@ -9,7 +9,7 @@ public final class Context {
         )
     }
 
-    let evaluator: RequestEvaluator
+    public let evaluator: RequestEvaluator
     public var modules: [Module]
     public var implicitImportModuleNames: [String]
 
