@@ -308,6 +308,28 @@ struct S {
         XCTAssertEqual(f.result.description, "Void")
     }
 
+    func testMethodInterfaceType() throws {
+        let module = try read("""
+struct S {
+    func f()
+}
+
+protocol P {
+    func f()
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+        let sf = try XCTUnwrap(s.find(name: "f") as? FuncDecl)
+        XCTAssertEqual(sf.interfaceType.description, "(S) -> () -> Void")
+        XCTAssertEqual(sf.selfAppliedInterfaceType.description, "() -> Void")
+
+        let p = try XCTUnwrap(module.find(name: "P") as? ProtocolDecl)
+        let pf = try XCTUnwrap(p.find(name: "f") as? FuncDecl)
+        XCTAssertEqual(pf.interfaceType.description, "(Self) -> () -> Void")
+        XCTAssertEqual(pf.selfAppliedInterfaceType.description, "() -> Void")
+    }
+
     func testInheritanceClause() throws {
         let module = try read("""
 struct S: Encodable {}

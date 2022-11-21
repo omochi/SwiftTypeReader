@@ -26,6 +26,14 @@ public final class FuncDecl: ValueDecl & DeclContext {
         return repr.resolve(from: self)
     }
 
+    public var selfAppliedInterfaceType: FunctionType {
+        let fullType = interfaceType as! FunctionType
+        guard let _ = parentContext?.selfInterfaceType else {
+            return fullType
+        }
+        return fullType.result as! FunctionType
+    }
+
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.value {
             if let decl = parameters.first(where: { $0.name == name }) {
