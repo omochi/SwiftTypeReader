@@ -38,6 +38,10 @@ struct S {
     }
 ```
 
+## More documents
+
+- [Version 2 Guide](https://github.com/omochi/SwiftTypeReader/blob/main/Docs/v2-migration-guide.md)
+
 # Development
 
 ## Design consideration
