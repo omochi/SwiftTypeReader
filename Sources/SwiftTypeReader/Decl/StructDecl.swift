@@ -7,8 +7,7 @@ public final class StructDecl: NominalTypeDecl {
         self.name = name
         self.syntaxGenericParams = .init()
         self.inheritedTypeLocs = []
-        self.types = []
-        self.properties = []
+        self.members = []
     }
 
     public unowned var context: any DeclContext
@@ -16,12 +15,12 @@ public final class StructDecl: NominalTypeDecl {
     public var name: String
     public var syntaxGenericParams: GenericParamList
     public var inheritedTypeLocs: [TypeLoc]
-    public var types: [any GenericTypeDecl]
-    public var properties: [VarDecl]
+    public var members: [any ValueDecl]
 
     public var storedProperties: [VarDecl] {
         properties.filter { $0.propertyKind == .stored }
     }
+
     public var computedProperties: [VarDecl] {
         properties.filter { $0.propertyKind == .computed }
     }

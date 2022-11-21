@@ -7,8 +7,7 @@ public final class EnumDecl: NominalTypeDecl {
         self.name = name
         self.syntaxGenericParams = .init()
         self.inheritedTypeLocs = []
-        self.types = []
-        self.caseElements = []
+        self.members = []
     }
 
     public unowned var context: any DeclContext
@@ -16,8 +15,11 @@ public final class EnumDecl: NominalTypeDecl {
     public var parentContext: (any DeclContext)? { context }
     public var syntaxGenericParams: GenericParamList
     public var inheritedTypeLocs: [TypeLoc]
-    public var types: [any GenericTypeDecl]
-    public var caseElements: [EnumCaseElementDecl]
+    public var members: [any ValueDecl]
+
+    public var caseElements: [EnumCaseElementDecl] {
+        members.compactMap { $0 as? EnumCaseElementDecl }
+    }
 
     public var typedDeclaredInterfaceType: EnumType {
         declaredInterfaceType as! EnumType

@@ -104,3 +104,4 @@ declared interface typeは、`TypeDecl` が定義する型です。
 `import` 文はそれが書かれたファイルでのみ、外部モジュールのシンボルを読み込み可能にします。
 この挙動を実装しました。
 
+`import struct Lib.S` 形式も対応しました。

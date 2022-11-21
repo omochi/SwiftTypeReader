@@ -191,10 +191,10 @@ protocol P: Encodable {
         XCTAssertIdentical(p.associatedTypes[safe: 0], t)
         XCTAssertEqual(t.name, "T")
 
-        XCTAssertEqual(p.propertyRequirements.count, 2)
+        XCTAssertEqual(p.properties.count, 2)
 
         let a = try XCTUnwrap(p.find(name: "a") as? VarDecl)
-        XCTAssertIdentical(p.propertyRequirements[safe: 0], a)
+        XCTAssertIdentical(p.properties[safe: 0], a)
         XCTAssertFalse(a.modifiers.contains(.static))
         XCTAssertEqual(a.name, "a")
         XCTAssertEqual(a.interfaceType.description, "String")
@@ -207,7 +207,7 @@ protocol P: Encodable {
         XCTAssertTrue(ag.modifiers.contains(.throws))
 
         let b = try XCTUnwrap(p.find(name: "b") as? VarDecl)
-        XCTAssertIdentical(p.propertyRequirements[safe: 1], b)
+        XCTAssertIdentical(p.properties[safe: 1], b)
         XCTAssertTrue(b.modifiers.contains(.static))
         XCTAssertEqual(b.name, "b")
         XCTAssertEqual(b.interfaceType.description, "Int")
@@ -219,9 +219,9 @@ protocol P: Encodable {
         XCTAssertEqual(bs.kind, .set)
         XCTAssertTrue(bs.modifiers.contains(.nonmutating))
 
-        XCTAssertEqual(p.functionRequirements.count, 2)
+        XCTAssertEqual(p.functions.count, 2)
         let c = try XCTUnwrap(p.find(name: "c") as? FuncDecl)
-        XCTAssertIdentical(p.functionRequirements[safe: 0], c)
+        XCTAssertIdentical(p.functions[safe: 0], c)
         XCTAssertFalse(c.modifiers.contains(.static))
         XCTAssertEqual(c.name, "c")
         XCTAssertEqual(c.parameters.count, 1)
@@ -233,7 +233,7 @@ protocol P: Encodable {
         XCTAssertTrue(c.modifiers.contains(.throws))
 
         let d = try XCTUnwrap(p.find(name: "d") as? FuncDecl)
-        XCTAssertIdentical(p.functionRequirements[safe: 1], d)
+        XCTAssertIdentical(p.functions[safe: 1], d)
         XCTAssertTrue(d.modifiers.contains(.static))
         XCTAssertEqual(d.parameters.count, 2)
         XCTAssertEqual(d.parameters[safe: 0]?.interfaceName, "_")
@@ -292,6 +292,22 @@ struct S {
         XCTAssertEqual(c.accessors[safe: 0]?.kind, .get)
     }
 
+    func testFunctionType() throws {
+        let module = try read("""
+struct S {
+    var a: (Int) -> Void
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+        let f = try XCTUnwrap(a.interfaceType as? FunctionType)
+        XCTAssertEqual(f.description, "(Int) -> Void")
+        XCTAssertEqual(f.params.count, 1)
+        XCTAssertEqual(f.params[safe: 0]?.description, "Int")
+        XCTAssertEqual(f.result.description, "Void")
+    }
+
     func testInheritanceClause() throws {
         let module = try read("""
 struct S: Encodable {}
@@ -343,7 +359,7 @@ struct S<T> {
         XCTAssertIdentical(aT.decl, t)
     }
 
-    func testChainedTypeRepr() throws {
+    func testIdentTypeRepr() throws {
         let module = try read("""
 struct S {
     var a: A.B
@@ -614,7 +630,7 @@ protocol P {
 
         let p = try XCTUnwrap(main.find(name: "P") as? ProtocolDecl)
         XCTAssertEqual(p.name, "P")
-        let f = try XCTUnwrap(p.functionRequirements[safe: 0])
+        let f = try XCTUnwrap(p.functions[safe: 0])
         XCTAssertEqual(f.name, "f")
         let e = try XCTUnwrap((f.resultInterfaceType as? EnumType)?.decl)
         XCTAssertIdentical(e, myLib.find(name: "E"))

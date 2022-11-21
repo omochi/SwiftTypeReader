@@ -36,6 +36,10 @@ public struct Reader {
         return try Reader.read(source: source, file: file, on: module)
     }
 
+    static func unescapeIdentifier(_ str: String) -> String {
+        return str.trimmingCharacters(in: ["`"])
+    }
+
     static func read(
         source sourceString: String, file: URL,
         on module: Module
@@ -49,7 +53,7 @@ public struct Reader {
         for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
             if let type = readNominalTypeDecl(decl: decl, on: source) {
                 source.types.append(type)
-            } else if let `import` = readImportDecl(decl: decl, on: source) {
+            } else if let `import` = readImport(decl: decl, on: source) {
                 source.imports.append(`import`)
             }
         }
@@ -59,24 +63,148 @@ public struct Reader {
         return source
     }
 
+    static func readMemberDecls(block: MemberDeclBlockSyntax, on context: any DeclContext) -> [any ValueDecl] {
+        return block.members.flatMap {
+            readMemberDecl(decl: $0.decl, on: context)
+        }
+    }
+
+    static func readMemberDecl(decl: DeclSyntax, on context: any DeclContext) -> [any ValueDecl] {
+        if let type = readNominalTypeDecl(decl: decl, on: context) {
+            return [type]
+        }
+        if let vars = readVars(decl: decl, on: context) {
+            return vars
+        }
+        if let `func` = readFunc(decl: decl, on: context) {
+            return [`func`]
+        }
+        if let cases = readCaseElements(decl: decl, on: context) {
+            return cases
+        }
+        if let associatedType = readAssociatedType(decl: decl, on: context) {
+            return [associatedType]
+        }
+
+        return []
+    }
+
     static func readNominalTypeDecl(decl: DeclSyntax, on context: any DeclContext) -> (any NominalTypeDecl)? {
         if let decl = decl.as(StructDeclSyntax.self) {
-            return StructReader.read(struct: decl, on: context)
+            return readStruct(struct: decl, on: context)
         } else if let decl = decl.as(EnumDeclSyntax.self) {
-            return EnumReader.read(enum: decl, on: context)
+            return readEnum(enum: decl, on: context)
         } else if let decl = decl.as(ProtocolDeclSyntax.self) {
-            return ProtocolReader.read(protocol: decl, on: context)
+            return readProtocol(protocol: decl, on: context)
         } else {
             return nil
         }
     }
 
-    static func readImportDecl(decl: DeclSyntax, on source: SourceFile) -> ImportDecl? {
-        if let decl = decl.as(ImportDeclSyntax.self) {
-            return ImportReader.read(import: decl, on: source)
-        } else {
-            return nil
+    static func readStruct(struct structSyntax: StructDeclSyntax, on context: any DeclContext) -> StructDecl? {
+        let name = structSyntax.identifier.text
+
+        let `struct` = StructDecl(context: context, name: name)
+
+        `struct`.syntaxGenericParams = readGenericParamList(
+            clause: structSyntax.genericParameterClause, on: `struct`
+        )
+
+        `struct`.inheritedTypeLocs = readInheritedTypes(
+            inheritance: structSyntax.inheritanceClause
+        )
+
+        `struct`.members = readMemberDecls(
+            block: structSyntax.members, on: `struct`
+        )
+
+        return `struct`
+    }
+
+    static func readEnum(enum enumSyntax: EnumDeclSyntax, on context: any DeclContext) -> EnumDecl? {
+        let name = enumSyntax.identifier.text
+
+        let `enum` = EnumDecl(context: context, name: name)
+
+        `enum`.syntaxGenericParams = readGenericParamList(
+            clause: enumSyntax.genericParameters, on: `enum`
+        )
+
+        `enum`.inheritedTypeLocs = readInheritedTypes(
+            inheritance: enumSyntax.inheritanceClause
+        )
+
+        `enum`.members = readMemberDecls(
+            block: enumSyntax.members, on: `enum`
+        )
+
+        return `enum`
+    }
+
+    static func readProtocol(
+        `protocol` protocolSyntax: ProtocolDeclSyntax,
+        on context: any DeclContext
+    ) -> ProtocolDecl? {
+        let name = protocolSyntax.identifier.text
+
+        let `protocol` = ProtocolDecl(context: context, name: name)
+
+        `protocol`.inheritedTypeLocs = readInheritedTypes(
+            inheritance: protocolSyntax.inheritanceClause
+        )
+
+        `protocol`.members = readMemberDecls(block: protocolSyntax.members, on: `protocol`)
+
+        return `protocol`
+    }
+
+    static func readCaseElements(
+        decl: DeclSyntax,
+        on context: any DeclContext
+    ) -> [EnumCaseElementDecl]? {
+        guard let caseDecl = decl.as(EnumCaseDeclSyntax.self),
+              let `enum` = context as? EnumDecl else { return nil }
+
+        return caseDecl.elements.map { (element) in
+            readCaseElement(element: element, on: `enum`)
         }
+    }
+
+    static func readCaseElement(
+        element elementSyntax: EnumCaseElementSyntax,
+        on enum: EnumDecl
+    ) -> EnumCaseElementDecl {
+        let name = elementSyntax.identifier.text
+        let element = EnumCaseElementDecl(enum: `enum`, name: name)
+
+        element.associatedValues = Reader.readParamList(
+            paramList: elementSyntax.associatedValue?.parameterList,
+            on: element
+        )
+
+        return element
+    }
+
+    static func readAssociatedType(
+        decl: DeclSyntax,
+        on context: any DeclContext
+    ) -> AssociatedTypeDecl? {
+        guard let decl = decl.as(AssociatedtypeDeclSyntax.self),
+              let `protocol` = context as? ProtocolDecl else { return nil }
+        return readAssociatedType(associatedType: decl, on: `protocol`)
+    }
+
+    static func readAssociatedType(
+        associatedType associatedTypeSyntax: AssociatedtypeDeclSyntax,
+        on `protocol`: ProtocolDecl
+    ) -> AssociatedTypeDecl {
+        let name = associatedTypeSyntax.identifier.text
+
+        let associatedType = AssociatedTypeDecl(protocol: `protocol`, name: name)
+        associatedType.inheritedTypeLocs = Reader.readInheritedTypes(
+            inheritance: associatedTypeSyntax.inheritanceClause
+        )
+        return associatedType
     }
 
     static func readParamList(
@@ -114,7 +242,7 @@ public struct Reader {
         }
 
         guard let typeSyntax = paramSyntax.type,
-              let typeRepr = Reader.readTypeRepr(type: typeSyntax)
+              let typeRepr = TypeReprReader.read(type: typeSyntax)
         else { return nil }
 
         return ParamDecl(
@@ -125,8 +253,8 @@ public struct Reader {
         )
     }
 
-    static func readVars(decl: DeclSyntax, on context: any DeclContext) -> [VarDecl] {
-        guard let decl = decl.as(VariableDeclSyntax.self) else { return [] }
+    static func readVars(decl: DeclSyntax, on context: any DeclContext) -> [VarDecl]? {
+        guard let decl = decl.as(VariableDeclSyntax.self) else { return nil }
         return readVars(var: decl, on: context)
     }
 
@@ -155,7 +283,7 @@ public struct Reader {
         let name = Reader.unescapeIdentifier(ident.identifier.text)
 
         guard let typeAnno = binding.typeAnnotation,
-              let typeRepr = Reader.readTypeRepr(
+              let typeRepr = TypeReprReader.read(
                 type: typeAnno.type
               ) else
         {
@@ -212,12 +340,12 @@ public struct Reader {
         return AccessorDecl(var: `var`, modifiers: modifiers.modifiers, kind: kind)
     }
 
-    static func readFunction(decl: DeclSyntax, on context: any DeclContext) -> FuncDecl? {
+    static func readFunc(decl: DeclSyntax, on context: any DeclContext) -> FuncDecl? {
         guard let decl = decl.as(FunctionDeclSyntax.self) else { return nil }
-        return readFunction(function: decl, on: context)
+        return readFunc(function: decl, on: context)
     }
 
-    static func readFunction(
+    static func readFunc(
         function functionSyntax: FunctionDeclSyntax,
         on context: any DeclContext
     ) -> FuncDecl? {
@@ -239,93 +367,10 @@ public struct Reader {
         }
 
         `func`.resultTypeRepr = functionSyntax.signature.output.flatMap { (returnTypeSyntax) in
-            readTypeRepr(type: returnTypeSyntax.returnType)
+            TypeReprReader.read(type: returnTypeSyntax.returnType)
         }
 
         return `func`
-    }
-
-    static func readTypeRepr(
-        type: TypeSyntax?
-    ) -> (any TypeRepr)? {
-        guard let type else { return nil }
-        return readTypeRepr(type: type)
-    }
-
-    static func readTypeRepr(
-        type: TypeSyntax
-    ) -> (any TypeRepr)? {
-        if let member = type.as(MemberTypeIdentifierSyntax.self) {
-            guard var repr = readTypeRepr(
-                type: member.baseType
-            ) as? IdentTypeRepr,
-                  let args = readGenericArguments(
-                    clause: member.genericArgumentClause
-                  )
-            else { return nil }
-
-            repr.elements.append(
-                .init(
-                    name: member.name.text,
-                    genericArgs: args
-                )
-            )
-
-            return repr
-        }
-
-        if let simple = type.as(SimpleTypeIdentifierSyntax.self) {
-            guard let args = readGenericArguments(
-                clause: simple.genericArgumentClause
-            ) else { return nil }
-
-            return IdentTypeRepr([
-                .init(
-                    name: simple.name.text,
-                    genericArgs: args
-                )
-            ])
-        }
-
-        if let optional = type.as(OptionalTypeSyntax.self) {
-            guard let wrapped = readTypeRepr(
-                type: optional.wrappedType
-            ) else { return nil }
-
-            return IdentTypeRepr([
-                .init(
-                    name: "Optional",
-                    genericArgs: [wrapped]
-                )
-            ])
-        } else if let array = type.as(ArrayTypeSyntax.self) {
-            guard let element = readTypeRepr(
-                type: array.elementType
-            ) else { return nil }
-
-            return IdentTypeRepr([
-                .init(
-                    name: "Array",
-                    genericArgs: [element]
-                )
-            ])
-        } else if let dictionary = type.as(DictionaryTypeSyntax.self) {
-            guard let key = readTypeRepr(
-                type: dictionary.keyType
-            ),
-                  let value = readTypeRepr(
-                    type: dictionary.valueType
-                  ) else { return nil }
-
-            return IdentTypeRepr([
-                .init(
-                    name: "Dictionary",
-                    genericArgs: [key, value]
-                )
-            ])
-        } else {
-            return nil
-        }
     }
 
     static func readGenericParamList(
@@ -357,7 +402,7 @@ public struct Reader {
             context: context,
             name: paramSyntax.name.text
         )
-        param.inheritedTypeLocs = readTypeRepr(type: paramSyntax.inheritedType)
+        param.inheritedTypeLocs = TypeReprReader.read(type: paramSyntax.inheritedType)
             .map { TypeLoc(repr: $0) }.toArray()
         return param
     }
@@ -373,12 +418,8 @@ public struct Reader {
         clause: GenericArgumentClauseSyntax
     ) -> [any TypeRepr]? {
         return clause.arguments.compactMap {
-            readTypeRepr(type: $0.argumentType)
+            TypeReprReader.read(type: $0.argumentType)
         }
-    }
-
-    static func unescapeIdentifier(_ str: String) -> String {
-        return str.trimmingCharacters(in: ["`"])
     }
 
     static func readInheritedTypes(
@@ -392,9 +433,42 @@ public struct Reader {
         inheritance: TypeInheritanceClauseSyntax
     ) -> [TypeLoc] {
         return inheritance.inheritedTypeCollection.compactMap { (type) in
-            readTypeRepr(type: type.typeName)
+            TypeReprReader.read(type: type.typeName)
                 .map { TypeLoc(repr: $0) }
         }
+    }
+
+    static func readImport(decl: DeclSyntax, on source: SourceFile) -> ImportDecl? {
+        if let decl = decl.as(ImportDeclSyntax.self) {
+            return readImport(import: decl, on: source)
+        } else {
+            return nil
+        }
+    }
+
+    static func readImport(
+        `import` importSyntax: ImportDeclSyntax,
+        on source: SourceFile
+    ) -> ImportDecl {
+        let isScoped = importSyntax.importKind != nil
+
+        let path = importSyntax.path.map { $0.name.text }
+
+        let moduleName: String
+        let declName: String?
+        if isScoped && path.count >= 2 {
+            moduleName = path.dropLast().joined(separator: ".")
+            declName = path.last
+        } else {
+            moduleName = path.joined(separator: ".")
+            declName = nil
+        }
+
+        return ImportDecl(
+            source: source,
+            moduleName: moduleName,
+            declName: declName
+        )
     }
 }
 

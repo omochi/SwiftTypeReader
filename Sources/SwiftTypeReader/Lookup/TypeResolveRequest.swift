@@ -17,18 +17,20 @@ private struct Impl {
     func resolve(repr: any TypeRepr) throws -> any SType {
         switch repr {
         case let repr as IdentTypeRepr:
-            return try resolve(repr: repr)
+            return try resolve(ident: repr)
+        case let repr as FunctionTypeRepr:
+            return resolve(function: repr)
         default:
             throw MessageError("invalid repr: \(repr)")
         }
     }
 
-    private func resolve(repr: IdentTypeRepr) throws -> any SType {
-        var type = try resolveHeadType(element: repr.elements[0])
+    private func resolve(ident: IdentTypeRepr) throws -> any SType {
+        var type = try resolveHeadType(element: ident.elements[0])
 
         var index = 1
-        while index < repr.elements.count {
-            type = try resolveNestedType(parent: type, element: repr.elements[index])
+        while index < ident.elements.count {
+            type = try resolveNestedType(parent: type, element: ident.elements[index])
             index += 1
         }
 
@@ -103,5 +105,31 @@ private struct Impl {
         return reprs.map { (repr) in
             repr.resolve(from: self.context)
         }
+    }
+
+    private func resolve(function: FunctionTypeRepr) -> FunctionType {
+        var attributes: [FunctionAttribute] = []
+        if function.hasAsync {
+            attributes.append(.async)
+        }
+        if function.hasThrows {
+            attributes.append(.throws)
+        }
+
+        let params = function.params.elements.map { (element) -> FunctionType.Param in
+            let param = element.resolve(from: context)
+            return FunctionType.Param(
+                attributes: [],
+                type: param
+            )
+        }
+
+        let result = function.result.resolve(from: context)
+
+        return FunctionType(
+            attributes: attributes,
+            params: params,
+            result: result
+        )
     }
 }
