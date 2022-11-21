@@ -5,6 +5,9 @@ struct TypeToTypeReprImpl {
     func convert() throws -> any TypeRepr {
         switch type {
         case let type as ErrorType:
+            if let repr = type.repr {
+                return repr
+            }
             return ErrorTypeRepr(text: type.description)
         case let type as GenericParamType:
             return IdentTypeRepr(name: type.name)
