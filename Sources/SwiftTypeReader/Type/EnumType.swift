@@ -1,51 +1,16 @@
-import Foundation
-
-public struct EnumType: RegularTypeProtocol {
+public struct EnumType: NominalType {
     public init(
-        module: Module,
-        file: URL,
-        location: Location,
-        name: String,
-        genericParameters: [GenericParameterType] = [],
-        genericArguments: [TypeSpecifier] = [],
-        inheritedTypes: [TypeSpecifier] = [],
-        caseElements: [CaseElement] = [],
-        types: [SType] = []
+        decl: EnumDecl,
+        parent: (any SType)? = nil,
+        genericArgs: [any SType] = []
     ) {
-        self.module = module
-        self.file = file
-        self.location = location
-        self.name = name
-        self.genericParameters = genericParameters
-        self.unresolvedGenericArguments = TypeCollection(genericArguments)
-        self.unresolvedInheritedTypes = TypeCollection(inheritedTypes)
-        self.caseElements = caseElements
-        self.types = types
+        self.decl = decl
+        self.parent = parent
+        self.genericArgs = genericArgs
     }
 
-    public unowned var module: Module
-    public var file: URL
-    public var location: Location
-    public var name: String
-    public var genericParameters: [GenericParameterType]
-    public var unresolvedGenericArguments: TypeCollection
-    public var unresolvedInheritedTypes: TypeCollection
-    public var caseElements: [CaseElement]
-    public var types: [SType]
-
-    public func genericArguments() -> [SType] {
-        unresolvedGenericArguments.resolved()
-    }
-
-    public mutating func setGenericArguments(_ ts: [SType]) {
-        unresolvedGenericArguments = .resolved(ts)
-    }
-
-    public var genericArgumentSpecifiers: [TypeSpecifier] {
-        unresolvedGenericArguments.asSpecifiers()
-    }
-
-    public func inheritedTypes() -> [SType] {
-        unresolvedInheritedTypes.resolved()
-    }
+    public var decl: EnumDecl
+    public var nominalTypeDecl: any NominalTypeDecl { decl }
+    @AnyTypeOptionalStorage public var parent: (any SType)?
+    @AnyTypeArrayStorage public var genericArgs: [any SType]
 }

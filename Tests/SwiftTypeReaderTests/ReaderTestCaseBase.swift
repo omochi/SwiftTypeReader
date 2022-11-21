@@ -14,7 +14,7 @@ class ReaderTestCaseBase: XCTestCase {
 
     func read(_ source: String, file: StaticString = #file, line: UInt = #line) throws -> Module {
         let reader = Reader(context: context!)
-        _ = try reader.read(source: source, file: URL(fileURLWithPath: "test.swift"))
+        _ = try reader.read(source: source, file: URL(fileURLWithPath: "main.swift"))
         return reader.module
     }
 }
