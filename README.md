@@ -5,28 +5,37 @@ You can gather type definitions from Swift source code.
 ## Example
 
 ```swift
-            let reader = Reader()
+    func testReadmeExample() throws {
+        try withExtendedLifetime(Context()) { (context) in
+            let module = context.getOrCreateModule(name: "main")
+            let reader = Reader(context: context, module: module)
 
-            let source = """
+            let source = try reader.read(
+                source: """
 struct S {
     var a: Int?
 }
-"""
-            let result = try reader.read(source: source)
+""",
+                file: URL(fileURLWithPath: "S.swift")
+            )
+            _ = source
 
-            let s = try XCTUnwrap(result.types[safe: 0]?.struct)
+            let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
             XCTAssertEqual(s.name, "S")
 
             XCTAssertEqual(s.storedProperties.count, 1)
-            let a = try XCTUnwrap(s.storedProperties[safe: 0])
+            let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+            XCTAssertIdentical(a, s.storedProperties[safe: 0])
             XCTAssertEqual(a.name, "a")
 
-            let aType = try XCTUnwrap(a.type?.struct)
+            let aType = try XCTUnwrap(a.interfaceType as? EnumType)
             XCTAssertEqual(aType.name, "Optional")
-            XCTAssertEqual(aType.genericsArguments.count, 1)
+            XCTAssertEqual(aType.genericArgs.count, 1)
 
-            let aWrappedType = try XCTUnwrap(aType.genericsArguments[safe: 0]?.struct)
+            let aWrappedType = try XCTUnwrap(aType.genericArgs[safe: 0] as? StructType)
             XCTAssertEqual(aWrappedType.name, "Int")
+        }
+    }
 ```
 
 # Development
@@ -44,26 +53,11 @@ It make implementation simple but ugly especially when generic argument applicat
 class C {}
 ```
 
-## Computed properties
+## Function body
 
-```swift
-struct S {
-    var x: Int { 0 }
-    var y: Int {
-        get { _y }
-        set { _y = newValue }
-    }
-    var _y: Int = 0
-}
-```
+It handles only signature.
 
-## Methods
-
-```swift
-struct S {
-    func f() {}
-}
-```
+## Generic signatures of function
 
 ## Variable without type annotation
 
@@ -73,11 +67,4 @@ struct S {
 }
 ```
 
-## Function types
-
-```swift
-struct S {
-    var f: () -> Void
-}
-```
-
+It doesn't have type inference.
