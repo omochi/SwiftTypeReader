@@ -44,7 +44,7 @@ private struct Impl {
                 name: element.name,
                 options: LookupOptions(value: false, type: true)
             )
-        ) as? any TypeDecl else {
+        )?.asType else {
             throw MessageError("not found: \(element.name)")
         }
 

@@ -163,7 +163,7 @@ public struct Reader {
         on context: any DeclContext
     ) -> [EnumCaseElementDecl]? {
         guard let caseDecl = decl.as(EnumCaseDeclSyntax.self),
-              let `enum` = context as? EnumDecl else { return nil }
+              let `enum` = context.asEnum else { return nil }
 
         return caseDecl.elements.map { (element) in
             readCaseElement(element: element, on: `enum`)
@@ -190,7 +190,7 @@ public struct Reader {
         on context: any DeclContext
     ) -> AssociatedTypeDecl? {
         guard let decl = decl.as(AssociatedtypeDeclSyntax.self),
-              let `protocol` = context as? ProtocolDecl else { return nil }
+              let `protocol` = context.asProtocol else { return nil }
         return readAssociatedType(associatedType: decl, on: `protocol`)
     }
 

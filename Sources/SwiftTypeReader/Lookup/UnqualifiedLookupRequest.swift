@@ -31,7 +31,7 @@ struct UnqualifiedLookupRequest: Request {
                 return decl
             }
 
-            if let decl = context as? any NominalTypeDecl {
+            if let decl = context.asNominalType {
                 if options.type {
                     if decl.name == self.name {
                         return decl

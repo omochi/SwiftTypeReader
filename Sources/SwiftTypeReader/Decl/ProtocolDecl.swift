@@ -17,11 +17,11 @@ public final class ProtocolDecl: NominalTypeDecl {
     public var members: [any ValueDecl]
 
     public var associatedTypes: [AssociatedTypeDecl] {
-        members.compactMap { $0 as? AssociatedTypeDecl }
+        members.compactMap { $0.asAssociatedType }
     }
 
     public var typedDeclaredInterfaceType: ProtocolType {
-        declaredInterfaceType as! ProtocolType
+        declaredInterfaceType.asProtocol!
     }
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {

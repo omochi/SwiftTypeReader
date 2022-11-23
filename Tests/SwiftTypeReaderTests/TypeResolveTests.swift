@@ -53,8 +53,8 @@ struct A {
         )
 
         do {
-            let g = try XCTUnwrap(module.find(name: "G") as? StructDecl)
-            let t = try XCTUnwrap(g.find(name: "T") as? GenericParamDecl)
+            let g = try XCTUnwrap(module.find(name: "G")?.asStruct)
+            let t = try XCTUnwrap(g.find(name: "T")?.asGenericParam)
             XCTAssertEqual(t.name, "T")
             XCTAssertIdentical(t.parentContext, g)
         }
@@ -100,11 +100,11 @@ struct A {
 
 
         do {
-            let a = try XCTUnwrap(module.find(name: "A") as? StructDecl)
-            let g = try XCTUnwrap(a.find(name: "G") as? StructDecl)
+            let a = try XCTUnwrap(module.find(name: "A")?.asStruct)
+            let g = try XCTUnwrap(a.find(name: "G")?.asStruct)
             XCTAssertEqual(g.name, "G")
             XCTAssertIdentical(g.parentContext, a)
-            let t = try XCTUnwrap(g.find(name: "T") as? GenericParamDecl)
+            let t = try XCTUnwrap(g.find(name: "T")?.asGenericParam)
             XCTAssertEqual(t.name, "T")
             XCTAssertIdentical(t.parentContext, g)
         }
@@ -156,7 +156,7 @@ struct A {
             "main.A.A.A"
         )
 
-        let a1 = try XCTUnwrap(module.find(name: "A") as? any NominalTypeDecl)
+        let a1 = try XCTUnwrap(module.find(name: "A")?.asNominalType)
 
         // from A
 
@@ -192,7 +192,7 @@ struct A {
             ) is ErrorType
         )
 
-        let a2 = try XCTUnwrap(a1.find(name: "A") as? any NominalTypeDecl)
+        let a2 = try XCTUnwrap(a1.find(name: "A")?.asNominalType)
 
         assertFullPath(
             resolve(
@@ -214,7 +214,7 @@ struct A {
             ) is ErrorType
         )
 
-        let a3 = try XCTUnwrap(a2.find(name: "A") as? any NominalTypeDecl)
+        let a3 = try XCTUnwrap(a2.find(name: "A")?.asNominalType)
 
         assertFullPath(
             resolve(
@@ -345,7 +345,7 @@ import X
             "X.Int"
         )
 
-        let yA = try XCTUnwrap(moduleY.find(name: "A") as? StructDecl)
+        let yA = try XCTUnwrap(moduleY.find(name: "A")?.asStruct)
 
         assertFullPath(
             resolve(

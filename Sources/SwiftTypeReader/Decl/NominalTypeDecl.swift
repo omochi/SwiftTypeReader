@@ -12,15 +12,15 @@ extension NominalTypeDecl {
     public var valueName: String? { name }
 
     public var types: [any GenericTypeDecl] {
-        members.compactMap { $0 as? any GenericTypeDecl }
+        members.compactMap { $0.asGenericType }
     }
 
     public var properties: [VarDecl] {
-        members.compactMap { $0 as? VarDecl }
+        members.compactMap { $0.asVar }
     }
 
     public var functions: [FuncDecl] {
-        members.compactMap { $0 as? FuncDecl }
+        members.compactMap { $0.asFunc }
     }
 
     func findInNominalTypeDecl(name: String, options: LookupOptions) -> (any Decl)? {

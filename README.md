@@ -20,19 +20,19 @@ struct S {
             )
             _ = source
 
-            let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+            let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
             XCTAssertEqual(s.name, "S")
 
             XCTAssertEqual(s.storedProperties.count, 1)
-            let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+            let a = try XCTUnwrap(s.find(name: "a")?.asVar)
             XCTAssertIdentical(a, s.storedProperties[safe: 0])
             XCTAssertEqual(a.name, "a")
 
-            let aType = try XCTUnwrap(a.interfaceType as? EnumType)
+            let aType = try XCTUnwrap(a.interfaceType.asEnum)
             XCTAssertEqual(aType.name, "Optional")
             XCTAssertEqual(aType.genericArgs.count, 1)
 
-            let aWrappedType = try XCTUnwrap(aType.genericArgs[safe: 0] as? StructType)
+            let aWrappedType = try XCTUnwrap(aType.genericArgs[safe: 0]?.asStruct)
             XCTAssertEqual(aWrappedType.name, "Int")
         }
     }

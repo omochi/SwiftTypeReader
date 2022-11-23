@@ -17,19 +17,19 @@ struct S {
             )
             _ = source
 
-            let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+            let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
             XCTAssertEqual(s.name, "S")
 
             XCTAssertEqual(s.storedProperties.count, 1)
-            let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+            let a = try XCTUnwrap(s.find(name: "a")?.asVar)
             XCTAssertIdentical(a, s.storedProperties[safe: 0])
             XCTAssertEqual(a.name, "a")
 
-            let aType = try XCTUnwrap(a.interfaceType as? EnumType)
+            let aType = try XCTUnwrap(a.interfaceType.asEnum)
             XCTAssertEqual(aType.name, "Optional")
             XCTAssertEqual(aType.genericArgs.count, 1)
 
-            let aWrappedType = try XCTUnwrap(aType.genericArgs[safe: 0] as? StructType)
+            let aWrappedType = try XCTUnwrap(aType.genericArgs[safe: 0]?.asStruct)
             XCTAssertEqual(aWrappedType.name, "Int")
         }
     }
@@ -42,18 +42,18 @@ struct S {
 """
         )
 
-        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
         XCTAssertEqual(s.name, "S")
 
         XCTAssertEqual(s.moduleContext.name, "main")
 
-        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+        let a = try XCTUnwrap(s.find(name: "a")?.asVar)
         XCTAssertEqual(a.name, "a")
 
         XCTAssertEqual(s.storedProperties.count, 1)
         XCTAssertIdentical(s.storedProperties[safe: 0], a)
 
-        let aType = try XCTUnwrap(a.interfaceType as? any NominalType)
+        let aType = try XCTUnwrap(a.interfaceType.asNominal)
         XCTAssertEqual(aType.description, "Optional<Int>")
 
         let aTypeDecl = aType.nominalTypeDecl
@@ -64,7 +64,7 @@ struct S {
 
         XCTAssertEqual(aType.genericArgs.count, 1)
 
-        let aWrappedType = try XCTUnwrap(aType.genericArgs[safe: 0] as? StructType)
+        let aWrappedType = try XCTUnwrap(aType.genericArgs[safe: 0]?.asStruct)
         XCTAssertEqual(aWrappedType.decl.moduleContext.name, "Swift")
         XCTAssertEqual(aWrappedType.decl.name, "Int")
 
@@ -88,28 +88,28 @@ struct S2 {
         )
 
         do {
-            let s1 = try XCTUnwrap(module.find(name: "S1") as? StructDecl)
+            let s1 = try XCTUnwrap(module.find(name: "S1")?.asStruct)
             XCTAssertEqual(s1.name, "S1")
 
-            let a = try XCTUnwrap(s1.find(name: "a") as? VarDecl)
+            let a = try XCTUnwrap(s1.find(name: "a")?.asVar)
             XCTAssertEqual(a.name, "a")
-            XCTAssertEqual((a.interfaceType as? any NominalType)?.name, "Int")
+            XCTAssertEqual(a.interfaceType.asNominal?.name, "Int")
 
-            let b = try XCTUnwrap(s1.find(name: "b") as? VarDecl)
+            let b = try XCTUnwrap(s1.find(name: "b")?.asVar)
             XCTAssertEqual(b.name, "b")
 
-            let s2 = try XCTUnwrap(b.interfaceType as? StructType)
+            let s2 = try XCTUnwrap(b.interfaceType.asStruct)
             XCTAssertEqual(s2.decl.name, "S2")
             XCTAssertEqual(s2.decl.storedProperties.count, 1)
         }
 
         do {
-            let s2 = try XCTUnwrap(module.find(name: "S2") as? StructDecl)
+            let s2 = try XCTUnwrap(module.find(name: "S2")?.asStruct)
             XCTAssertEqual(s2.name, "S2")
 
-            let a = try XCTUnwrap(s2.find(name: "a") as? VarDecl)
+            let a = try XCTUnwrap(s2.find(name: "a")?.asVar)
             XCTAssertEqual(a.name, "a")
-            XCTAssertEqual((a.interfaceType as? any NominalType)?.name, "Int")
+            XCTAssertEqual(a.interfaceType.asNominal?.name, "Int")
         }
 
     }
@@ -122,11 +122,11 @@ struct S {
 """
         )
 
-        let s = try XCTUnwrap(module.findType(name: "S") as? StructDecl)
+        let s = try XCTUnwrap(module.findType(name: "S")?.asStruct)
 
-        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+        let a = try XCTUnwrap(s.find(name: "a")?.asVar)
 
-        let aType = try XCTUnwrap(a.interfaceType as? ErrorType)
+        let aType = try XCTUnwrap(a.interfaceType.asError)
         XCTAssertEqual(aType.description, "URL")
     }
 
@@ -140,15 +140,15 @@ enum E {
 """
         )
 
-        let e = try XCTUnwrap(module.find(name: "E") as? EnumDecl)
+        let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
         XCTAssertEqual(e.caseElements.count, 3)
 
-        let a = try XCTUnwrap(e.find(name: "a") as? EnumCaseElementDecl)
+        let a = try XCTUnwrap(e.find(name: "a")?.asEnumCaseElement)
         XCTAssertIdentical(e.caseElements[safe: 0], a)
         XCTAssertEqual(a.name, "a")
         XCTAssertEqual(a.associatedValues.count, 0)
 
-        let b = try XCTUnwrap(e.find(name: "b") as? EnumCaseElementDecl)
+        let b = try XCTUnwrap(e.find(name: "b")?.asEnumCaseElement)
         XCTAssertIdentical(e.caseElements[safe: 1], b)
         XCTAssertEqual(b.name, "b")
 
@@ -156,23 +156,23 @@ enum E {
 
         let bv = try XCTUnwrap(b.associatedValues[safe: 0])
         XCTAssertNil(bv.name)
-        XCTAssertEqual((bv.interfaceType as? any NominalType)?.name, "Int")
+        XCTAssertEqual(bv.interfaceType.asNominal?.name, "Int")
 
-        let c = try XCTUnwrap(e.find(name: "c") as? EnumCaseElementDecl)
+        let c = try XCTUnwrap(e.find(name: "c")?.asEnumCaseElement)
         XCTAssertIdentical(e.caseElements[safe: 2], c)
         XCTAssertEqual(c.name, "c")
 
         XCTAssertEqual(c.associatedValues.count, 2)
 
-        let x = try XCTUnwrap(c.find(name: "x") as? ParamDecl)
+        let x = try XCTUnwrap(c.find(name: "x")?.asParam)
         XCTAssertIdentical(c.associatedValues[safe: 0], x)
         XCTAssertEqual(x.name, "x")
-        XCTAssertEqual((x.interfaceType as? any NominalType)?.name, "Int")
+        XCTAssertEqual(x.interfaceType.asNominal?.name, "Int")
 
-        let y = try XCTUnwrap(c.find(name: "y") as? ParamDecl)
+        let y = try XCTUnwrap(c.find(name: "y")?.asParam)
         XCTAssertIdentical(c.associatedValues[safe: 1], y)
         XCTAssertEqual(y.name, "y")
-        XCTAssertEqual((y.interfaceType as? any NominalType)?.name, "String")
+        XCTAssertEqual(y.interfaceType.asNominal?.name, "String")
 
         XCTAssertEqual(
             AnyTypeOptionalStorage(e.selfInterfaceType),
@@ -192,7 +192,7 @@ protocol P: Encodable {
     static func d(_ x: Int, for y: Int)
 }
 """)
-        let p = try XCTUnwrap(module.find(name: "P") as? ProtocolDecl)
+        let p = try XCTUnwrap(module.find(name: "P")?.asProtocol)
 
         let pg = p.genericParams
         XCTAssertEqual(pg.items.count, 1)
@@ -201,7 +201,7 @@ protocol P: Encodable {
         XCTAssertEqual(pSelf.name, "Self")
 
         XCTAssertEqual(pSelf.inheritedTypes.count, 1)
-        let pSelfP = try XCTUnwrap((pSelf.inheritedTypes[safe: 0] as? ProtocolType)?.decl)
+        let pSelfP = try XCTUnwrap(pSelf.inheritedTypes[safe: 0]?.asProtocol?.decl)
         XCTAssertIdentical(pSelfP, p)
 
         XCTAssertEqual(
@@ -210,22 +210,22 @@ protocol P: Encodable {
         )
 
         XCTAssertIdentical(
-            p.findType(name: "Self") as? GenericParamDecl,
+            p.findType(name: "Self")?.asGenericParam,
             pSelf
         )
 
         XCTAssertEqual(p.inheritedTypes.count, 1)
-        let encodable = try XCTUnwrap(p.inheritedTypes[safe: 0] as? ProtocolType)
+        let encodable = try XCTUnwrap(p.inheritedTypes[safe: 0]?.asProtocol)
         XCTAssertEqual(encodable.name, "Encodable")
 
         XCTAssertEqual(p.associatedTypes.count, 1)
-        let t = try XCTUnwrap(p.find(name: "T") as? AssociatedTypeDecl)
+        let t = try XCTUnwrap(p.find(name: "T")?.asAssociatedType)
         XCTAssertIdentical(p.associatedTypes[safe: 0], t)
         XCTAssertEqual(t.name, "T")
 
         XCTAssertEqual(p.properties.count, 2)
 
-        let a = try XCTUnwrap(p.find(name: "a") as? VarDecl)
+        let a = try XCTUnwrap(p.find(name: "a")?.asVar)
         XCTAssertIdentical(p.properties[safe: 0], a)
         XCTAssertFalse(a.modifiers.contains(.static))
         XCTAssertEqual(a.name, "a")
@@ -238,7 +238,7 @@ protocol P: Encodable {
         XCTAssertTrue(ag.modifiers.contains(.async))
         XCTAssertTrue(ag.modifiers.contains(.throws))
 
-        let b = try XCTUnwrap(p.find(name: "b") as? VarDecl)
+        let b = try XCTUnwrap(p.find(name: "b")?.asVar)
         XCTAssertIdentical(p.properties[safe: 1], b)
         XCTAssertTrue(b.modifiers.contains(.static))
         XCTAssertEqual(b.name, "b")
@@ -252,7 +252,7 @@ protocol P: Encodable {
         XCTAssertTrue(bs.modifiers.contains(.nonmutating))
 
         XCTAssertEqual(p.functions.count, 2)
-        let c = try XCTUnwrap(p.find(name: "c") as? FuncDecl)
+        let c = try XCTUnwrap(p.find(name: "c")?.asFunc)
         XCTAssertIdentical(p.functions[safe: 0], c)
         XCTAssertFalse(c.modifiers.contains(.static))
         XCTAssertEqual(c.name, "c")
@@ -264,7 +264,7 @@ protocol P: Encodable {
         XCTAssertTrue(c.modifiers.contains(.async))
         XCTAssertTrue(c.modifiers.contains(.throws))
 
-        let d = try XCTUnwrap(p.find(name: "d") as? FuncDecl)
+        let d = try XCTUnwrap(p.find(name: "d")?.asFunc)
         XCTAssertIdentical(p.functions[safe: 1], d)
         XCTAssertTrue(d.modifiers.contains(.static))
         XCTAssertEqual(d.parameters.count, 2)
@@ -294,28 +294,28 @@ struct S {
 """
         )
 
-        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
         XCTAssertEqual(s.properties.count, 3)
         XCTAssertEqual(s.storedProperties.count, 1)
         XCTAssertEqual(s.computedProperties.count, 2)
 
-        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+        let a = try XCTUnwrap(s.find(name: "a")?.asVar)
         XCTAssertIdentical(s.computedProperties[safe: 0], a)
         XCTAssertEqual(a.propertyKind, .computed)
         XCTAssertEqual(a.name, "a")
         XCTAssertEqual(a.accessors.count, 1)
         XCTAssertEqual(a.accessors[safe: 0]?.kind, .get)
 
-        let b = try XCTUnwrap(s.find(name: "b") as? VarDecl)
+        let b = try XCTUnwrap(s.find(name: "b")?.asVar)
         XCTAssertIdentical(s.storedProperties[safe: 0], b)
         XCTAssertEqual(b.propertyKind, .stored)
         XCTAssertEqual(b.name, "b")
-        XCTAssertEqual((b.interfaceType as? any NominalType)?.name, "Int")
+        XCTAssertEqual(b.interfaceType.asNominal?.name, "Int")
         XCTAssertEqual(b.accessors.count, 2)
         XCTAssertEqual(b.accessors[safe: 0]?.kind, .willSet)
         XCTAssertEqual(b.accessors[safe: 1]?.kind, .didSet)
 
-        let c = try XCTUnwrap(s.find(name: "c") as? VarDecl)
+        let c = try XCTUnwrap(s.find(name: "c")?.asVar)
         XCTAssertIdentical(s.computedProperties[safe: 1], c)
         XCTAssertEqual(c.propertyKind, .computed)
         XCTAssertEqual(c.name, "c")
@@ -331,9 +331,9 @@ struct S {
 }
 """)
 
-        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
-        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
-        let f = try XCTUnwrap(a.interfaceType as? FunctionType)
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let a = try XCTUnwrap(s.find(name: "a")?.asVar)
+        let f = try XCTUnwrap(a.interfaceType.asFunction)
         XCTAssertEqual(f.description, "(Int) -> Void")
         XCTAssertEqual(f.params.count, 1)
         XCTAssertEqual(f.params[safe: 0]?.description, "Int")
@@ -351,13 +351,13 @@ protocol P {
 }
 """)
 
-        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
-        let sf = try XCTUnwrap(s.find(name: "f") as? FuncDecl)
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let sf = try XCTUnwrap(s.find(name: "f")?.asFunc)
         XCTAssertEqual(sf.interfaceType.description, "(S) -> () -> Void")
         XCTAssertEqual(sf.selfAppliedInterfaceType.description, "() -> Void")
 
-        let p = try XCTUnwrap(module.find(name: "P") as? ProtocolDecl)
-        let pf = try XCTUnwrap(p.find(name: "f") as? FuncDecl)
+        let p = try XCTUnwrap(module.find(name: "P")?.asProtocol)
+        let pf = try XCTUnwrap(p.find(name: "f")?.asFunc)
         XCTAssertEqual(pf.interfaceType.description, "(Self) -> () -> Void")
         XCTAssertEqual(pf.selfAppliedInterfaceType.description, "() -> Void")
     }
@@ -372,17 +372,17 @@ enum E: Decodable {
 """)
 
         do{
-            let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+            let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
             XCTAssertEqual(s.inheritedTypes.count, 1)
-            let e = try XCTUnwrap(s.inheritedTypes[safe: 0] as? ProtocolType)
+            let e = try XCTUnwrap(s.inheritedTypes[safe: 0]?.asProtocol)
             XCTAssertEqual(e.decl.moduleContext.name, "Swift")
             XCTAssertEqual(e.name, "Encodable")
         }
 
         do {
-            let e = try XCTUnwrap(module.find(name: "E") as? EnumDecl)
+            let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
             XCTAssertEqual(e.inheritedTypes.count, 1)
-            let d = try XCTUnwrap(e.inheritedTypes[safe: 0] as? ProtocolType)
+            let d = try XCTUnwrap(e.inheritedTypes[safe: 0]?.asProtocol)
             XCTAssertEqual(d.decl.moduleContext.name, "Swift")
             XCTAssertEqual(d.name, "Decodable")
         }
@@ -396,7 +396,7 @@ struct S<T> {
 """
         )
 
-        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
         XCTAssertEqual(s.name, "S")
 
         XCTAssertEqual(s.genericParams.items.count, 1)
@@ -409,7 +409,7 @@ struct S<T> {
         XCTAssertIdentical(s.find(name: "a"), a)
         XCTAssertEqual(a.name, "a")
 
-        let aT = try XCTUnwrap(a.interfaceType as? GenericParamType)
+        let aT = try XCTUnwrap(a.interfaceType.asGenericParam)
         XCTAssertIdentical(aT.decl, t)
     }
 
@@ -425,30 +425,30 @@ struct K {}
 """
         )
 
-        let s = try XCTUnwrap(module.find(name: "S") as? StructDecl)
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
         XCTAssertEqual(s.name, "S")
 
         XCTAssertEqual(s.storedProperties.count, 3)
 
-        let a = try XCTUnwrap(s.find(name: "a") as? VarDecl)
+        let a = try XCTUnwrap(s.find(name: "a")?.asVar)
         XCTAssertEqual(a.name, "a")
-        let aTypeRepr = try XCTUnwrap(a.typeRepr as? IdentTypeRepr)
+        let aTypeRepr = try XCTUnwrap(a.typeRepr.asIdent)
         XCTAssertEqual(aTypeRepr.elements, [.init(name: "A"), .init(name: "B")])
-        let aType = try XCTUnwrap(a.interfaceType as? ErrorType)
+        let aType = try XCTUnwrap(a.interfaceType.asError)
         XCTAssertEqual(aType.description, "A.B")
 
-        let b = try XCTUnwrap(s.find(name: "b") as? VarDecl)
+        let b = try XCTUnwrap(s.find(name: "b")?.asVar)
         XCTAssertEqual(b.name, "b")
-        let bTypeRepr = try XCTUnwrap(b.typeRepr as? IdentTypeRepr)
+        let bTypeRepr = try XCTUnwrap(b.typeRepr.asIdent)
         XCTAssertEqual(bTypeRepr.elements, [.init(name: "A"), .init(name: "B"), .init(name: "C")])
-        let bType = try XCTUnwrap(b.interfaceType as? ErrorType)
+        let bType = try XCTUnwrap(b.interfaceType.asError)
         XCTAssertEqual(bType.description, "A.B.C")
 
-        let c = try XCTUnwrap(s.find(name: "c") as? VarDecl)
+        let c = try XCTUnwrap(s.find(name: "c")?.asVar)
         XCTAssertEqual(c.name, "c")
-        let cTypeRepr = try XCTUnwrap(c.typeRepr as? IdentTypeRepr)
+        let cTypeRepr = try XCTUnwrap(c.typeRepr.asIdent)
         XCTAssertEqual(cTypeRepr.elements, [.init(name: "main"), .init(name: "K")])
-        let cType = try XCTUnwrap(c.interfaceType as? StructType)
+        let cType = try XCTUnwrap(c.interfaceType.asStruct)
         XCTAssertIdentical(module.find(name: "K"), cType.decl)
     }
 
@@ -461,16 +461,16 @@ struct A {
         )
 
         XCTAssertEqual(module.types.count, 1)
-        let a = try XCTUnwrap(module.find(name: "A") as? StructDecl)
+        let a = try XCTUnwrap(module.find(name: "A")?.asStruct)
         XCTAssertEqual(a.name, "A")
-        let aType = try XCTUnwrap(a.declaredInterfaceType as? StructType)
+        let aType = try XCTUnwrap(a.declaredInterfaceType.asStruct)
         XCTAssertNil(aType.parent)
 
         XCTAssertEqual(a.types.count, 1)
-        let b = try XCTUnwrap(a.find(name: "B") as? StructDecl)
+        let b = try XCTUnwrap(a.find(name: "B")?.asStruct)
         XCTAssertEqual(b.name, "B")
         XCTAssertIdentical(b.parentContext, a)
-        let bType = try XCTUnwrap(b.declaredInterfaceType as? StructType)
+        let bType = try XCTUnwrap(b.declaredInterfaceType.asStruct)
         XCTAssertEqual(bType.description, "A.B")
         XCTAssertEqual(bType.parent?.description, "A")
     }
@@ -483,14 +483,14 @@ enum A {
 """
         )
 
-        let a = try XCTUnwrap(module.find(name: "A") as? EnumDecl)
+        let a = try XCTUnwrap(module.find(name: "A")?.asEnum)
         XCTAssertEqual(a.name, "A")
 
-        let b = try XCTUnwrap(a.find(name: "B") as? StructDecl)
+        let b = try XCTUnwrap(a.find(name: "B")?.asStruct)
         XCTAssertEqual(b.name, "B")
         XCTAssertIdentical(b.parentContext, a)
 
-        let bType = try XCTUnwrap(b.declaredInterfaceType as? StructType)
+        let bType = try XCTUnwrap(b.declaredInterfaceType.asStruct)
         XCTAssertEqual(bType.description, "A.B")
         XCTAssertEqual(bType.parent?.description, "A")
     }
@@ -509,17 +509,17 @@ struct C {
     var y: B
 }
 """)
-        let a = try XCTUnwrap(module.find(name: "A") as? StructDecl)
-        let b = try XCTUnwrap(module.find(name: "B") as? StructDecl)
-        let aB = try XCTUnwrap(a.find(name: "B") as? StructDecl)
+        let a = try XCTUnwrap(module.find(name: "A")?.asStruct)
+        let b = try XCTUnwrap(module.find(name: "B")?.asStruct)
+        let aB = try XCTUnwrap(a.find(name: "B")?.asStruct)
         XCTAssertNotIdentical(b, aB)
 
-        let xb = try XCTUnwrap(((a.find(name: "x") as? VarDecl)?.interfaceType as? StructType)?.decl)
+        let xb = try XCTUnwrap(a.find(name: "x")?.asVar?.interfaceType.asStruct?.decl)
         XCTAssertIdentical(xb, aB)
 
-        let c = try XCTUnwrap(module.find(name: "C") as? StructDecl)
+        let c = try XCTUnwrap(module.find(name: "C")?.asStruct)
 
-        let yb = try XCTUnwrap(((c.find(name: "y") as? VarDecl)?.interfaceType as? StructType)?.decl)
+        let yb = try XCTUnwrap(c.find(name: "y")?.asVar?.interfaceType.asStruct?.decl)
         XCTAssertIdentical(yb, b)
     }
 
@@ -595,15 +595,15 @@ struct K {
             file: URL(fileURLWithPath: "K.swift")
         )
 
-        let aX = try XCTUnwrap(moduleA.find(name: "X") as? StructDecl)
-        let bX = try XCTUnwrap(moduleB.find(name: "X") as? EnumDecl)
-        let s = try XCTUnwrap(moduleC.find(name: "S") as? StructDecl)
-        let sX = try XCTUnwrap(s.find(name: "x") as? VarDecl)
-        let sXType = try XCTUnwrap(sX.interfaceType as? any NominalType)
+        let aX = try XCTUnwrap(moduleA.find(name: "X")?.asStruct)
+        let bX = try XCTUnwrap(moduleB.find(name: "X")?.asEnum)
+        let s = try XCTUnwrap(moduleC.find(name: "S")?.asStruct)
+        let sX = try XCTUnwrap(s.find(name: "x")?.asVar)
+        let sXType = try XCTUnwrap(sX.interfaceType.asNominal)
         XCTAssertIdentical(sXType.nominalTypeDecl, aX)
-        let k = try XCTUnwrap(moduleC.find(name: "K") as? StructDecl)
-        let kX = try XCTUnwrap(k.find(name: "x") as? VarDecl)
-        let kXType = try XCTUnwrap(kX.interfaceType as? any NominalType)
+        let k = try XCTUnwrap(moduleC.find(name: "K")?.asStruct)
+        let kX = try XCTUnwrap(k.find(name: "x")?.asVar)
+        let kXType = try XCTUnwrap(kX.interfaceType.asNominal)
         XCTAssertIdentical(kXType.nominalTypeDecl, bX)
     }
 
@@ -617,8 +617,8 @@ struct K {}
             file: URL(fileURLWithPath: "a.swift")
         )
 
-        let aS = try XCTUnwrap(a.find(name: "S") as? StructDecl)
-        let aK = try XCTUnwrap(a.find(name: "K") as? StructDecl)
+        let aS = try XCTUnwrap(a.find(name: "S")?.asStruct)
+        let aK = try XCTUnwrap(a.find(name: "K")?.asStruct)
 
         let main = context.getOrCreateModule(name: "main")
         let mainSource = try Reader(context: context, module: main).read(
@@ -630,25 +630,25 @@ import struct A.S
 
         let mS1 = try XCTUnwrap(
             IdentTypeRepr([.init(name: "S")])
-                .resolve(from: mainSource) as? StructType
+                .resolve(from: mainSource).asStruct
         )
         XCTAssertIdentical(mS1.decl, aS)
 
         let mK1 = try XCTUnwrap(
             IdentTypeRepr([.init(name: "K")])
-                .resolve(from: mainSource) as? ErrorType
+                .resolve(from: mainSource).asError
         )
         _ = mK1
 
         let mS2 = try XCTUnwrap(
             IdentTypeRepr([.init(name: "A"), .init(name: "S")])
-                .resolve(from: mainSource) as? StructType
+                .resolve(from: mainSource).asStruct
         )
         XCTAssertIdentical(mS2.decl, aS)
 
         let mK2 = try XCTUnwrap(
             IdentTypeRepr([.init(name: "A"), .init(name: "K")])
-                .resolve(from: mainSource) as? StructType
+                .resolve(from: mainSource).asStruct
         )
         XCTAssertIdentical(mK2.decl, aK)
     }
@@ -682,11 +682,11 @@ protocol P {
             file: URL(fileURLWithPath: "main.swift")
         )
 
-        let p = try XCTUnwrap(main.find(name: "P") as? ProtocolDecl)
+        let p = try XCTUnwrap(main.find(name: "P")?.asProtocol)
         XCTAssertEqual(p.name, "P")
         let f = try XCTUnwrap(p.functions[safe: 0])
         XCTAssertEqual(f.name, "f")
-        let e = try XCTUnwrap((f.resultInterfaceType as? EnumType)?.decl)
+        let e = try XCTUnwrap(f.resultInterfaceType.asEnum?.decl)
         XCTAssertIdentical(e, myLib.find(name: "E"))
         let ea = try XCTUnwrap(e.caseElements[safe: 0])
         XCTAssertEqual(ea.name, "a")

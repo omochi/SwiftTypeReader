@@ -18,7 +18,7 @@ public final class EnumDecl: NominalTypeDecl {
     public var members: [any ValueDecl]
 
     public var caseElements: [EnumCaseElementDecl] {
-        members.compactMap { $0 as? EnumCaseElementDecl }
+        members.compactMap { $0.asEnumCaseElement }
     }
 
     public var typedDeclaredInterfaceType: EnumType {
