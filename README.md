@@ -72,3 +72,12 @@ struct S {
 ```
 
 It doesn't have type inference.
+
+# Vision
+
+This library focus to use for building other libraries below.
+
+- [CodableToTypeScript](https://github.com/omochi/CodableToTypeScript): Swift type transpiler for TypeScript by me.
+- [CallableKit](https://github.com/sidepelican/CallableKit): Swift RPC bridge for TypeScript by iceman.
+
+But It's useful in standalone for other purpose like meta programming for Swift.
