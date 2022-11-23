@@ -39,7 +39,8 @@ declared interface typeは、`TypeDecl` が定義する型です。
 
 `SType` は `enum` から `protocol` に変更され、
 ほとんど全てのプロパティが除去されました。
-型についてなにか操作を行いたい場合、 `any NominalType` や `StructType` に `as?` でダウンキャストしてください。
+型についてなにか操作を行いたい場合、 `any NominalType` や `StructType` に `as?` でダウンキャストするか、
+`asStruct` などのキャストプロパティを使ってください。
 
 型の名前は `NominalType` から `NominalTypeDecl` を参照し、そこから `name` として取得できます。
 `SType` が名前すら持っていないのは、型には `(Int) -> Int` のような関数型など、名前を持たないものもあるからです。

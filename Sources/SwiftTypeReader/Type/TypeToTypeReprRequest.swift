@@ -20,7 +20,7 @@ struct TypeToTypeReprImpl {
         case let type as DependentMemberType:
             guard var repr = type.base.toTypeRepr(
                 containsModule: containsModule
-            ) as? IdentTypeRepr else {
+            ).asIdent else {
                 throw MessageError("invalid base repr")
             }
             let name = type.decl.name
@@ -64,7 +64,7 @@ struct TypeToTypeReprImpl {
         )
 
         var nextParent = nominal.parent
-        while let parent = nextParent as? any NominalType {
+        while let parent = nextParent?.asNominal {
             reversedElements.append(
                 makeElement(type: parent)
             )

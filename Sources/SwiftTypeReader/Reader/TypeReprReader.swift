@@ -37,7 +37,7 @@ struct TypeReprReader {
     static func read(member: MemberTypeIdentifierSyntax) -> (any TypeRepr)? {
         guard var repr = read(
             type: member.baseType
-        ) as? IdentTypeRepr,
+        )?.asIdent,
               let args = Reader.readGenericArguments(
                 clause: member.genericArgumentClause
               )
