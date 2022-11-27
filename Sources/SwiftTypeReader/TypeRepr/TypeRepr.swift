@@ -11,7 +11,10 @@ extension TypeRepr {
                 )
             )
         } catch {
-            return ErrorType(repr: self)
+            return ErrorType(
+                repr: self,
+                context: context
+            )
         }
     }
 
