@@ -46,8 +46,8 @@ struct S {
 
 ## Design consideration
 
-This library doesn't distinguish type descriptor and concrete type.
-It make implementation simple but ugly especially when generic argument application happens.
+This library refer to the Swift compiler and [Slava's book](https://forums.swift.org/t/compiling-swift-generics-part-i/60898) to build architecture.
+It provides *decls*, *types*, and *type reprs*.
 
 # Unsupported language features
 
