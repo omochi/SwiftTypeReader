@@ -8,6 +8,17 @@ public protocol SType: Hashable & CustomStringConvertible {
 }
 
 extension SType {
+    // MARK: - cast
+    public var asDependentMember: DependentMemberType? { self as? DependentMemberType }
+    public var asEnum: EnumType? { self as? EnumType }
+    public var asError: ErrorType? { self as? ErrorType }
+    public var asFunction: FunctionType? { self as? FunctionType }
+    public var asGenericParam: GenericParamType? { self as? GenericParamType }
+    public var asMetatype: MetatypeType? { self as? MetatypeType }
+    public var asNominal: (any NominalType)? { self as? any NominalType }
+    public var asProtocol: ProtocolType? { self as? ProtocolType }
+    public var asStruct: StructType? { self as? StructType }
+
     public var description: String {
         switch self {
         case let self as ErrorType:
@@ -29,15 +40,4 @@ extension SType {
             return ErrorTypeRepr(text: "\(error)")
         }
     }
-
-    // MARK: - cast
-    public var asDependentMember: DependentMemberType? { self as? DependentMemberType }
-    public var asEnum: EnumType? { self as? EnumType }
-    public var asError: ErrorType? { self as? ErrorType }
-    public var asFunction: FunctionType? { self as? FunctionType }
-    public var asGenericParam: GenericParamType? { self as? GenericParamType }
-    public var asMetatype: MetatypeType? { self as? MetatypeType }
-    public var asNominal: (any NominalType)? { self as? any NominalType }
-    public var asProtocol: ProtocolType? { self as? ProtocolType }
-    public var asStruct: StructType? { self as? StructType }
 }
