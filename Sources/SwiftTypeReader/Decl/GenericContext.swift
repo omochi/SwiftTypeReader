@@ -12,4 +12,14 @@ extension GenericContext {
             return GenericParamList()
         }
     }
+
+    public var genericSignature: GenericSignature {
+        do {
+            return try rootContext.evaluator(
+                GenericSignatureRequest(context: self)
+            )
+        } catch {
+            return GenericSignature(params: [])
+        }
+    }
 }
