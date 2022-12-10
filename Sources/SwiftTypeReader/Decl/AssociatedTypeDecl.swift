@@ -5,7 +5,7 @@ public final class AssociatedTypeDecl: TypeDecl {
     ) {
         self.protocol = `protocol`
         self.name = name
-        self.inheritedTypeLocs = []
+        self.inheritedTypeReprs = []
     }
 
     public unowned var `protocol`: ProtocolDecl
@@ -14,5 +14,5 @@ public final class AssociatedTypeDecl: TypeDecl {
     public var name: String
     public var valueName: String? { name }
 
-    public var inheritedTypeLocs: [TypeLoc]
+    public var inheritedTypeReprs: [any TypeRepr]
 }

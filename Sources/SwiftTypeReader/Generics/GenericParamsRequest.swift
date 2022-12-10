@@ -10,8 +10,8 @@ struct GenericParamsRequest: Request {
                 context: `protocol`, name: "Self"
             )
 
-            paramDecl.inheritedTypeLocs = [
-                TypeLoc(type: `protocol`.declaredInterfaceType)
+            paramDecl.inheritedTypeReprs = [
+                IdentTypeRepr(name: `protocol`.name)
             ]
 
             return GenericParamList([paramDecl])
