@@ -6,7 +6,7 @@ public final class EnumDecl: NominalTypeDecl {
         self.context = context
         self.name = name
         self.syntaxGenericParams = .init()
-        self.inheritedTypeLocs = []
+        self.inheritedTypeReprs = []
         self.members = []
     }
 
@@ -14,7 +14,7 @@ public final class EnumDecl: NominalTypeDecl {
     public var name: String
     public var parentContext: (any DeclContext)? { context }
     public var syntaxGenericParams: GenericParamList
-    public var inheritedTypeLocs: [TypeLoc]
+    public var inheritedTypeReprs: [any TypeRepr]
     public var members: [any ValueDecl]
 
     public var caseElements: [EnumCaseElementDecl] {

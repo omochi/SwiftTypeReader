@@ -12,7 +12,7 @@ public final class Module: TypeDecl & DeclContext {
     public var parentContext: (any DeclContext)? { nil }
     public var name: String
     public var valueName: String? { name }
-    public var inheritedTypeLocs: [TypeLoc] { [] }
+    public var inheritedTypeReprs: [any TypeRepr] { [] }
 
     public var sources: [SourceFile]
 

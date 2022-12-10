@@ -110,7 +110,7 @@ public struct Reader {
             clause: structSyntax.genericParameterClause, on: `struct`
         )
 
-        `struct`.inheritedTypeLocs = readInheritedTypes(
+        `struct`.inheritedTypeReprs = readInheritedTypes(
             inheritance: structSyntax.inheritanceClause
         )
 
@@ -130,7 +130,7 @@ public struct Reader {
             clause: enumSyntax.genericParameters, on: `enum`
         )
 
-        `enum`.inheritedTypeLocs = readInheritedTypes(
+        `enum`.inheritedTypeReprs = readInheritedTypes(
             inheritance: enumSyntax.inheritanceClause
         )
 
@@ -149,7 +149,7 @@ public struct Reader {
 
         let `protocol` = ProtocolDecl(context: context, name: name)
 
-        `protocol`.inheritedTypeLocs = readInheritedTypes(
+        `protocol`.inheritedTypeReprs = readInheritedTypes(
             inheritance: protocolSyntax.inheritanceClause
         )
 
@@ -201,7 +201,7 @@ public struct Reader {
         let name = associatedTypeSyntax.identifier.text
 
         let associatedType = AssociatedTypeDecl(protocol: `protocol`, name: name)
-        associatedType.inheritedTypeLocs = Reader.readInheritedTypes(
+        associatedType.inheritedTypeReprs = Reader.readInheritedTypes(
             inheritance: associatedTypeSyntax.inheritanceClause
         )
         return associatedType
@@ -402,8 +402,8 @@ public struct Reader {
             context: context,
             name: paramSyntax.name.text
         )
-        param.inheritedTypeLocs = TypeReprReader.read(type: paramSyntax.inheritedType)
-            .map { TypeLoc(repr: $0) }.toArray()
+        param.inheritedTypeReprs = TypeReprReader.read(type: paramSyntax.inheritedType)
+            .toArray()
         return param
     }
 
@@ -424,17 +424,16 @@ public struct Reader {
 
     static func readInheritedTypes(
         inheritance: TypeInheritanceClauseSyntax?
-    ) -> [TypeLoc] {
+    ) -> [any TypeRepr] {
         guard let inheritance else { return [] }
         return readInheritedTypes(inheritance: inheritance)
     }
 
     static func readInheritedTypes(
         inheritance: TypeInheritanceClauseSyntax
-    ) -> [TypeLoc] {
+    ) -> [any TypeRepr] {
         return inheritance.inheritedTypeCollection.compactMap { (type) in
             TypeReprReader.read(type: type.typeName)
-                .map { TypeLoc(repr: $0) }
         }
     }
 

@@ -1,10 +1,10 @@
 public protocol TypeDecl: ValueDecl {
-    var inheritedTypeLocs: [TypeLoc] { get }
+    var inheritedTypeReprs: [any TypeRepr] { get }
 }
 
 extension TypeDecl {
     public var inheritedTypes: [any SType] {
-        inheritedTypeLocs.map { $0.resolve(from: innermostContext) }
+        inheritedTypeReprs.map { $0.resolve(from: innermostContext) }
     }
 
     public var declaredInterfaceType: any SType {
