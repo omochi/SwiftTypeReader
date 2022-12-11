@@ -29,11 +29,6 @@ public final class EnumDecl: NominalTypeDecl {
         if let decl = findInNominalTypeDecl(name: name, options: options) {
             return decl
         }
-        if options.value {
-            if let decl = caseElements.first(where: { $0.name == name }) {
-                return decl
-            }
-        }
         return nil
     }
 

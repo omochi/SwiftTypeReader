@@ -4,15 +4,7 @@ public protocol Decl: AnyObject & HashableFromIdentity & _DeclParentContextHolde
 }
 
 extension Decl {
-    public var innermostContext: any DeclContext {
-        if let self = self as? any DeclContext {
-            return self
-        }
-        return parentContext!
-    }
-
     // MARK: - cast
-
     public var asAccessor: AccessorDecl? { self as? AccessorDecl }
     public var asAssociatedType: AssociatedTypeDecl? { self as? AssociatedTypeDecl }
     public var asEnumCaseElement: EnumCaseElementDecl? { self as? EnumCaseElementDecl }
@@ -27,7 +19,17 @@ extension Decl {
     public var asProtocol: ProtocolDecl? { self as? ProtocolDecl }
     public var asSourceFile: SourceFile? { self as? SourceFile }
     public var asStruct: StructDecl? { self as? StructDecl }
+    public var asTypeAlias: TypeAliasDecl? { self as? TypeAliasDecl }
     public var asType: (any TypeDecl)? { self as? any TypeDecl }
     public var asValue: (any ValueDecl)? { self as? any ValueDecl }
     public var asVar: VarDecl? { self as? VarDecl }
+
+    public var innermostContext: any DeclContext {
+        if let self = self as? any DeclContext {
+            return self
+        }
+        return parentContext!
+    }
+
+
 }

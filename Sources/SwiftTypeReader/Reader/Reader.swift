@@ -51,7 +51,9 @@ public struct Reader {
         let source = SourceFile(module: module, file: file)
 
         for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
-            if let type = readNominalTypeDecl(decl: decl, on: source) {
+            if let type = readNominalType(decl: decl, on: source) {
+                source.types.append(type)
+            } else if let type = readTypeAlias(decl: decl, on: source) {
                 source.types.append(type)
             } else if let `import` = readImport(decl: decl, on: source) {
                 source.imports.append(`import`)
@@ -63,33 +65,31 @@ public struct Reader {
         return source
     }
 
-    static func readMemberDecls(block: MemberDeclBlockSyntax, on context: any DeclContext) -> [any ValueDecl] {
+    static func readMembers(block: MemberDeclBlockSyntax, on context: any DeclContext) -> [any ValueDecl] {
         return block.members.flatMap {
-            readMemberDecl(decl: $0.decl, on: context)
+            readMember(decl: $0.decl, on: context)
         }
     }
 
-    static func readMemberDecl(decl: DeclSyntax, on context: any DeclContext) -> [any ValueDecl] {
-        if let type = readNominalTypeDecl(decl: decl, on: context) {
+    static func readMember(decl: DeclSyntax, on context: any DeclContext) -> [any ValueDecl] {
+        if let type = readNominalType(decl: decl, on: context) {
             return [type]
-        }
-        if let vars = readVars(decl: decl, on: context) {
+        } else if let type = readTypeAlias(decl: decl, on: context) {
+            return [type]
+        } else if let vars = readVars(decl: decl, on: context) {
             return vars
-        }
-        if let `func` = readFunc(decl: decl, on: context) {
+        } else if let `func` = readFunc(decl: decl, on: context) {
             return [`func`]
-        }
-        if let cases = readCaseElements(decl: decl, on: context) {
+        } else if let cases = readCaseElements(decl: decl, on: context) {
             return cases
-        }
-        if let associatedType = readAssociatedType(decl: decl, on: context) {
+        } else if let associatedType = readAssociatedType(decl: decl, on: context) {
             return [associatedType]
+        } else {
+            return []
         }
-
-        return []
     }
 
-    static func readNominalTypeDecl(decl: DeclSyntax, on context: any DeclContext) -> (any NominalTypeDecl)? {
+    static func readNominalType(decl: DeclSyntax, on context: any DeclContext) -> (any NominalTypeDecl)? {
         if let decl = decl.as(StructDeclSyntax.self) {
             return readStruct(struct: decl, on: context)
         } else if let decl = decl.as(EnumDeclSyntax.self) {
@@ -114,7 +114,7 @@ public struct Reader {
             inheritance: structSyntax.inheritanceClause
         )
 
-        `struct`.members = readMemberDecls(
+        `struct`.members = readMembers(
             block: structSyntax.members, on: `struct`
         )
 
@@ -134,7 +134,7 @@ public struct Reader {
             inheritance: enumSyntax.inheritanceClause
         )
 
-        `enum`.members = readMemberDecls(
+        `enum`.members = readMembers(
             block: enumSyntax.members, on: `enum`
         )
 
@@ -153,7 +153,7 @@ public struct Reader {
             inheritance: protocolSyntax.inheritanceClause
         )
 
-        `protocol`.members = readMemberDecls(block: protocolSyntax.members, on: `protocol`)
+        `protocol`.members = readMembers(block: protocolSyntax.members, on: `protocol`)
 
         return `protocol`
     }
@@ -435,6 +435,25 @@ public struct Reader {
         return inheritance.inheritedTypeCollection.compactMap { (type) in
             TypeReprReader.read(type: type.typeName)
         }
+    }
+
+    static func readTypeAlias(decl: DeclSyntax, on context: any DeclContext) -> TypeAliasDecl? {
+        guard let decl = decl.as(TypealiasDeclSyntax.self) else { return nil }
+
+        let name = decl.identifier.text
+
+        guard let underlyingSyntax = decl.initializer,
+              let underlying = TypeReprReader.read(type: underlyingSyntax.value) else { return nil }
+
+        let alias = TypeAliasDecl(
+            context: context,
+            name: name,
+            underlyingTypeRepr: underlying
+        )
+
+        alias.syntaxGenericParams = readGenericParamList(clause: decl.genericParameterClause, on: alias)
+
+        return alias
     }
 
     static func readImport(decl: DeclSyntax, on source: SourceFile) -> ImportDecl? {

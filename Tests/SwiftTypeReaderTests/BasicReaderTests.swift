@@ -693,4 +693,82 @@ protocol P {
 
         XCTAssertEqual(mainSource.imports[safe: 0]?.moduleName, "MyLib")
     }
+
+    func testTopLevelTypeAlias() throws {
+        let module = try read("""
+typealias A = Int
+"""
+        )
+
+        let a = try XCTUnwrap(module.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(a.name, "A")
+    }
+
+    func testNestedTypeAlias() throws {
+        let module = try read("""
+struct S {
+    typealias A = Int
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(a.name, "A")
+    }
+
+    func testSpecializedTypeAlias() throws {
+        let module = try read("""
+struct K<T> {}
+
+struct S {
+    typealias A = K<Int>
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(a.name, "A")
+    }
+
+    func testGenericTypeAlias() throws {
+        let module = try read("""
+struct K<T> {}
+
+struct S {
+    typealias A<V> = K<V>
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(a.name, "A")
+    }
+
+    func testOuterParamTypeAlias() throws {
+        let module = try read("""
+struct K<T> {}
+
+struct S<V> {
+    typealias A = K<V>
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(a.name, "A")
+    }
+
+    func testOuterParamGenericTypeAlias() throws {
+        let module = try read("""
+struct K<T, U> {}
+
+struct S<V> {
+    typealias A<W> = K<V, W>
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(a.name, "A")
+    }
 }

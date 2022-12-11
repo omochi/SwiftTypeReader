@@ -8,11 +8,12 @@ extension TypeDecl {
     }
 
     public var declaredInterfaceType: any SType {
-        switch interfaceType {
+        let type = self.interfaceType
+        switch type {
         case let metatype as MetatypeType:
             return metatype.instance
         default:
-            return interfaceType
+            return type
         }
     }
 }
