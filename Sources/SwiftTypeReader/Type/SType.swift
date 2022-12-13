@@ -18,6 +18,7 @@ extension SType {
     public var asNominal: (any NominalType)? { self as? any NominalType }
     public var asProtocol: ProtocolType? { self as? ProtocolType }
     public var asStruct: StructType? { self as? StructType }
+    public var asTypeAlias: TypeAliasType? { self as? TypeAliasType }
 
     public var description: String {
         switch self {

@@ -30,6 +30,8 @@ struct TypeToTypeReprImpl {
             return convert(function: type)
         case let type as any NominalType:
             return convert(nominal: type)
+        case let type as TypeAliasType:
+            return convert(typeAlias: type)
         default:
             throw MessageError("unimplemented")
         }
@@ -80,10 +82,26 @@ struct TypeToTypeReprImpl {
         return IdentTypeRepr(reversedElements.reversed())
     }
 
+    private func convert(typeAlias: TypeAliasType) -> IdentTypeRepr {
+        var repr: IdentTypeRepr = (typeAlias.parent?.asNominal).map { (parent) in
+            convert(nominal: parent)
+        } ?? IdentTypeRepr()
+
+        repr.elements.append(
+            makeElement(name: typeAlias.decl.name, args: typeAlias.genericArgs)
+        )
+
+        return repr
+    }
+
     private func makeElement(type: any NominalType) -> IdentTypeRepr.Element {
+        return makeElement(name: type.name, args: type.genericArgs)
+    }
+
+    private func makeElement(name: String, args: [any SType]) -> IdentTypeRepr.Element {
         return .init(
-            name: type.name,
-            genericArgs: type.genericArgs.map { (arg) in
+            name: name,
+            genericArgs: args.map { (arg) in
                 arg.toTypeRepr(containsModule: containsModule)
             }
         )

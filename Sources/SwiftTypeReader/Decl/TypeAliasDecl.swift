@@ -24,4 +24,10 @@ public final class TypeAliasDecl: GenericTypeDecl {
         }
         return nil
     }
+
+    public func makeDeclaredInterfaceType(
+        parent: (any SType)?, genericArgs: [any SType]
+    ) -> TypeAliasType {
+        TypeAliasType(decl: self, parent: parent, genericArgs: genericArgs)
+    }
 }

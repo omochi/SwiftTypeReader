@@ -700,8 +700,15 @@ typealias A = Int
 """
         )
 
-        let a = try XCTUnwrap(module.find(name: "A")?.asTypeAlias)
+        let ad = try XCTUnwrap(module.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 0)
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "A")
         XCTAssertEqual(a.name, "A")
+        XCTAssertNil(a.parent)
+        XCTAssertEqual(a.genericArgs.count, 0)
     }
 
     func testNestedTypeAlias() throws {
@@ -712,8 +719,15 @@ struct S {
 """)
 
         let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
-        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 0)
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S.A")
         XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S")
+        XCTAssertEqual(a.genericArgs.count, 0)
     }
 
     func testSpecializedTypeAlias() throws {
@@ -726,8 +740,15 @@ struct S {
 """)
 
         let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
-        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 0)
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S.A")
         XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S")
+        XCTAssertEqual(a.genericArgs.count, 0)
     }
 
     func testGenericTypeAlias() throws {
@@ -740,8 +761,16 @@ struct S {
 """)
 
         let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
-        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 1)
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S.A<V>")
         XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S")
+        XCTAssertEqual(a.genericArgs.count, 1)
+        XCTAssertEqual(a.genericArgs[safe: 0]?.description, "V")
     }
 
     func testOuterParamTypeAlias() throws {
@@ -754,8 +783,15 @@ struct S<V> {
 """)
 
         let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
-        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 0)
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S<V>.A")
         XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S<V>")
+        XCTAssertEqual(a.genericArgs.count, 0)
     }
 
     func testOuterParamGenericTypeAlias() throws {
@@ -768,7 +804,15 @@ struct S<V> {
 """)
 
         let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
-        let a = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 1)
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S<V>.A<W>")
         XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S<V>")
+        XCTAssertEqual(a.genericArgs.count, 1)
+        XCTAssertEqual(a.genericArgs[safe: 0]?.description, "W")
     }
 }

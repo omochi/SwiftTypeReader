@@ -87,18 +87,28 @@ private struct Impl {
             parent = nil
         }
 
-        let declType = decl.declaredInterfaceType
+        let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
+        let type = decl.declaredInterfaceType
 
-        switch declType {
+        switch type {
         case let declType as any NominalType:
             let decl = declType.nominalTypeDecl
-            let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
+
             return decl.makeNominalDeclaredInterfaceType(
                 parent: parent,
                 genericArgs: genericArgs
             )
-        default: return declType
+        case let declType as TypeAliasType:
+            let decl = declType.decl
+
+            return decl.makeDeclaredInterfaceType(
+                parent: parent,
+                genericArgs: genericArgs
+            )
+        default: break
         }
+
+        return type
     }
 
     private func resolveGenericArgs(reprs: [any TypeRepr]) -> [any SType] {

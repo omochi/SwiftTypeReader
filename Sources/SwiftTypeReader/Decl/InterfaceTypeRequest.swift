@@ -62,17 +62,27 @@ struct InterfaceTypeRequest: Request {
 
     private func declaredInterfaceType(type: any TypeDecl) throws -> any SType {
         switch type {
-        case let decl as any NominalTypeDecl:
+        case let decl as any GenericTypeDecl:
             var parent: (any SType)? = nil
             if let parentDecl = decl.parentContext as? any TypeDecl {
                 parent = parentDecl.declaredInterfaceType
             }
 
             let genericArgs = decl.genericParams.asDeclaredInterfaceTypeArgs()
-            return decl.makeNominalDeclaredInterfaceType(
-                parent: parent,
-                genericArgs: genericArgs
-            )
+
+            switch decl {
+            case let decl as any NominalTypeDecl:
+                return decl.makeNominalDeclaredInterfaceType(
+                    parent: parent,
+                    genericArgs: genericArgs
+                )
+            case let decl as TypeAliasDecl:
+                return decl.makeDeclaredInterfaceType(
+                    parent: parent,
+                    genericArgs: genericArgs
+                )
+            default: break
+            }
         case let decl as GenericParamDecl:
             return GenericParamType(decl: decl)
         case let decl as AssociatedTypeDecl:
@@ -83,8 +93,8 @@ struct InterfaceTypeRequest: Request {
                 base: selfType,
                 decl: decl
             )
-        default:
-            throw MessageError("invalid decl: \(type)")
+        default: break
         }
+        throw MessageError("unsupported decl: \(type)")
     }
 }
