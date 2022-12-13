@@ -22,11 +22,12 @@ struct K {
         XCTAssertEqual(map.signature.params[safe: 0]?.description, "T")
         XCTAssertEqual(map.replacementTypes[safe: 0]?.description, "Int")
 
-
         let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
         let a = try XCTUnwrap(s.find(name: "a")?.asVar)
 
-        XCTAssertEqual(a.interfaceType.subst(map: map).description, "Int")
+        let at = a.interfaceType
+        XCTAssertEqual(at.description, "T")
+        XCTAssertEqual(at.subst(map: map).description, "Int")
     }
 
     func testNestedSubst() throws {

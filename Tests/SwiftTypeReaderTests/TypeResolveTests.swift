@@ -369,8 +369,7 @@ import X
     }
 
     func resolve(
-        repr: IdentTypeRepr, from: any DeclContext,
-        file: StaticString = #file, line: UInt = #line
+        repr: IdentTypeRepr, from: any DeclContext
     ) -> any SType {
         repr.resolve(from: from)
     }
@@ -381,7 +380,8 @@ import X
     ) {
         XCTAssertEqual(
             type.toTypeRepr(containsModule: true).description,
-            expected
+            expected,
+            file: file, line: line
         )
     }
 }

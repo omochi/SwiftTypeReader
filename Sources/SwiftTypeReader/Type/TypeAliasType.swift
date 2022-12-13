@@ -16,4 +16,25 @@ public struct TypeAliasType: SType {
     public var name: String {
         decl.name
     }
+
+    public var underlyingType: any SType {
+        do {
+            return try decl.rootContext.evaluator(
+                TypeAliasTypeUnderlyingTypeRequest(type: self)
+            )
+        } catch {
+            return ErrorType(error: error)
+        }
+    }
+}
+
+struct TypeAliasTypeUnderlyingTypeRequest: Request {
+    var type: TypeAliasType
+
+    func evaluate(on evaluator: RequestEvaluator) throws -> any SType {
+        let map = type.contextSubstitutionMap()
+        var under = type.decl.underlyingType
+        under = under.subst(map: map)
+        return under
+    }
 }

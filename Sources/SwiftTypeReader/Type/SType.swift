@@ -41,4 +41,15 @@ extension SType {
             return ErrorTypeRepr(text: "\(error)")
         }
     }
+
+    public var typeDecl: (any TypeDecl)? {
+        switch self {
+        case let type as ModuleType: return type.decl
+        case let type as any NominalType: return type.nominalTypeDecl
+        case let type as TypeAliasType: return type.decl
+        case let type as GenericParamType: return type.decl
+        case let type as DependentMemberType: return type.decl
+        default: return nil
+        }
+    }
 }

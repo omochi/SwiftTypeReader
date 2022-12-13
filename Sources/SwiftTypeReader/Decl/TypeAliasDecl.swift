@@ -30,4 +30,19 @@ public final class TypeAliasDecl: GenericTypeDecl {
     ) -> TypeAliasType {
         TypeAliasType(decl: self, parent: parent, genericArgs: genericArgs)
     }
+
+    public var underlyingType: any SType {
+        return try! rootContext.evaluator(
+            TypeAliasDeclUnderlyingTypeRequest(decl: self)
+        )
+    }
+}
+
+
+struct TypeAliasDeclUnderlyingTypeRequest: Request {
+    var decl: TypeAliasDecl
+
+    func evaluate(on evaluator: RequestEvaluator) -> any SType {
+        return decl.underlyingTypeRepr.resolve(from: decl)
+    }
 }

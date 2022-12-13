@@ -68,7 +68,7 @@ struct InterfaceTypeRequest: Request {
                 parent = parentDecl.declaredInterfaceType
             }
 
-            let genericArgs = decl.genericParams.asDeclaredInterfaceTypeArgs()
+            let genericArgs = decl.genericParams.genericParamTypes
 
             switch decl {
             case let decl as any NominalTypeDecl:
