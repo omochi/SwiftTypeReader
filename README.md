@@ -42,13 +42,6 @@ struct S {
 
 - [Version 2 Guide](https://github.com/omochi/SwiftTypeReader/blob/main/Docs/v2-migration-guide.md)
 
-# Development
-
-## Design consideration
-
-This library refer to the Swift compiler and [Slava's book](https://forums.swift.org/t/compiling-swift-generics-part-i/60898) to build architecture.
-It provides *decls*, *types*, and *type reprs*.
-
 # Unsupported language features
 
 ## Class
@@ -83,6 +76,11 @@ This library focus to use for building other libraries below.
 But It's useful in standalone for other purpose like meta programming for Swift.
 
 # Development
+
+## Design consideration
+
+This library refer to the Swift compiler and [Slava's book](https://forums.swift.org/t/compiling-swift-generics-part-i/60898) to build architecture.
+It provides *decls*, *types*, and *type reprs*.
 
 ## Code generation
 
