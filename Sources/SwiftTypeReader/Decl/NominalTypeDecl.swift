@@ -24,7 +24,7 @@ extension NominalTypeDecl {
     }
 
     func findInNominalTypeDecl(name: String, options: LookupOptions) -> (any Decl)? {
-        if let decl = genericParams.find(name: name, options: options) {
+        if let decl = findInGenericContext(name: name, options: options) {
             return decl
         }
 

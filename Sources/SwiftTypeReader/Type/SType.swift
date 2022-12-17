@@ -19,6 +19,7 @@ extension SType {
     public var asNominal: (any NominalType)? { self as? any NominalType }
     public var asProtocol: ProtocolType? { self as? ProtocolType }
     public var asStruct: StructType? { self as? StructType }
+    public var asTypeAlias: TypeAliasType? { self as? TypeAliasType }
     // @end
 
     public var description: String {
@@ -40,6 +41,17 @@ extension SType {
             ).convert()
         } catch {
             return ErrorTypeRepr(text: "\(error)")
+        }
+    }
+
+    public var typeDecl: (any TypeDecl)? {
+        switch self {
+        case let type as ModuleType: return type.decl
+        case let type as any NominalType: return type.nominalTypeDecl
+        case let type as TypeAliasType: return type.decl
+        case let type as GenericParamType: return type.decl
+        case let type as DependentMemberType: return type.decl
+        default: return nil
         }
     }
 }

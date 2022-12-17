@@ -1,4 +1,8 @@
 public struct SubstitutionMap: Hashable & CustomStringConvertible {
+    public typealias Dictionary = [GenericParamType: any SType]
+
+    public typealias Pair = (param: GenericParamType, replacement: any SType)
+
     public init(
         signature: GenericSignature = GenericSignature(),
         replacementTypes: [any SType] = []
@@ -9,6 +13,14 @@ public struct SubstitutionMap: Hashable & CustomStringConvertible {
         precondition(signature.params.count == replacementTypes.count)
     }
 
+    public init(
+        signature: GenericSignature,
+        dictionary: Dictionary
+    ) {
+        let repls = signature.params.map { dictionary[$0]! }
+        self.init(signature: signature, replacementTypes: repls)
+    }
+
     public var signature: GenericSignature
     @AnyTypeArrayStorage public var replacementTypes: [any SType]
 
@@ -17,11 +29,23 @@ public struct SubstitutionMap: Hashable & CustomStringConvertible {
         return replacementTypes[index]
     }
 
-    public var description: String {
-        var pairs: [String] = []
-        for (param, rep) in zip(signature.params, replacementTypes) {
-            pairs.append(param.description + ": " + rep.description)
+    public var pairs: [Pair] {
+        zip(signature.params, replacementTypes).map { Pair(param: $0, replacement: $1) }
+    }
+
+    public var asDictionary: Dictionary {
+        var dict = Dictionary()
+        for pair in pairs {
+            dict[pair.param] = pair.replacement
         }
-        return "[" + pairs.joined(separator: ", ") + "]"
+        return dict
+    }
+
+    public var description: String {
+        var strs: [String] = []
+        for (param, repl) in pairs {
+            strs.append(param.description + ": " + repl.description)
+        }
+        return "[" + strs.joined(separator: ", ") + "]"
     }
 }

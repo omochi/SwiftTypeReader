@@ -16,11 +16,20 @@ public final class SourceFile: Decl & DeclContext {
     public var parentContext: (any DeclContext)? { module }
 
     public var imports: [ImportDecl]
-    public var types: [any NominalTypeDecl]
+    public var types: [any GenericTypeDecl]
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.type {
-            if let type = types.first(where: { $0.name == name }) {
+            if let type = types.first(where: { (type) in
+                switch type {
+                case let type as any NominalTypeDecl:
+                    return type.name == name
+                case let type as TypeAliasDecl:
+                    return type.name == name
+                default:
+                    return false
+                }
+            }) {
                 return type
             }
         }

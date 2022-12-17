@@ -19,6 +19,7 @@ extension Decl {
     public var asProtocol: ProtocolDecl? { self as? ProtocolDecl }
     public var asSourceFile: SourceFile? { self as? SourceFile }
     public var asStruct: StructDecl? { self as? StructDecl }
+    public var asTypeAlias: TypeAliasDecl? { self as? TypeAliasDecl }
     public var asType: (any TypeDecl)? { self as? any TypeDecl }
     public var asValue: (any ValueDecl)? { self as? any ValueDecl }
     public var asVar: VarDecl? { self as? VarDecl }

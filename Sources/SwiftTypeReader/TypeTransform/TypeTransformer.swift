@@ -24,6 +24,7 @@ open class TypeTransformer {
         case let t as ModuleType: return visitImpl(module: t)
         case let t as ProtocolType: return visitImpl(protocol: t)
         case let t as StructType: return visitImpl(struct: t)
+        case let t as TypeAliasType: return visitImpl(typeAlias: t)
         default: return type
         }
     }
@@ -39,6 +40,7 @@ open class TypeTransformer {
     open func visit(module type: ModuleType) -> (any SType)? { nil }
     open func visit(protocol type: ProtocolType) -> (any SType)? { nil }
     open func visit(struct type: StructType) -> (any SType)? { nil }
+    open func visit(typeAlias type: TypeAliasType) -> (any SType)? { nil }
     // @end
 
     private func visitImpl(dependentMember type: DependentMemberType) -> any SType {
@@ -101,5 +103,12 @@ open class TypeTransformer {
         let parent = walk(type.parent)
         let args = walk(type.genericArgs)
         return StructType(decl: type.decl, parent: parent, genericArgs: args)
+    }
+
+    private func visitImpl(typeAlias type: TypeAliasType) -> any SType {
+        if let t = visit(typeAlias: type) { return t }
+        let parent = walk(type.parent)
+        let args = walk(type.genericArgs)
+        return TypeAliasType(decl: type.decl, parent: parent, genericArgs: args)
     }
 }

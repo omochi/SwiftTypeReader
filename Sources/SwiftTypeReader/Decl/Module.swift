@@ -16,7 +16,7 @@ public final class Module: TypeDecl & DeclContext {
 
     public var sources: [SourceFile]
 
-    public var types: [any NominalTypeDecl] {
+    public var types: [any GenericTypeDecl] {
         sources.flatMap { $0.types }
     }
 

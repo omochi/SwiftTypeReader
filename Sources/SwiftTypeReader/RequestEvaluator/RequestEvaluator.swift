@@ -36,3 +36,4 @@ public final class RequestEvaluator {
         return try typedResult.get()
     }
 }
+

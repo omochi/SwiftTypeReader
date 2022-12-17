@@ -21,7 +21,8 @@ extension TypeRepr {
         } catch {
             return ErrorType(
                 repr: self,
-                context: context
+                context: context,
+                error: error
             )
         }
     }
