@@ -11,7 +11,8 @@ struct Codegen {
         let defs = Definitions()
         self.definitions = defs
         self.runner = CodegenRunner(renderers: [
-            BaseTypeRenderer(defs: defs)
+            BaseTypeRenderer(defs: defs),
+            TypeTransformerRenderer(defs: defs)
         ])
     }
 

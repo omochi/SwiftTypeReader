@@ -1,5 +1,19 @@
 open class TypeTransformer {
     public func walk(_ type: any SType) -> any SType {
+        return dispatch(type: type)
+    }
+
+    private func walk(_ type: (any SType)?) -> (any SType)? {
+        guard let type else { return nil }
+        return walk(type)
+    }
+
+    private func walk(_ types: [any SType]) -> [any SType] {
+        return types.map { walk($0) }
+    }
+
+    // @codegen(dispatch)
+    private func dispatch(type: any SType) -> any SType {
         switch type {
         case let t as DependentMemberType: return visitImpl(dependentMember: t)
         case let t as EnumType: return visitImpl(enum: t)
@@ -13,16 +27,9 @@ open class TypeTransformer {
         default: return type
         }
     }
+    // @end
 
-    private func walk(_ type: (any SType)?) -> (any SType)? {
-        guard let type else { return nil }
-        return walk(type)
-    }
-
-    private func walk(_ types: [any SType]) -> [any SType] {
-        return types.map { walk($0) }
-    }
-
+    // @codegen(visit)
     open func visit(dependentMember type: DependentMemberType) -> (any SType)? { nil }
     open func visit(enum type: EnumType) -> (any SType)? { nil }
     open func visit(error type: ErrorType) -> (any SType)? { nil }
@@ -32,6 +39,7 @@ open class TypeTransformer {
     open func visit(module type: ModuleType) -> (any SType)? { nil }
     open func visit(protocol type: ProtocolType) -> (any SType)? { nil }
     open func visit(struct type: StructType) -> (any SType)? { nil }
+    // @end
 
     private func visitImpl(dependentMember type: DependentMemberType) -> any SType {
         if let t = visit(dependentMember: type) { return t }

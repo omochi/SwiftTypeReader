@@ -15,6 +15,7 @@ extension SType {
     public var asFunction: FunctionType? { self as? FunctionType }
     public var asGenericParam: GenericParamType? { self as? GenericParamType }
     public var asMetatype: MetatypeType? { self as? MetatypeType }
+    public var asModule: ModuleType? { self as? ModuleType }
     public var asNominal: (any NominalType)? { self as? any NominalType }
     public var asProtocol: ProtocolType? { self as? ProtocolType }
     public var asStruct: StructType? { self as? StructType }

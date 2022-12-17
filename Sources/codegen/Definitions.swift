@@ -78,6 +78,7 @@ struct Definitions {
         .init(.type, "function"),
         .init(.type, "genericParam"),
         .init(.type, "metatype"),
+        .init(.type, "module"),
         .init(.type, "nominal", attributes: [.protocol]),
         .init(.type, "protocol", "nominal"),
         .init(.type, "struct", "nominal"),
@@ -87,9 +88,6 @@ struct Definitions {
         .init(.typeRepr, "metatype"),
         .init(.typeRepr, "tuple")
     ]
-
-    var decls: [Node] { nodes.filter { $0.kind == .decl } }
-    var declContexts: [Node] { nodes.filter { isDeclContext(node: $0) } }
 
     func nodes(kind: Node.Kind) -> [Node] {
         switch kind {
