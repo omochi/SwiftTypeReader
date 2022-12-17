@@ -693,4 +693,171 @@ protocol P {
 
         XCTAssertEqual(mainSource.imports[safe: 0]?.moduleName, "MyLib")
     }
+
+    func testTopLevelTypeAlias() throws {
+        let module = try read("""
+typealias A = Int
+"""
+        )
+
+        let ad = try XCTUnwrap(module.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 0)
+        XCTAssertEqual(ad.contextGenericSignature.description, "")
+        XCTAssertEqual(ad.underlyingType.description, "Int")
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "A")
+        XCTAssertEqual(a.name, "A")
+        XCTAssertNil(a.parent)
+        XCTAssertEqual(a.genericArgs.count, 0)
+        XCTAssertEqual(a.underlyingType.description, "Int")
+    }
+
+    func testNestedTypeAlias() throws {
+        let module = try read("""
+struct S {
+    typealias A = Int
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 0)
+        XCTAssertEqual(ad.contextGenericSignature.description, "")
+        XCTAssertEqual(ad.underlyingType.description, "Int")
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S.A")
+        XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S")
+        XCTAssertEqual(a.genericArgs.count, 0)
+        XCTAssertEqual(a.underlyingType.description, "Int")
+    }
+
+    func testSpecializedTypeAlias() throws {
+        let module = try read("""
+struct K<T> {}
+
+struct S {
+    typealias A = K<Int>
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 0)
+        XCTAssertEqual(ad.contextGenericSignature.description, "")
+        XCTAssertEqual(ad.underlyingType.description, "K<Int>")
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S.A")
+        XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S")
+        XCTAssertEqual(a.genericArgs.count, 0)
+        XCTAssertEqual(a.underlyingType.description, "K<Int>")
+    }
+
+    func testGenericTypeAlias() throws {
+        let module = try read("""
+struct K<T> {}
+
+struct S {
+    typealias A<V> = K<V>
+}
+
+struct D {
+    var b: S.A<Int>
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 1)
+        XCTAssertEqual(ad.contextGenericSignature.description, "<V>")
+        XCTAssertEqual(ad.underlyingType.description, "K<V>")
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S.A<V>")
+        XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S")
+        XCTAssertEqual(a.genericArgs.count, 1)
+        XCTAssertEqual(a.genericArgs[safe: 0]?.description, "V")
+        XCTAssertEqual(a.underlyingType.description, "K<V>")
+
+        let d = try XCTUnwrap(module.find(name: "D")?.asStruct)
+        let b = try XCTUnwrap(d.find(name: "b")?.asVar)
+        let bt = try XCTUnwrap(b.interfaceType.asTypeAlias)
+        XCTAssertEqual(bt.underlyingType.description, "K<Int>")
+    }
+
+    func testOuterParamTypeAlias() throws {
+        let module = try read("""
+struct K<T> {}
+
+struct S<V> {
+    typealias A = K<V>
+}
+
+struct D {
+    var b: S<Int>.A
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 0)
+        XCTAssertEqual(ad.contextGenericSignature.description, "<V>")
+        XCTAssertEqual(ad.underlyingType.description, "K<V>")
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S<V>.A")
+        XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S<V>")
+        XCTAssertEqual(a.genericArgs.count, 0)
+        XCTAssertEqual(a.underlyingType.description, "K<V>")
+
+        let d = try XCTUnwrap(module.find(name: "D")?.asStruct)
+        let b = try XCTUnwrap(d.find(name: "b")?.asVar)
+        let bt = try XCTUnwrap(b.interfaceType.asTypeAlias)
+        XCTAssertEqual(bt.underlyingType.description, "K<Int>")
+    }
+
+    func testOuterParamGenericTypeAlias() throws {
+        let module = try read("""
+struct K<T, U> {}
+
+struct S<V> {
+    typealias A<W> = K<V, W>
+}
+
+struct D {
+    var b: S<Int>.A<Bool>
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        let ad = try XCTUnwrap(s.find(name: "A")?.asTypeAlias)
+        XCTAssertEqual(ad.name, "A")
+        XCTAssertEqual(ad.genericParams.items.count, 1)
+        XCTAssertEqual(ad.contextGenericSignature.description, "<V, W>")
+        XCTAssertEqual(ad.underlyingType.description, "K<V, W>")
+
+        let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
+        XCTAssertEqual(a.description, "S<V>.A<W>")
+        XCTAssertEqual(a.name, "A")
+        XCTAssertEqual(a.parent?.description, "S<V>")
+        XCTAssertEqual(a.genericArgs.count, 1)
+        XCTAssertEqual(a.genericArgs[safe: 0]?.description, "W")
+        XCTAssertEqual(a.underlyingType.description, "K<V, W>")
+
+        let d = try XCTUnwrap(module.find(name: "D")?.asStruct)
+        let b = try XCTUnwrap(d.find(name: "b")?.asVar)
+        let bt = try XCTUnwrap(b.interfaceType.asTypeAlias)
+        XCTAssertEqual(bt.underlyingType.description, "K<Int, Bool>")
+    }
 }

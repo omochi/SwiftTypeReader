@@ -15,12 +15,9 @@ private final class TypeSubst: TypeTransformer {
     var map: SubstitutionMap
 
     override func visit(genericParam type: GenericParamType) -> (any SType)? {
-        guard let rep = map.replacementType(for: type) else {
-            return ErrorType(
-                repr: type.toTypeRepr(containsModule: false),
-                context: type.decl.parentContext
-            )
+        guard let repl = map.replacementType(for: type) else {
+            return type
         }
-        return rep
+        return repl
     }
 }

@@ -3,41 +3,23 @@ extension SType {
      Not confident...
      */
     public func contextSubstitutionMap() -> SubstitutionMap {
-        guard let context = self.typeContext() else {
-            return SubstitutionMap()
-        }
-
-        let signature = context.contextGenericSignature
-        var table: [GenericParamType: any SType] = [:]
-
-        var typeIter: any SType = self
-        while true {
-            guard let type = typeIter.asNominal else {
-                break
+        do {
+            switch self {
+            case let type as any NominalType:
+                return try type.nominalTypeDecl.contextSubstitutionMap(
+                    parent: type.parent,
+                    genericArgs: type.genericArgs
+                )
+            case let type as TypeAliasType:
+                return try type.decl.contextSubstitutionMap(
+                    parent: type.parent,
+                    genericArgs: type.genericArgs
+                )
+            default:
+                throw MessageError("unsupported type: \(self)")
             }
-
-            for (index, param) in type.nominalTypeDecl.genericParams.items.enumerated() {
-                table[param.typedDeclaredInterfaceType] = type.genericArgs[index]
-            }
-
-            guard let parent = type.parent else {
-                break
-            }
-            typeIter = parent
-        }
-
-        let repls: [any SType] = signature.params.map { table[$0]! }
-
-        return SubstitutionMap(
-            signature: signature,
-            replacementTypes: repls
-        )
-    }
-
-    private func typeContext() -> (any DeclContext)? {
-        switch self {
-        case let t as any NominalType: return t.nominalTypeDecl
-        default: return nil
+        } catch {
+            fatalError("\(error)")
         }
     }
 }

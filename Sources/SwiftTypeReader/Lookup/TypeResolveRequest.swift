@@ -54,7 +54,9 @@ private struct Impl {
     }
 
     private func resolveNestedType(parent: any SType, element: IdentTypeRepr.Element) throws -> any SType {
-        let parentContext = try self.context(from: parent)
+        guard let parentContext = parent.typeDecl?.innermostContext else {
+            throw MessageError("invalid type: \(parent)")
+        }
         guard let decl = parentContext.findType(name: element.name) else {
             throw MessageError("not found: \(element.name)")
         }
@@ -66,17 +68,6 @@ private struct Impl {
         return parentDecl.declaredInterfaceType
     }
 
-    private func context(from type: any SType) throws -> any DeclContext {
-        switch type {
-        case let type as ModuleType:
-            return type.decl
-        case let type as any NominalType:
-            return type.nominalTypeDecl
-        default:
-            throw MessageError("invalid type: \(type)")
-        }
-    }
-
     private func resolveTypeDecl(
         decl: any TypeDecl,
         parent: (any SType)?,
@@ -86,19 +77,8 @@ private struct Impl {
         if parent is ModuleType {
             parent = nil
         }
-
-        let declType = decl.declaredInterfaceType
-
-        switch declType {
-        case let declType as any NominalType:
-            let decl = declType.nominalTypeDecl
-            let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
-            return decl.makeNominalDeclaredInterfaceType(
-                parent: parent,
-                genericArgs: genericArgs
-            )
-        default: return declType
-        }
+        let genericArgs = resolveGenericArgs(reprs: element.genericArgs)
+        return try makeType(decl: decl, parent: parent, genericArgs: genericArgs)
     }
 
     private func resolveGenericArgs(reprs: [any TypeRepr]) -> [any SType] {
@@ -131,5 +111,21 @@ private struct Impl {
             params: params,
             result: result
         )
+    }
+
+    private func makeType(
+        decl: any TypeDecl,
+        parent: (any SType)?,
+        genericArgs: [any SType]
+    ) throws -> any SType {
+        var type = decl.declaredInterfaceType
+
+        let map = try decl.contextSubstitutionMap(
+            parent: parent, genericArgs: genericArgs
+        )
+
+        type = type.subst(map: map)
+
+        return type
     }
 }

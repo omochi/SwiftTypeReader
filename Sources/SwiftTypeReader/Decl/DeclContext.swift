@@ -13,9 +13,10 @@ extension DeclContext {
     public var asProtocol: ProtocolDecl? { self as? ProtocolDecl }
     public var asSourceFile: SourceFile? { self as? SourceFile }
     public var asStruct: StructDecl? { self as? StructDecl }
+    public var asTypeAlias: TypeAliasDecl? { self as? TypeAliasDecl }
 
     public func find(name: String) -> (any Decl)? {
-        find(name: name, options: LookupOptions(value: true, type: true))
+        find(name: name, options: LookupOptions())
     }
 
     public func findType(name: String) -> (any TypeDecl)? {
