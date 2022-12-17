@@ -4,7 +4,7 @@ public protocol Decl: AnyObject & HashableFromIdentity & _DeclParentContextHolde
 }
 
 extension Decl {
-    // MARK: - cast
+    // @codegen(as) MARK: - cast
     public var asAccessor: AccessorDecl? { self as? AccessorDecl }
     public var asAssociatedType: AssociatedTypeDecl? { self as? AssociatedTypeDecl }
     public var asEnumCaseElement: EnumCaseElementDecl? { self as? EnumCaseElementDecl }
@@ -23,6 +23,7 @@ extension Decl {
     public var asType: (any TypeDecl)? { self as? any TypeDecl }
     public var asValue: (any ValueDecl)? { self as? any ValueDecl }
     public var asVar: VarDecl? { self as? VarDecl }
+    // @end
 
     public var innermostContext: any DeclContext {
         if let self = self as? any DeclContext {
@@ -30,6 +31,4 @@ extension Decl {
         }
         return parentContext!
     }
-
-
 }
