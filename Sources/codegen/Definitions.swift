@@ -18,7 +18,8 @@ struct Node {
         _ stem: String,
         _ parent: String? = nil,
         typeName: String? = nil,
-        attributes: Set<Attribute> = []
+        attributes: Set<Attribute> = [],
+        children: [String] = []
     ) {
         self.kind = kind
         self.stem = stem
@@ -27,6 +28,7 @@ struct Node {
             kind: kind, stem: stem, isProtocol: attributes.contains(.protocol)
         )
         self.attributes = attributes
+        self.children = children
     }
 
     var kind: Kind
@@ -34,6 +36,7 @@ struct Node {
     var parent: String?
     var typeName: String
     var attributes: Set<Attribute>
+    var children: [String]
 
     var optionalTypeName: String {
         if attributes.contains(.protocol) {
@@ -73,17 +76,29 @@ struct Definitions {
         .init(.decl, "type", "value", attributes: [.protocol]),
         .init(.decl, "value", attributes: [.protocol]),
         .init(.decl, "var", "value"),
-        .init(.type, "dependentMember"),
-        .init(.type, "enum", "nominal"),
+        .init(.type, "dependentMember", children: [
+            "base"
+        ]),
+        .init(.type, "enum", "nominal", children: [
+            "parent", "genericArgs"
+        ]),
         .init(.type, "error"),
-        .init(.type, "function"),
+        .init(.type, "function", children: [
+            "params", "result"
+        ]),
         .init(.type, "genericParam"),
-        .init(.type, "metatype"),
+        .init(.type, "metatype", children: [
+            "instance"
+        ]),
         .init(.type, "module"),
         .init(.type, "nominal", attributes: [.protocol]),
         .init(.type, "protocol", "nominal"),
-        .init(.type, "struct", "nominal"),
-        .init(.type, "typeAlias"),
+        .init(.type, "struct", "nominal", children: [
+            "parent", "genericArgs"
+        ]),
+        .init(.type, "typeAlias", children: [
+            "parent", "genericArgs"
+        ]),
         .init(.typeRepr, "error"),
         .init(.typeRepr, "function"),
         .init(.typeRepr, "ident"),

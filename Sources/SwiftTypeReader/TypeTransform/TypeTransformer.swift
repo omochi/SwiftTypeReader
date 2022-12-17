@@ -12,6 +12,16 @@ open class TypeTransformer {
         return types.map { walk($0) }
     }
 
+    private func walk(_ params: [FunctionType.Param]) -> [FunctionType.Param] {
+        params.map { walk($0) }
+    }
+
+    private func walk(_ param: FunctionType.Param) -> FunctionType.Param {
+        var param = param
+        param.type = walk(param.type)
+        return param
+    }
+
     // @codegen(dispatch)
     private func dispatch(type: any SType) -> any SType {
         switch type {
@@ -43,17 +53,20 @@ open class TypeTransformer {
     open func visit(typeAlias type: TypeAliasType) -> (any SType)? { nil }
     // @end
 
+    // @codegen(visitImpl)
     private func visitImpl(dependentMember type: DependentMemberType) -> any SType {
         if let t = visit(dependentMember: type) { return t }
-        let base = walk(type.base)
-        return DependentMemberType(base: base, decl: type.decl)
+        var type = type
+        type.base = walk(type.base)
+        return type
     }
 
     private func visitImpl(enum type: EnumType) -> any SType {
         if let t = visit(enum: type) { return t }
-        let parent = walk(type.parent)
-        let args = walk(type.genericArgs)
-        return EnumType(decl: type.decl, parent: parent, genericArgs: args)
+        var type = type
+        type.parent = walk(type.parent)
+        type.genericArgs = walk(type.genericArgs)
+        return type
     }
 
     private func visitImpl(error type: ErrorType) -> any SType {
@@ -63,18 +76,10 @@ open class TypeTransformer {
 
     private func visitImpl(function type: FunctionType) -> any SType {
         if let t = visit(function: type) { return t }
-        let params = visitImpl(params: type.params)
-        let result = walk(type.result)
-        return FunctionType(attributes: type.attributes, params: params, result: result)
-    }
-
-    private func visitImpl(param: FunctionType.Param) -> FunctionType.Param {
-        let type = walk(param.type)
-        return FunctionType.Param(attributes: param.attributes, type: type)
-    }
-
-    private func visitImpl(params: [FunctionType.Param]) -> [FunctionType.Param] {
-        return params.map { visitImpl(param: $0) }
+        var type = type
+        type.params = walk(type.params)
+        type.result = walk(type.result)
+        return type
     }
 
     private func visitImpl(genericParam type: GenericParamType) -> any SType {
@@ -84,8 +89,9 @@ open class TypeTransformer {
 
     private func visitImpl(metatype type: MetatypeType) -> any SType {
         if let t = visit(metatype: type) { return t }
-        let instance = walk(type.instance)
-        return MetatypeType(instance: instance)
+        var type = type
+        type.instance = walk(type.instance)
+        return type
     }
 
     private func visitImpl(module type: ModuleType) -> any SType {
@@ -100,15 +106,18 @@ open class TypeTransformer {
 
     private func visitImpl(struct type: StructType) -> any SType {
         if let t = visit(struct: type) { return t }
-        let parent = walk(type.parent)
-        let args = walk(type.genericArgs)
-        return StructType(decl: type.decl, parent: parent, genericArgs: args)
+        var type = type
+        type.parent = walk(type.parent)
+        type.genericArgs = walk(type.genericArgs)
+        return type
     }
 
     private func visitImpl(typeAlias type: TypeAliasType) -> any SType {
         if let t = visit(typeAlias: type) { return t }
-        let parent = walk(type.parent)
-        let args = walk(type.genericArgs)
-        return TypeAliasType(decl: type.decl, parent: parent, genericArgs: args)
+        var type = type
+        type.parent = walk(type.parent)
+        type.genericArgs = walk(type.genericArgs)
+        return type
     }
+    // @end
 }
