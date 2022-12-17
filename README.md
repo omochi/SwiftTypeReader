@@ -81,3 +81,11 @@ This library focus to use for building other libraries below.
 - [CallableKit](https://github.com/sidepelican/CallableKit): Swift RPC bridge for TypeScript by iceman.
 
 But It's useful in standalone for other purpose like meta programming for Swift.
+
+# Development
+
+## Code generation
+
+```
+$ swift package codegen
+```
