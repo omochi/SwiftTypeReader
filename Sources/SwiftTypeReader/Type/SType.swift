@@ -8,7 +8,7 @@ public protocol SType: Hashable & CustomStringConvertible {
 }
 
 extension SType {
-    // MARK: - cast
+    // @codegen(as) MARK: - cast
     public var asDependentMember: DependentMemberType? { self as? DependentMemberType }
     public var asEnum: EnumType? { self as? EnumType }
     public var asError: ErrorType? { self as? ErrorType }
@@ -18,6 +18,7 @@ extension SType {
     public var asNominal: (any NominalType)? { self as? any NominalType }
     public var asProtocol: ProtocolType? { self as? ProtocolType }
     public var asStruct: StructType? { self as? StructType }
+    // @end
 
     public var description: String {
         switch self {

@@ -3,26 +3,30 @@ public protocol DeclContext: AnyObject & HashableFromIdentity & _DeclParentConte
 }
 
 extension DeclContext {
-    // MARK: - cast
+    // @codegen(as) MARK: - cast
     public var asEnumCaseElement: EnumCaseElementDecl? { self as? EnumCaseElementDecl }
     public var asEnum: EnumDecl? { self as? EnumDecl }
     public var asFunc: FuncDecl? { self as? FuncDecl }
     public var asGenericContext: (any GenericContext)? { self as? any GenericContext }
+    public var asGenericType: (any GenericTypeDecl)? { self as? any GenericTypeDecl }
     public var asModule: Module? { self as? Module }
     public var asNominalType: (any NominalTypeDecl)? { self as? any NominalTypeDecl }
     public var asProtocol: ProtocolDecl? { self as? ProtocolDecl }
     public var asSourceFile: SourceFile? { self as? SourceFile }
     public var asStruct: StructDecl? { self as? StructDecl }
+    // @end
 
     public func find(name: String) -> (any Decl)? {
         find(name: name, options: LookupOptions(value: true, type: true))
     }
 
     public func findType(name: String) -> (any TypeDecl)? {
-        guard let decl = find(
-            name: name,
-            options: LookupOptions(value: false, type: true)
-        ) else { return nil }
+        guard
+            let decl = find(
+                name: name,
+                options: LookupOptions(value: false, type: true)
+            )
+        else { return nil }
         return (decl as! any TypeDecl)
     }
 
