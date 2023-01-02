@@ -37,7 +37,8 @@ let package = Package(
             name: "SwiftTypeReader",
             dependencies: [
                 .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
-                .product(name: "Collections", package: "swift-collections")
+                .product(name: "Collections", package: "swift-collections"),
+                .product(name: "CodegenKit", package: "CodegenKit"),
             ]
         ),
         .testTarget(
