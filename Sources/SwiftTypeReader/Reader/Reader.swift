@@ -1,23 +1,27 @@
 import Foundation
 import SwiftSyntax
 import SwiftSyntaxParser
+import CodegenKit
 
 public struct Reader {
     public var context: Context
+    public var fileManager: FileManager
     public var module: Module
 
     public init(
         context: Context,
+        fileManager: FileManager = .default,
         module: Module? = nil
     ) {
         self.context = context
+        self.fileManager = fileManager
         self.module = module ?? context.getOrCreateModule(name: "main")
     }
 
-    public func read(file: URL) throws -> [SourceFile] {
+    public func read(directory: URL) throws -> [SourceFile] {
         var sources: [SourceFile] = []
 
-        for file in fileManager.directoryOrFileEnumerator(at: file) {
+        for file in fileManager.enumerateRelative(path: directory, options: [.skipsHiddenFiles]) {
             let ext = file.pathExtension
             guard ext == "swift" else {
                 continue
