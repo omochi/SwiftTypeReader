@@ -4,6 +4,7 @@ public protocol DeclContext: AnyObject & HashableFromIdentity & _DeclParentConte
 
 extension DeclContext {
     // @codegen(as) MARK: - cast
+    public var asClass: ClassDecl? { self as? ClassDecl }
     public var asEnumCaseElement: EnumCaseElementDecl? { self as? EnumCaseElementDecl }
     public var asEnum: EnumDecl? { self as? EnumDecl }
     public var asFunc: FuncDecl? { self as? FuncDecl }

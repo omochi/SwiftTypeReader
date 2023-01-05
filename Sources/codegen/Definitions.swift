@@ -59,6 +59,7 @@ struct Definitions {
     var nodes: [Node] = [
         .init(.decl, "accessor", "value"),
         .init(.decl, "associatedType", "type"),
+        .init(.decl, "class", "nominalType"),
         .init(.decl, "enumCaseElement", "value", attributes: [.declContext]),
         .init(.decl, "enum", "nominalType"),
         .init(.decl, "func", "value", attributes: [.declContext]),
@@ -76,6 +77,9 @@ struct Definitions {
         .init(.decl, "type", "value", attributes: [.protocol]),
         .init(.decl, "value", attributes: [.protocol]),
         .init(.decl, "var", "value"),
+        .init(.type, "class", "nominal", children: [
+            "parent", "genericArgs"
+        ]),
         .init(.type, "dependentMember", children: [
             "base"
         ]),

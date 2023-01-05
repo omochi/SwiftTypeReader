@@ -7,6 +7,7 @@ extension Decl {
     // @codegen(as) MARK: - cast
     public var asAccessor: AccessorDecl? { self as? AccessorDecl }
     public var asAssociatedType: AssociatedTypeDecl? { self as? AssociatedTypeDecl }
+    public var asClass: ClassDecl? { self as? ClassDecl }
     public var asEnumCaseElement: EnumCaseElementDecl? { self as? EnumCaseElementDecl }
     public var asEnum: EnumDecl? { self as? EnumDecl }
     public var asFunc: FuncDecl? { self as? FuncDecl }

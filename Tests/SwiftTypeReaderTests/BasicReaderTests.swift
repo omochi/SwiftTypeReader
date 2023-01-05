@@ -280,6 +280,43 @@ protocol P: Encodable {
         XCTAssertFalse(d.modifiers.contains(.throws))
     }
 
+    func testSimpleClass() throws {
+        let module = try read("""
+class C {
+    var a: Int?
+    func f(s: S) throws {}
+}
+"""
+        )
+
+        let s = try XCTUnwrap(module.find(name: "C")?.asClass)
+        XCTAssertEqual(s.name, "C")
+
+        XCTAssertEqual(s.moduleContext.name, "main")
+
+        let a = try XCTUnwrap(s.find(name: "a")?.asVar)
+        XCTAssertEqual(a.name, "a")
+
+        XCTAssertEqual(s.storedProperties.count, 1)
+        XCTAssertIdentical(s.storedProperties[safe: 0], a)
+
+        let aType = try XCTUnwrap(a.interfaceType.asNominal)
+        XCTAssertEqual(aType.description, "Optional<Int>")
+
+        let f = try XCTUnwrap(s.find(name: "f")?.asFunc)
+        XCTAssertEqual(f.name, "f")
+        XCTAssertEqual(f.parameters.count, 1)
+        XCTAssertEqual(f.parameters[safe: 0]?.argumentName, "s")
+        XCTAssertEqual(f.parameters[safe: 0]?.interfaceType.description, "S")
+        XCTAssertTrue(f.modifiers.contains(.throws))
+        XCTAssertEqual(f.resultInterfaceType.description, "Void")
+
+        XCTAssertEqual(
+            AnyTypeOptionalStorage(s.selfInterfaceType),
+            AnyTypeOptionalStorage(s.declaredInterfaceType)
+        )
+    }
+
     func testStructProperty() throws {
         let module = try read("""
 struct S {

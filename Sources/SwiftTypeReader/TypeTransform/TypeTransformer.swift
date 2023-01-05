@@ -25,6 +25,7 @@ open class TypeTransformer {
     // @codegen(dispatch)
     private func dispatch(type: any SType) -> any SType {
         switch type {
+        case let t as ClassType: return visitImpl(class: t)
         case let t as DependentMemberType: return visitImpl(dependentMember: t)
         case let t as EnumType: return visitImpl(enum: t)
         case let t as ErrorType: return visitImpl(error: t)
@@ -41,6 +42,7 @@ open class TypeTransformer {
     // @end
 
     // @codegen(visit)
+    open func visit(class type: ClassType) -> (any SType)? { nil }
     open func visit(dependentMember type: DependentMemberType) -> (any SType)? { nil }
     open func visit(enum type: EnumType) -> (any SType)? { nil }
     open func visit(error type: ErrorType) -> (any SType)? { nil }
@@ -54,6 +56,14 @@ open class TypeTransformer {
     // @end
 
     // @codegen(visitImpl)
+    private func visitImpl(class type: ClassType) -> any SType {
+        if let t = visit(class: type) { return t }
+        var type = type
+        type.parent = walk(type.parent)
+        type.genericArgs = walk(type.genericArgs)
+        return type
+    }
+
     private func visitImpl(dependentMember type: DependentMemberType) -> any SType {
         if let t = visit(dependentMember: type) { return t }
         var type = type
