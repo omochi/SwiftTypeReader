@@ -44,12 +44,6 @@ struct S {
 
 # Unsupported language features
 
-## Class
-
-```swift
-class C {}
-```
-
 ## Function body
 
 It handles only signature.
