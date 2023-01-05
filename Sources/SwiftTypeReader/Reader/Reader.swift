@@ -112,6 +112,8 @@ public struct Reader {
 
         let `struct` = StructDecl(context: context, name: name)
 
+        `struct`.modifiers = readModifires(decls: structSyntax.modifiers)
+        
         `struct`.syntaxGenericParams = readGenericParamList(
             clause: structSyntax.genericParameterClause, on: `struct`
         )
@@ -131,6 +133,8 @@ public struct Reader {
         let name = enumSyntax.identifier.text
 
         let `enum` = EnumDecl(context: context, name: name)
+
+        `enum`.modifiers = readModifires(decls: enumSyntax.modifiers)
 
         `enum`.syntaxGenericParams = readGenericParamList(
             clause: enumSyntax.genericParameters, on: `enum`
@@ -155,6 +159,8 @@ public struct Reader {
 
         let `protocol` = ProtocolDecl(context: context, name: name)
 
+        `protocol`.modifiers = readModifires(decls: protocolSyntax.modifiers)
+
         `protocol`.inheritedTypeReprs = readInheritedTypes(
             inheritance: protocolSyntax.inheritanceClause
         )
@@ -171,6 +177,8 @@ public struct Reader {
         let name = classSyntax.identifier.text
 
         let `class` = ClassDecl(context: context, name: name)
+
+        `class`.modifiers = readModifires(decls: classSyntax.modifiers)
 
         `class`.syntaxGenericParams = readGenericParamList(
             clause: classSyntax.genericParameterClause, on: `class`
@@ -400,6 +408,14 @@ public struct Reader {
         }
 
         return `func`
+    }
+
+    static func readModifires(
+        decls: ModifierListSyntax?
+    ) -> [DeclModifier] {
+        var reader = ModifierReader()
+        reader.read(decls: decls)
+        return reader.modifiers
     }
 
     static func readGenericParamList(

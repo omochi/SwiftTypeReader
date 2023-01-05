@@ -4,6 +4,7 @@ public final class EnumDecl: NominalTypeDecl {
         name: String
     ) {
         self.context = context
+        self.modifiers = []
         self.name = name
         self.syntaxGenericParams = .init()
         self.inheritedTypeReprs = []
@@ -11,14 +12,19 @@ public final class EnumDecl: NominalTypeDecl {
     }
 
     public unowned var context: any DeclContext
-    public var name: String
     public var parentContext: (any DeclContext)? { context }
+    public var modifiers: [DeclModifier]
+    public var name: String
     public var syntaxGenericParams: GenericParamList
     public var inheritedTypeReprs: [any TypeRepr]
     public var members: [any ValueDecl]
 
     public var caseElements: [EnumCaseElementDecl] {
         members.compactMap { $0.asEnumCaseElement }
+    }
+
+    public var computedProperties: [VarDecl] {
+        properties.filter { $0.propertyKind == .computed }
     }
 
     public var typedDeclaredInterfaceType: EnumType {

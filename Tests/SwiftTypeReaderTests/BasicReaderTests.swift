@@ -81,8 +81,8 @@ struct S1 {
     var b: S2
 }
 
-struct S2 {
-    var a: Int
+public struct S2 {
+    public var a: Int
 }
 """
         )
@@ -106,12 +106,13 @@ struct S2 {
         do {
             let s2 = try XCTUnwrap(module.find(name: "S2")?.asStruct)
             XCTAssertEqual(s2.name, "S2")
+            XCTAssertTrue(s2.modifiers.contains(.public))
 
             let a = try XCTUnwrap(s2.find(name: "a")?.asVar)
             XCTAssertEqual(a.name, "a")
             XCTAssertEqual(a.interfaceType.asNominal?.name, "Int")
+            XCTAssertTrue(a.modifiers.contains(.public))
         }
-
     }
 
     func testUnknown() throws {
