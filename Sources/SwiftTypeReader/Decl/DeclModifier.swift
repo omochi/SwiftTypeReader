@@ -8,4 +8,9 @@ public enum DeclModifier: String, Hashable {
     case `rethrows`
     case `async`
     case `reasync`
+    case `public`
+    case `private`
+    case `fileprivate`
+    case `internal`
+    case `open`
 }

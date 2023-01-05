@@ -4,6 +4,7 @@ public final class ProtocolDecl: NominalTypeDecl {
         name: String
     ) {
         self.context = context
+        self.modifiers = []
         self.name = name
         self.inheritedTypeReprs = []
         self.members = []
@@ -11,6 +12,7 @@ public final class ProtocolDecl: NominalTypeDecl {
 
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
+    public var modifiers: [DeclModifier]
     public var name: String
     public var syntaxGenericParams: GenericParamList { .init() }
     public var inheritedTypeReprs: [any TypeRepr]
