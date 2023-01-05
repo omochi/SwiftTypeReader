@@ -9,6 +9,7 @@ public protocol SType: Hashable & CustomStringConvertible {
 
 extension SType {
     // @codegen(as) MARK: - cast
+    public var asClass: ClassType? { self as? ClassType }
     public var asDependentMember: DependentMemberType? { self as? DependentMemberType }
     public var asEnum: EnumType? { self as? EnumType }
     public var asError: ErrorType? { self as? ErrorType }
