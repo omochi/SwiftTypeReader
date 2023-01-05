@@ -112,9 +112,7 @@ public struct Reader {
 
         let `struct` = StructDecl(context: context, name: name)
 
-        var reader = ModifierReader()
-        reader.read(decls: structSyntax.modifiers)
-        `struct`.modifiers = reader.modifiers
+        `struct`.modifiers = readModifires(decls: structSyntax.modifiers)
         
         `struct`.syntaxGenericParams = readGenericParamList(
             clause: structSyntax.genericParameterClause, on: `struct`
@@ -136,9 +134,7 @@ public struct Reader {
 
         let `enum` = EnumDecl(context: context, name: name)
 
-        var reader = ModifierReader()
-        reader.read(decls: enumSyntax.modifiers)
-        `enum`.modifiers = reader.modifiers
+        `enum`.modifiers = readModifires(decls: enumSyntax.modifiers)
 
         `enum`.syntaxGenericParams = readGenericParamList(
             clause: enumSyntax.genericParameters, on: `enum`
@@ -163,9 +159,7 @@ public struct Reader {
 
         let `protocol` = ProtocolDecl(context: context, name: name)
 
-        var reader = ModifierReader()
-        reader.read(decls: protocolSyntax.modifiers)
-        `protocol`.modifiers = reader.modifiers
+        `protocol`.modifiers = readModifires(decls: protocolSyntax.modifiers)
 
         `protocol`.inheritedTypeReprs = readInheritedTypes(
             inheritance: protocolSyntax.inheritanceClause
@@ -184,9 +178,7 @@ public struct Reader {
 
         let `class` = ClassDecl(context: context, name: name)
 
-        var reader = ModifierReader()
-        reader.read(decls: classSyntax.modifiers)
-        `class`.modifiers = reader.modifiers
+        `class`.modifiers = readModifires(decls: classSyntax.modifiers)
 
         `class`.syntaxGenericParams = readGenericParamList(
             clause: classSyntax.genericParameterClause, on: `class`
@@ -416,6 +408,14 @@ public struct Reader {
         }
 
         return `func`
+    }
+
+    static func readModifires(
+        decls: ModifierListSyntax?
+    ) -> [DeclModifier] {
+        var reader = ModifierReader()
+        reader.read(decls: decls)
+        return reader.modifiers
     }
 
     static func readGenericParamList(
