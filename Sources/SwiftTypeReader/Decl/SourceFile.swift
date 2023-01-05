@@ -9,6 +9,7 @@ public final class SourceFile: Decl & DeclContext {
         self.file = file
         self.imports = []
         self.types = []
+        self.funcs = []
     }
 
     public unowned var module: Module
@@ -17,6 +18,7 @@ public final class SourceFile: Decl & DeclContext {
 
     public var imports: [ImportDecl]
     public var types: [any GenericTypeDecl]
+    public var funcs: [FuncDecl]
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.type {
@@ -30,6 +32,11 @@ public final class SourceFile: Decl & DeclContext {
                     return false
                 }
             }) {
+                return type
+            }
+        }
+        if options.value {
+            if let type = funcs.first(where: { $0.name == name }) {
                 return type
             }
         }
