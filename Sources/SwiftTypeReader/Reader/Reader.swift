@@ -100,6 +100,8 @@ public struct Reader {
             return readEnum(enum: decl, on: context)
         } else if let decl = decl.as(ProtocolDeclSyntax.self) {
             return readProtocol(protocol: decl, on: context)
+        } else if let decl = decl.as(ClassDeclSyntax.self) {
+            return readClass(class: decl, on: context)
         } else {
             return nil
         }
@@ -160,6 +162,29 @@ public struct Reader {
         `protocol`.members = readMembers(block: protocolSyntax.members, on: `protocol`)
 
         return `protocol`
+    }
+
+    static func readClass(
+        class classSyntax: ClassDeclSyntax,
+        on context: any DeclContext
+    ) -> ClassDecl? {
+        let name = classSyntax.identifier.text
+
+        let `class` = ClassDecl(context: context, name: name)
+
+        `class`.syntaxGenericParams = readGenericParamList(
+            clause: classSyntax.genericParameterClause, on: `class`
+        )
+
+        `class`.inheritedTypeReprs = readInheritedTypes(
+            inheritance: classSyntax.inheritanceClause
+        )
+
+        `class`.members = readMembers(
+            block: classSyntax.members, on: `class`
+        )
+
+        return `class`
     }
 
     static func readCaseElements(
