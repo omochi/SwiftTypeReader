@@ -78,7 +78,7 @@ struct S {
         let module = try read("""
 struct S1 {
     var a: Int
-    var b: S2
+    func b() -> S2 {}
 }
 
 public struct S2 {
@@ -95,10 +95,10 @@ public struct S2 {
             XCTAssertEqual(a.name, "a")
             XCTAssertEqual(a.interfaceType.asNominal?.name, "Int")
 
-            let b = try XCTUnwrap(s1.find(name: "b")?.asVar)
+            let b = try XCTUnwrap(s1.find(name: "b")?.asFunc)
             XCTAssertEqual(b.name, "b")
 
-            let s2 = try XCTUnwrap(b.interfaceType.asStruct)
+            let s2 = try XCTUnwrap(b.resultInterfaceType.asStruct)
             XCTAssertEqual(s2.decl.name, "S2")
             XCTAssertEqual(s2.decl.storedProperties.count, 1)
         }
@@ -897,5 +897,16 @@ struct D {
         let b = try XCTUnwrap(d.find(name: "b")?.asVar)
         let bt = try XCTUnwrap(b.interfaceType.asTypeAlias)
         XCTAssertEqual(bt.underlyingType.description, "K<Int, Bool>")
+    }
+
+    func testTopLevelFunc() throws {
+        let module = try read("""
+public func f() {
+}
+""")
+
+        let f = try XCTUnwrap(module.find(name: "f")?.asFunc)
+        XCTAssertTrue(f.modifiers.contains(.public))
+        XCTAssertEqual(f.parameters, [])
     }
 }

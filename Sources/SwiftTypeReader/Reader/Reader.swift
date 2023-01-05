@@ -61,6 +61,8 @@ public struct Reader {
                 source.types.append(type)
             } else if let `import` = readImport(decl: decl, on: source) {
                 source.imports.append(`import`)
+            } else if let `func` = readFunc(decl: decl, on: source) {
+                source.funcs.append(`func`)
             }
         }
 
@@ -385,7 +387,7 @@ public struct Reader {
     static func readFunc(
         function functionSyntax: FunctionDeclSyntax,
         on context: any DeclContext
-    ) -> FuncDecl? {
+    ) -> FuncDecl {
         let name = functionSyntax.identifier.text
 
         var modifiers = ModifierReader()
