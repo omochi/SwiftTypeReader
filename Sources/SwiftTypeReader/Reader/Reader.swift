@@ -112,12 +112,10 @@ public struct Reader {
 
         let `struct` = StructDecl(context: context, name: name)
 
-        if let modifiers = structSyntax.modifiers {
-            var reader = ModifierReader()
-            reader.read(decls: modifiers)
-            `struct`.modifiers = reader.modifiers
-        }
-
+        var reader = ModifierReader()
+        reader.read(decls: structSyntax.modifiers)
+        `struct`.modifiers = reader.modifiers
+        
         `struct`.syntaxGenericParams = readGenericParamList(
             clause: structSyntax.genericParameterClause, on: `struct`
         )
@@ -138,11 +136,9 @@ public struct Reader {
 
         let `enum` = EnumDecl(context: context, name: name)
 
-        if let modifiers = enumSyntax.modifiers {
-            var reader = ModifierReader()
-            reader.read(decls: modifiers)
-            `enum`.modifiers = reader.modifiers
-        }
+        var reader = ModifierReader()
+        reader.read(decls: enumSyntax.modifiers)
+        `enum`.modifiers = reader.modifiers
 
         `enum`.syntaxGenericParams = readGenericParamList(
             clause: enumSyntax.genericParameters, on: `enum`
@@ -167,11 +163,9 @@ public struct Reader {
 
         let `protocol` = ProtocolDecl(context: context, name: name)
 
-        if let modifiers = protocolSyntax.modifiers {
-            var reader = ModifierReader()
-            reader.read(decls: modifiers)
-            `protocol`.modifiers = reader.modifiers
-        }
+        var reader = ModifierReader()
+        reader.read(decls: protocolSyntax.modifiers)
+        `protocol`.modifiers = reader.modifiers
 
         `protocol`.inheritedTypeReprs = readInheritedTypes(
             inheritance: protocolSyntax.inheritanceClause
@@ -190,11 +184,9 @@ public struct Reader {
 
         let `class` = ClassDecl(context: context, name: name)
 
-        if let modifiers = classSyntax.modifiers {
-            var reader = ModifierReader()
-            reader.read(decls: modifiers)
-            `class`.modifiers = reader.modifiers
-        }
+        var reader = ModifierReader()
+        reader.read(decls: classSyntax.modifiers)
+        `class`.modifiers = reader.modifiers
 
         `class`.syntaxGenericParams = readGenericParamList(
             clause: classSyntax.genericParameterClause, on: `class`
