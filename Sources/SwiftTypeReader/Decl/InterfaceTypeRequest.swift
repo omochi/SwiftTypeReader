@@ -15,6 +15,8 @@ struct InterfaceTypeRequest: Request {
             return decl.typeRepr.resolve(from: decl.context)
         case let decl as FuncDecl:
             return functionType(func: decl)
+        case let decl as InitDecl:
+            return try initilizerType(init: decl)
         case let decl as any TypeDecl:
             let instance = try declaredInterfaceType(type: decl)
             return MetatypeType(instance: instance)
@@ -39,24 +41,22 @@ struct InterfaceTypeRequest: Request {
     }
 
     private func functionBodyType(func funcDecl: FuncDecl) -> FunctionType {
-        let params: [FunctionType.Param] = funcDecl.parameters.map { (param) in
-            let type = param.interfaceType
-            return FunctionType.Param(attributes: [], type: type)
-        }
-        let result = funcDecl.resultInterfaceType
+        return FunctionType(
+            attributes: funcDecl.modifiers.asFunctionAttributes,
+            params: funcDecl.parameters.asFunctionTypeParams,
+            result: funcDecl.resultInterfaceType
+        )
+    }
 
-        var attributes: [FunctionAttribute] = []
-        if funcDecl.modifiers.contains(.async) {
-            attributes.append(.async)
-        }
-        if funcDecl.modifiers.contains(.throws) {
-            attributes.append(.throws)
+    private func initilizerType(init initDecl: InitDecl) throws -> FunctionType {
+        guard let selfType = initDecl.parentContext?.selfInterfaceType else {
+            throw MessageError("Self type not found")
         }
 
         return FunctionType(
-            attributes: attributes,
-            params: params,
-            result: result
+            attributes: initDecl.modifiers.asFunctionAttributes,
+            params: initDecl.parameters.asFunctionTypeParams,
+            result: selfType
         )
     }
 
@@ -96,5 +96,27 @@ struct InterfaceTypeRequest: Request {
         default: break
         }
         throw MessageError("unsupported decl: \(type)")
+    }
+}
+
+extension [DeclModifier] {
+    fileprivate var asFunctionAttributes: [FunctionAttribute] {
+        var attributes: [FunctionAttribute] = []
+        if contains(.async) {
+            attributes.append(.async)
+        }
+        if contains(.throws) {
+            attributes.append(.throws)
+        }
+        return attributes
+    }
+}
+
+extension [ParamDecl] {
+    fileprivate var asFunctionTypeParams: [FunctionType.Param] {
+        map { (param) in
+            let type = param.interfaceType
+            return FunctionType.Param(attributes: [], type: type)
+        }
     }
 }

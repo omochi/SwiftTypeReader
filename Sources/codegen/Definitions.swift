@@ -67,6 +67,7 @@ struct Definitions {
         .init(.decl, "genericParam", "type"),
         .init(.decl, "genericType", "type", attributes: [.protocol, .declContext]),
         .init(.decl, "import"),
+        .init(.decl, "init", "value", attributes: [.declContext]),
         .init(.decl, "module", "type", typeName: "Module", attributes: [.declContext]),
         .init(.decl, "nominalType", "genericType", attributes: [.protocol]),
         .init(.decl, "param", "value"),

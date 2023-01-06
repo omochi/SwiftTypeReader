@@ -909,4 +909,26 @@ public func f() {
         XCTAssertTrue(f.modifiers.contains(.public))
         XCTAssertEqual(f.parameters, [])
     }
+
+    func testInitializer() throws {
+        let module = try read("""
+struct S {
+    init() {}
+}
+class C {
+    init(a: Int) throws {}
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        XCTAssertEqual(s.initializers.count, 1)
+        XCTAssertEqual(s.initializers[safe: 0]?.parameters.count, 0)
+
+        let c = try XCTUnwrap(module.find(name: "C")?.asClass)
+        XCTAssertEqual(c.initializers.count, 1)
+        XCTAssertEqual(c.initializers[safe: 0]?.parameters.count, 1)
+        XCTAssertEqual(c.initializers[safe: 0]?.parameters[safe: 0]?.typeRepr.description, "Int")
+        XCTAssertEqual(c.initializers[safe: 0]?.modifiers.contains(.throws), true)
+        XCTAssertEqual(c.initializers[safe: 0]?.interfaceType.description, "(Int) throws -> C")
+    }
 }
