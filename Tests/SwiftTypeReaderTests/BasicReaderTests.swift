@@ -931,4 +931,26 @@ class C {
         XCTAssertEqual(c.initializers[safe: 0]?.modifiers.contains(.throws), true)
         XCTAssertEqual(c.initializers[safe: 0]?.interfaceType.description, "(Int) throws -> C")
     }
+
+    func testArgumentName() throws {
+        let module = try read("""
+func f1(a: Int) {}
+func f2(b c: Int) {}
+func f3(_ d: Int) {}
+func f4(Int) {}
+""")
+
+        let f1 = try XCTUnwrap(module.find(name: "f1")?.asFunc)
+        XCTAssertEqual(f1.parameters[safe: 0]?.argumentName, "a")
+
+        let f2 = try XCTUnwrap(module.find(name: "f2")?.asFunc)
+        XCTAssertEqual(f2.parameters[safe: 0]?.argumentName, "c")
+
+        let f3 = try XCTUnwrap(module.find(name: "f3")?.asFunc)
+        XCTAssertEqual(f3.parameters[safe: 0]?.argumentName, "d")
+
+        let f4 = try XCTUnwrap(module.find(name: "f4")?.asFunc)
+        XCTAssertEqual(f4.parameters.count, 1)
+        XCTAssertNil(f4.parameters[safe: 0]?.argumentName)
+    }
 }
