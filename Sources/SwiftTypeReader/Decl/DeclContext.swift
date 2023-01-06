@@ -10,6 +10,7 @@ extension DeclContext {
     public var asFunc: FuncDecl? { self as? FuncDecl }
     public var asGenericContext: (any GenericContext)? { self as? any GenericContext }
     public var asGenericType: (any GenericTypeDecl)? { self as? any GenericTypeDecl }
+    public var asInit: InitDecl? { self as? InitDecl }
     public var asModule: Module? { self as? Module }
     public var asNominalType: (any NominalTypeDecl)? { self as? any NominalTypeDecl }
     public var asProtocol: ProtocolDecl? { self as? ProtocolDecl }

@@ -86,6 +86,8 @@ public struct Reader {
             return vars
         } else if let `func` = readFunc(decl: decl, on: context) {
             return [`func`]
+        } else if let `init` = readInit(decl: decl, on: context) {
+            return [`init`]
         } else if let cases = readCaseElements(decl: decl, on: context) {
             return cases
         } else if let associatedType = readAssociatedType(decl: decl, on: context) {
@@ -410,6 +412,29 @@ public struct Reader {
         }
 
         return `func`
+    }
+
+    static func readInit(decl: DeclSyntax, on context: any DeclContext) -> InitDecl? {
+        guard let decl = decl.as(InitializerDeclSyntax.self) else { return nil }
+        return readInit(initializer: decl, on: context)
+    }
+
+    static func readInit(
+        initializer initializerSyntax: InitializerDeclSyntax,
+        on context: any DeclContext
+    ) -> InitDecl {
+        var modifiers = ModifierReader()
+        modifiers.read(decls: initializerSyntax.modifiers)
+//        modifiers.read(token: initializerSyntax.asyncOrReasyncKeyword) // FIXME: not supported in SwiftSyntax 0.50700.1
+        modifiers.read(token: initializerSyntax.throwsOrRethrowsKeyword)
+
+        let `init` = InitDecl(context: context, modifiers: modifiers.modifiers)
+
+        `init`.parameters = initializerSyntax.parameters.parameterList.compactMap { (param) in
+            readParam(param: param, on: `init`)
+        }
+
+        return `init`
     }
 
     static func readModifires(

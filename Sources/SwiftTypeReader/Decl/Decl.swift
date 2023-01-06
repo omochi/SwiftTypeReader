@@ -14,6 +14,7 @@ extension Decl {
     public var asGenericParam: GenericParamDecl? { self as? GenericParamDecl }
     public var asGenericType: (any GenericTypeDecl)? { self as? any GenericTypeDecl }
     public var asImport: ImportDecl? { self as? ImportDecl }
+    public var asInit: InitDecl? { self as? InitDecl }
     public var asModule: Module? { self as? Module }
     public var asNominalType: (any NominalTypeDecl)? { self as? any NominalTypeDecl }
     public var asParam: ParamDecl? { self as? ParamDecl }

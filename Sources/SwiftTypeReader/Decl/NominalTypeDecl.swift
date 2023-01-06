@@ -19,6 +19,10 @@ extension NominalTypeDecl {
         members.compactMap { $0.asVar }
     }
 
+    public var initializers: [InitDecl] {
+        members.compactMap { $0.asInit }
+    }
+
     public var functions: [FuncDecl] {
         members.compactMap { $0.asFunc }
     }
