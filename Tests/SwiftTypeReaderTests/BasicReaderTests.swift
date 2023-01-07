@@ -932,25 +932,38 @@ class C {
         XCTAssertEqual(c.initializers[safe: 0]?.interfaceType.description, "(Int) throws -> C")
     }
 
-    func testArgumentName() throws {
+    func testParamDecl() throws {
         let module = try read("""
 func f1(a: Int) {}
 func f2(b c: Int) {}
 func f3(_ d: Int) {}
 func f4(Int) {}
+func f5(_: Int) {}
 """)
 
-        let f1 = try XCTUnwrap(module.find(name: "f1")?.asFunc)
-        XCTAssertEqual(f1.parameters[safe: 0]?.argumentName, "a")
+        let f1Param0 = try XCTUnwrap(module.find(name: "f1")?.asFunc?.parameters[safe: 0])
+        XCTAssertEqual(f1Param0.name, "a")
+        XCTAssertEqual(f1Param0.interfaceName, nil)
+        XCTAssertEqual(f1Param0.argumentName, "a")
 
-        let f2 = try XCTUnwrap(module.find(name: "f2")?.asFunc)
-        XCTAssertEqual(f2.parameters[safe: 0]?.argumentName, "c")
+        let f2Param0 = try XCTUnwrap(module.find(name: "f2")?.asFunc?.parameters[safe: 0])
+        XCTAssertEqual(f2Param0.name, "c")
+        XCTAssertEqual(f2Param0.interfaceName, "b")
+        XCTAssertEqual(f2Param0.argumentName, "b")
 
-        let f3 = try XCTUnwrap(module.find(name: "f3")?.asFunc)
-        XCTAssertEqual(f3.parameters[safe: 0]?.argumentName, "d")
+        let f3Param0 = try XCTUnwrap(module.find(name: "f3")?.asFunc?.parameters[safe: 0])
+        XCTAssertEqual(f3Param0.name, "d")
+        XCTAssertEqual(f3Param0.interfaceName, "_")
+        XCTAssertEqual(f3Param0.argumentName, nil)
 
-        let f4 = try XCTUnwrap(module.find(name: "f4")?.asFunc)
-        XCTAssertEqual(f4.parameters.count, 1)
-        XCTAssertNil(f4.parameters[safe: 0]?.argumentName)
+        let f4Param0 = try XCTUnwrap(module.find(name: "f4")?.asFunc?.parameters[safe: 0])
+        XCTAssertEqual(f4Param0.name, nil)
+        XCTAssertEqual(f4Param0.interfaceName, nil)
+        XCTAssertEqual(f4Param0.argumentName, nil)
+
+        let f5Param0 = try XCTUnwrap(module.find(name: "f5")?.asFunc?.parameters[safe: 0])
+        XCTAssertEqual(f5Param0.name, "_")
+        XCTAssertEqual(f5Param0.interfaceName, nil)
+        XCTAssertEqual(f5Param0.argumentName, nil)
     }
 }
