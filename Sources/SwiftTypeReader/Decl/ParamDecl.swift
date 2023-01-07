@@ -17,7 +17,7 @@ public final class ParamDecl: ValueDecl {
     public var name: String?
     public var valueName: String? { name }
 
-    public var argumentName: String? { name ?? interfaceName }
+    public var argumentName: String? { interfaceName ?? name }
 
     public var typeRepr: any TypeRepr
 }
