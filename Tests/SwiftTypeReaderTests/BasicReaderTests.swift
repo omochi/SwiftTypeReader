@@ -939,6 +939,7 @@ func f2(b c: Int) {}
 func f3(_ d: Int) {}
 func f4(Int) {}
 func f5(_: Int) {}
+func f6(e _: Int) {}
 """)
 
         let f1Param0 = try XCTUnwrap(module.find(name: "f1")?.asFunc?.parameters[safe: 0])
@@ -975,5 +976,12 @@ func f5(_: Int) {}
         XCTAssertEqual(f5Param0.syntaxOuterName, nil)
         XCTAssertEqual(f5Param0.syntaxName, "_")
         XCTAssertEqual(f5Param0.interfaceName, nil)
+
+        let f6Param0 = try XCTUnwrap(module.find(name: "f6")?.asFunc?.parameters[safe: 0])
+        XCTAssertEqual(f6Param0.outerName, "e")
+        XCTAssertEqual(f6Param0.name, nil)
+        XCTAssertEqual(f6Param0.syntaxOuterName, "e")
+        XCTAssertEqual(f6Param0.syntaxName, "_")
+        XCTAssertEqual(f6Param0.interfaceName, "e")
     }
 }
