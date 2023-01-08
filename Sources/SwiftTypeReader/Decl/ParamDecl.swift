@@ -1,23 +1,29 @@
 public final class ParamDecl: ValueDecl {
     public init(
         context: any DeclContext,
-        interfaceName: String?,
+        outerName: String?,
         name: String?,
         typeRepr: any TypeRepr
     ) {
         self.context = context
-        self.interfaceName = interfaceName
+        self.outerName = outerName
         self.name = name
         self.typeRepr = typeRepr
     }
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
 
-    public var interfaceName: String?
+    public var outerName: String?
     public var name: String?
     public var valueName: String? { name }
 
-    public var argumentName: String? { interfaceName ?? name }
+    public var interfaceName: String? {
+        let interfaceName = outerName ?? name
+        if interfaceName == "_" {
+            return nil
+        }
+        return interfaceName
+    }
 
     public var typeRepr: any TypeRepr
 }

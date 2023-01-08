@@ -269,15 +269,14 @@ public struct Reader {
         param paramSyntax: FunctionParameterSyntax,
         on context: any DeclContext
     ) -> ParamDecl? {
-        var interfaceName: String? = nil
+        var outerName: String? = nil
         var name: String? = nil
 
         if let first = paramSyntax.firstName {
             if let second = paramSyntax.secondName {
-                interfaceName = first.text
+                outerName = first.text
                 name = second.text
             } else {
-                interfaceName = first.text
                 name = first.text
             }
         }
@@ -288,7 +287,7 @@ public struct Reader {
 
         return ParamDecl(
             context: context,
-            interfaceName: interfaceName,
+            outerName: outerName,
             name: name,
             typeRepr: typeRepr
         )
