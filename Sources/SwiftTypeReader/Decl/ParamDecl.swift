@@ -1,24 +1,38 @@
 public final class ParamDecl: ValueDecl {
     public init(
         context: any DeclContext,
-        outerName: String?,
-        name: String?,
+        syntaxOuterName: String?,
+        syntaxName: String?,
         typeRepr: any TypeRepr
     ) {
         self.context = context
-        self.outerName = outerName
-        self.name = name
+        self.syntaxOuterName = syntaxOuterName
+        self.syntaxName = syntaxName
         self.typeRepr = typeRepr
     }
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
 
-    public var outerName: String?
-    public var name: String?
+    public var syntaxOuterName: String?
+    public var syntaxName: String?
     public var valueName: String? { name }
 
+    public var outerName: String? {
+        if syntaxOuterName == "_" {
+            return nil
+        }
+        return syntaxOuterName
+    }
+
+    public var name: String? {
+        if syntaxName == "_" {
+            return nil
+        }
+        return syntaxName
+    }
+
     public var interfaceName: String? {
-        let interfaceName = outerName ?? name
+        let interfaceName = syntaxOuterName ?? syntaxName
         if interfaceName == "_" {
             return nil
         }

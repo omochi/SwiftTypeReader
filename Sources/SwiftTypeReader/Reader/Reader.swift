@@ -287,8 +287,8 @@ public struct Reader {
 
         return ParamDecl(
             context: context,
-            outerName: outerName,
-            name: name,
+            syntaxOuterName: outerName,
+            syntaxName: name,
             typeRepr: typeRepr
         )
     }

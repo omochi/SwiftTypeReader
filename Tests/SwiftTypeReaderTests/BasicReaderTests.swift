@@ -942,28 +942,38 @@ func f5(_: Int) {}
 """)
 
         let f1Param0 = try XCTUnwrap(module.find(name: "f1")?.asFunc?.parameters[safe: 0])
-        XCTAssertEqual(f1Param0.name, "a")
         XCTAssertEqual(f1Param0.outerName, nil)
+        XCTAssertEqual(f1Param0.name, "a")
+        XCTAssertEqual(f1Param0.syntaxOuterName, nil)
+        XCTAssertEqual(f1Param0.syntaxName, "a")
         XCTAssertEqual(f1Param0.interfaceName, "a")
 
         let f2Param0 = try XCTUnwrap(module.find(name: "f2")?.asFunc?.parameters[safe: 0])
-        XCTAssertEqual(f2Param0.name, "c")
         XCTAssertEqual(f2Param0.outerName, "b")
+        XCTAssertEqual(f2Param0.name, "c")
+        XCTAssertEqual(f2Param0.syntaxOuterName, "b")
+        XCTAssertEqual(f2Param0.syntaxName, "c")
         XCTAssertEqual(f2Param0.interfaceName, "b")
 
         let f3Param0 = try XCTUnwrap(module.find(name: "f3")?.asFunc?.parameters[safe: 0])
+        XCTAssertEqual(f3Param0.outerName, nil)
         XCTAssertEqual(f3Param0.name, "d")
-        XCTAssertEqual(f3Param0.outerName, "_")
+        XCTAssertEqual(f3Param0.syntaxOuterName, "_")
+        XCTAssertEqual(f3Param0.syntaxName, "d")
         XCTAssertEqual(f3Param0.interfaceName, nil)
 
         let f4Param0 = try XCTUnwrap(module.find(name: "f4")?.asFunc?.parameters[safe: 0])
-        XCTAssertEqual(f4Param0.name, nil)
         XCTAssertEqual(f4Param0.outerName, nil)
+        XCTAssertEqual(f4Param0.name, nil)
+        XCTAssertEqual(f4Param0.syntaxOuterName, nil)
+        XCTAssertEqual(f4Param0.syntaxName, nil)
         XCTAssertEqual(f4Param0.interfaceName, nil)
 
         let f5Param0 = try XCTUnwrap(module.find(name: "f5")?.asFunc?.parameters[safe: 0])
-        XCTAssertEqual(f5Param0.name, "_")
         XCTAssertEqual(f5Param0.outerName, nil)
+        XCTAssertEqual(f5Param0.name, nil)
+        XCTAssertEqual(f5Param0.syntaxOuterName, nil)
+        XCTAssertEqual(f5Param0.syntaxName, "_")
         XCTAssertEqual(f5Param0.interfaceName, nil)
     }
 }
