@@ -521,6 +521,8 @@ public struct Reader {
             underlyingTypeRepr: underlying
         )
 
+        alias.modifiers = readModifires(decls: decl.modifiers)
+
         alias.syntaxGenericParams = readGenericParamList(clause: decl.genericParameterClause, on: alias)
 
         return alias

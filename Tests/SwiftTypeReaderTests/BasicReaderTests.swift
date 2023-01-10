@@ -734,7 +734,7 @@ protocol P {
 
     func testTopLevelTypeAlias() throws {
         let module = try read("""
-typealias A = Int
+public typealias A = Int
 """
         )
 
@@ -743,6 +743,7 @@ typealias A = Int
         XCTAssertEqual(ad.genericParams.items.count, 0)
         XCTAssertEqual(ad.contextGenericSignature.description, "")
         XCTAssertEqual(ad.underlyingType.description, "Int")
+        XCTAssertTrue(ad.modifiers.contains(.public))
 
         let a = try XCTUnwrap(ad.declaredInterfaceType.asTypeAlias)
         XCTAssertEqual(a.description, "A")
