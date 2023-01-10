@@ -38,7 +38,6 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
                 .product(name: "Collections", package: "swift-collections"),
-                .product(name: "CodegenKit", package: "CodegenKit"),
             ]
         ),
         .testTarget(
