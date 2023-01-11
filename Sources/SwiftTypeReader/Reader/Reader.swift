@@ -4,9 +4,12 @@ import SwiftParser
 
 public struct Reader {
     public var context: Context
+#if !os(WASI)
     public var fileManager: FileManager
+#endif
     public var module: Module
 
+#if !os(WASI)
     public init(
         context: Context,
         fileManager: FileManager = .default,
@@ -16,7 +19,17 @@ public struct Reader {
         self.fileManager = fileManager
         self.module = module ?? context.getOrCreateModule(name: "main")
     }
+#else
+    public init(
+        context: Context,
+        module: Module? = nil
+    ) {
+        self.context = context
+        self.module = module ?? context.getOrCreateModule(name: "main")
+    }
+#endif
 
+#if !os(WASI)
     public func read(directory: URL) throws -> [SourceFile] {
         var sources: [SourceFile] = []
 
@@ -34,6 +47,7 @@ public struct Reader {
 
         return sources
     }
+#endif
 
     public func read(source: String, file: URL) -> SourceFile {
         return Reader.read(source: source, file: file, on: module)
