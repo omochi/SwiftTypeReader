@@ -39,10 +39,10 @@
     {
       "identity" : "swift-syntax",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-syntax",
+      "location" : "https://github.com/sidepelican/swift-syntax",
       "state" : {
-        "revision" : "72d3da66b085c2299dd287c2be3b92b5ebd226de",
-        "version" : "0.50700.1"
+        "branch" : "wasi",
+        "revision" : "24c34287f5567d2aeab360fd8e2de8e68b88492a"
       }
     },
     {

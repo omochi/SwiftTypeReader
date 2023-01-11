@@ -12,7 +12,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax", exact: "0.50700.1"),
+        .package(url: "https://github.com/sidepelican/swift-syntax", branch: "wasi"),
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
         .package(url: "https://github.com/omochi/CodegenKit", from: "1.1.3")
     ],

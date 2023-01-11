@@ -348,18 +348,17 @@ public struct Reader {
     }
 
     static func readVarAccessor(
-        accessor: Syntax,
+        accessor: PatternBindingSyntax.Accessor,
         on `var`: VarDecl
     ) -> [AccessorDecl] {
-        if accessor.is(CodeBlockSyntax.self) {
-            let accessor = AccessorDecl(var: `var`, modifiers: [], kind: .get)
-            return [accessor]
-        } else if let accessorsSyntax = accessor.as(AccessorBlockSyntax.self) {
-            return accessorsSyntax.accessors.compactMap {
+        switch accessor {
+        case .accessors(let accessorBlockSyntax):
+            return accessorBlockSyntax.accessors.compactMap {
                 readAccessor(accessor: $0, on: `var`)
             }
-        } else {
-            return []
+        case .getter:
+            let accessor = AccessorDecl(var: `var`, modifiers: [], kind: .get)
+            return [accessor]
         }
     }
 
@@ -423,12 +422,12 @@ public struct Reader {
     ) -> InitDecl {
         var modifiers = ModifierReader()
         modifiers.read(decls: initializerSyntax.modifiers)
-//        modifiers.read(token: initializerSyntax.asyncOrReasyncKeyword) // FIXME: not supported in SwiftSyntax 0.50700.1
-        modifiers.read(token: initializerSyntax.throwsOrRethrowsKeyword)
+        modifiers.read(token: initializerSyntax.signature.asyncOrReasyncKeyword)
+        modifiers.read(token: initializerSyntax.signature.throwsOrRethrowsKeyword)
 
         let `init` = InitDecl(context: context, modifiers: modifiers.modifiers)
 
-        `init`.parameters = initializerSyntax.parameters.parameterList.compactMap { (param) in
+        `init`.parameters = initializerSyntax.signature.input.parameterList.compactMap { (param) in
             readParam(param: param, on: `init`)
         }
 
@@ -512,8 +511,8 @@ public struct Reader {
 
         let name = decl.identifier.text
 
-        guard let underlyingSyntax = decl.initializer,
-              let underlying = TypeReprReader.read(type: underlyingSyntax.value) else { return nil }
+        let underlyingSyntax = decl.initializer
+        guard let underlying = TypeReprReader.read(type: underlyingSyntax.value) else { return nil }
 
         let alias = TypeAliasDecl(
             context: context,
