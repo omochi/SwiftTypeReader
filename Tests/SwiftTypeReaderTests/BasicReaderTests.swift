@@ -7,7 +7,7 @@ final class BasicReaderTests: ReaderTestCaseBase {
             let module = context.getOrCreateModule(name: "main")
             let reader = Reader(context: context, module: module)
 
-            let source = try reader.read(
+            let source = reader.read(
                 source: """
 struct S {
     var a: Int?
@@ -35,7 +35,7 @@ struct S {
     }
 
     func testSimpleStruct() throws {
-        let module = try read("""
+        let module = read("""
 struct S {
     var a: Int?
 }
@@ -75,7 +75,7 @@ struct S {
     }
 
     func testTwoStruct() throws {
-        let module = try read("""
+        let module = read("""
 struct S1 {
     var a: Int
     func b() -> S2 {}
@@ -116,7 +116,7 @@ public struct S2 {
     }
 
     func testUnknown() throws {
-        let module = try read("""
+        let module = read("""
 struct S {
     var a: URL
 }
@@ -132,7 +132,7 @@ struct S {
     }
 
     func testEnum() throws {
-        let module = try read("""
+        let module = read("""
 enum E {
     case a
     case b(Int)
@@ -182,7 +182,7 @@ enum E {
     }
 
     func testProtocol() throws {
-        let module = try read("""
+        let module = read("""
 protocol P: Encodable {
     associatedtype T: Decodable
 
@@ -282,7 +282,7 @@ protocol P: Encodable {
     }
 
     func testSimpleClass() throws {
-        let module = try read("""
+        let module = read("""
 class C {
     var a: Int?
     func f(s: S) throws {}
@@ -319,7 +319,7 @@ class C {
     }
 
     func testStructProperty() throws {
-        let module = try read("""
+        let module = read("""
 struct S {
     var a: Int { 0 }
     var b: Int = 0 {
@@ -363,7 +363,7 @@ struct S {
     }
 
     func testFunctionType() throws {
-        let module = try read("""
+        let module = read("""
 struct S {
     var a: (Int) -> Void
 }
@@ -379,7 +379,7 @@ struct S {
     }
 
     func testMethodInterfaceType() throws {
-        let module = try read("""
+        let module = read("""
 struct S {
     func f()
 }
@@ -401,7 +401,7 @@ protocol P {
     }
 
     func testInheritanceClause() throws {
-        let module = try read("""
+        let module = read("""
 struct S: Encodable {}
 
 enum E: Decodable {
@@ -427,7 +427,7 @@ enum E: Decodable {
     }
 
     func testGenericParameter() throws {
-        let module = try read("""
+        let module = read("""
 struct S<T> {
     var a: T
 }
@@ -452,7 +452,7 @@ struct S<T> {
     }
 
     func testIdentTypeRepr() throws {
-        let module = try read("""
+        let module = read("""
 struct S {
     var a: A.B
     var b: A.B.C
@@ -491,7 +491,7 @@ struct K {}
     }
 
     func testNestedTypeInStruct() throws {
-        let module = try read("""
+        let module = read("""
 struct A {
     struct B {}
 }
@@ -514,7 +514,7 @@ struct A {
     }
 
     func testNestedTypeInEnum() throws {
-        let module = try read("""
+        let module = read("""
 enum A {
     struct B {}
 }
@@ -534,7 +534,7 @@ enum A {
     }
 
     func testResolveNestedTypes() throws {
-        let module = try read("""
+        let module = read("""
 struct A {
     struct B {}
 
@@ -562,7 +562,7 @@ struct C {
     }
 
     func testImportDecl() throws {
-        let source = try Reader(
+        let source = Reader(
             context: context
         ).read(
             source: """
@@ -584,7 +584,7 @@ import struct Baz.S
 
     func testImportResolution() throws {
         let moduleA = context.getOrCreateModule(name: "A")
-        _ = try Reader(
+        _ = Reader(
             context: context,
             module: moduleA
         ).read(
@@ -595,7 +595,7 @@ public struct X {}
         )
 
         let moduleB = context.getOrCreateModule(name: "B")
-        _ = try Reader(
+        _ = Reader(
             context: context,
             module: moduleB
         ).read(
@@ -611,7 +611,7 @@ public enum X {}
             module: moduleC
         )
 
-        _ = try reader.read(
+        _ = reader.read(
             source: """
 import A
 
@@ -622,7 +622,7 @@ struct S {
             file: URL(fileURLWithPath: "S.swift")
         )
 
-        _ = try reader.read(
+        _ = reader.read(
             source: """
 import B
 
@@ -647,7 +647,7 @@ struct K {
 
     func testScopedImport() throws {
         let a = context.getOrCreateModule(name: "A")
-        _ = try Reader(context: context, module: a).read(
+        _ = Reader(context: context, module: a).read(
             source: """
 struct S {}
 struct K {}
@@ -659,7 +659,7 @@ struct K {}
         let aK = try XCTUnwrap(a.find(name: "K")?.asStruct)
 
         let main = context.getOrCreateModule(name: "main")
-        let mainSource = try Reader(context: context, module: main).read(
+        let mainSource = Reader(context: context, module: main).read(
             source: """
 import struct A.S
 """,
@@ -693,7 +693,7 @@ import struct A.S
 
     func testModules() throws {
         let myLib = context.getOrCreateModule(name: "MyLib")
-        _ = try Reader(
+        _ = Reader(
             context: context,
             module: myLib
         ).read(
@@ -706,7 +706,7 @@ public enum E {
         )
 
         let main = context.getOrCreateModule(name: "main")
-        let mainSource = try Reader(
+        let mainSource = Reader(
             context: context,
             module: main
         ).read(
@@ -733,7 +733,7 @@ protocol P {
     }
 
     func testTopLevelTypeAlias() throws {
-        let module = try read("""
+        let module = read("""
 public typealias A = Int
 """
         )
@@ -754,7 +754,7 @@ public typealias A = Int
     }
 
     func testNestedTypeAlias() throws {
-        let module = try read("""
+        let module = read("""
 struct S {
     typealias A = Int
 }
@@ -776,7 +776,7 @@ struct S {
     }
 
     func testSpecializedTypeAlias() throws {
-        let module = try read("""
+        let module = read("""
 struct K<T> {}
 
 struct S {
@@ -800,7 +800,7 @@ struct S {
     }
 
     func testGenericTypeAlias() throws {
-        let module = try read("""
+        let module = read("""
 struct K<T> {}
 
 struct S {
@@ -834,7 +834,7 @@ struct D {
     }
 
     func testOuterParamTypeAlias() throws {
-        let module = try read("""
+        let module = read("""
 struct K<T> {}
 
 struct S<V> {
@@ -867,7 +867,7 @@ struct D {
     }
 
     func testOuterParamGenericTypeAlias() throws {
-        let module = try read("""
+        let module = read("""
 struct K<T, U> {}
 
 struct S<V> {
@@ -901,7 +901,7 @@ struct D {
     }
 
     func testTopLevelFunc() throws {
-        let module = try read("""
+        let module = read("""
 public func f() {
 }
 """)
@@ -912,7 +912,7 @@ public func f() {
     }
 
     func testInitializer() throws {
-        let module = try read("""
+        let module = read("""
 struct S {
     init() {}
 }
@@ -934,7 +934,7 @@ class C {
     }
 
     func testParamDecl() throws {
-        let module = try read("""
+        let module = read("""
 func f1(a: Int) {}
 func f2(b c: Int) {}
 func f3(_ d: Int) {}

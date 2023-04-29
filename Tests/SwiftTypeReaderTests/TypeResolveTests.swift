@@ -3,7 +3,7 @@ import SwiftTypeReader
 
 final class TypeResolveTests: ReaderTestCaseBase {
     func testResolveFullPath() throws {
-        let module = try read("""
+        let module = read("""
 struct G<T> {}
 
 struct A {
@@ -111,7 +111,7 @@ struct A {
     }
 
     func testFromContext() throws {
-        let module = try read("""
+        let module = read("""
 struct A {
     struct A {
         struct A {
@@ -289,7 +289,7 @@ struct A {
 
     func testCrossModuleResolve() throws {
         let moduleX = context.getOrCreateModule(name: "X")
-        _ = try Reader(
+        _ = Reader(
             context: context,
             module: moduleX
         ).read(
@@ -306,7 +306,7 @@ struct Int {
             module: moduleY
         )
 
-        _ = try readerY.read(
+        _ = readerY.read(
             source: """
 struct A {
     struct Int {
@@ -317,7 +317,7 @@ struct A {
             file: URL(fileURLWithPath: "y.swift")
         )
 
-        let y2Swift = try readerY.read(
+        let y2Swift = readerY.read(
             source: """
 import X
 """,

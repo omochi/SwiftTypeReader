@@ -3,7 +3,7 @@ import SwiftTypeReader
 
 final class GenericsTests: ReaderTestCaseBase {
     func testSubst() throws {
-        let module = try read("""
+        let module = read("""
 struct S<T> {
     var a: T
 }
@@ -31,7 +31,7 @@ struct K {
     }
 
     func testNestedSubst() throws {
-        let module = try read("""
+        let module = read("""
 struct O<T> {
     struct S<U> {
         var a: T
@@ -66,7 +66,7 @@ struct K {
     }
 
     func testSubstParam() throws {
-        let module = try read("""
+        let module = read("""
 struct S<T> {
     var a: T
 }

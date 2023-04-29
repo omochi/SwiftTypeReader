@@ -12,9 +12,9 @@ class ReaderTestCaseBase: XCTestCase {
         context = nil
     }
 
-    func read(_ source: String, file: StaticString = #file, line: UInt = #line) throws -> Module {
+    func read(_ source: String, file: StaticString = #file, line: UInt = #line) -> Module {
         let reader = Reader(context: context!)
-        _ = try reader.read(source: source, file: URL(fileURLWithPath: "main.swift"))
+        _ = reader.read(source: source, file: URL(fileURLWithPath: "main.swift"))
         return reader.module
     }
 }
