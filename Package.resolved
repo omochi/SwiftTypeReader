@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/omochi/CodegenKit",
       "state" : {
-        "revision" : "b4d72f1908ea73d53cd20ebc24b1687793109f2e",
-        "version" : "1.1.3"
+        "revision" : "b3df97750a2a456e546fa4f66ab84ab764145dcb",
+        "version" : "1.3.0"
       }
     },
     {
@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-format",
       "state" : {
-        "revision" : "5f184220d032a019a63df457cdea4b9c8241e911",
-        "version" : "0.50700.1"
+        "revision" : "3330aaa0a97fe07e764a4dc9bb032b23df3a948f",
+        "version" : "508.0.0"
       }
     },
     {
@@ -41,8 +41,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-syntax",
       "state" : {
-        "revision" : "72d3da66b085c2299dd287c2be3b92b5ebd226de",
-        "version" : "0.50700.1"
+        "revision" : "cd793adf5680e138bf2bcbaacc292490175d0dcd",
+        "version" : "508.0.0"
       }
     },
     {
@@ -59,8 +59,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-tools-support-core.git",
       "state" : {
-        "revision" : "4f07be3dc201f6e2ee85b6942d0c220a16926811",
-        "version" : "0.2.7"
+        "revision" : "93784c59434dbca8e8a9e4b700d0d6d94551da6a",
+        "version" : "0.5.2"
       }
     }
   ],

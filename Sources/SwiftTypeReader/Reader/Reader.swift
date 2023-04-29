@@ -1,6 +1,6 @@
 import Foundation
 import SwiftSyntax
-import SwiftSyntaxParser
+import SwiftParser
 
 public struct Reader {
     public var context: Context
@@ -28,15 +28,15 @@ public struct Reader {
 
             let string = try String(contentsOf: file)
             sources.append(
-                try read(source: string, file: file)
+                read(source: string, file: file)
             )
         }
 
         return sources
     }
 
-    public func read(source: String, file: URL) throws -> SourceFile {
-        return try Reader.read(source: source, file: file, on: module)
+    public func read(source: String, file: URL) -> SourceFile {
+        return Reader.read(source: source, file: file, on: module)
     }
 
     static func unescapeIdentifier(_ str: String) -> String {
@@ -46,8 +46,8 @@ public struct Reader {
     static func read(
         source sourceString: String, file: URL,
         on module: Module
-    ) throws -> SourceFile {
-        let sourceSyntax: SourceFileSyntax = try SyntaxParser.parse(source: sourceString)
+    ) -> SourceFile {
+        let sourceSyntax: SourceFileSyntax = Parser.parse(source: sourceString)
 
         let statements = sourceSyntax.statements.map { $0.item }
 
@@ -348,18 +348,17 @@ public struct Reader {
     }
 
     static func readVarAccessor(
-        accessor: Syntax,
+        accessor: PatternBindingSyntax.Accessor,
         on `var`: VarDecl
     ) -> [AccessorDecl] {
-        if accessor.is(CodeBlockSyntax.self) {
+        switch accessor {
+        case .getter:
             let accessor = AccessorDecl(var: `var`, modifiers: [], kind: .get)
             return [accessor]
-        } else if let accessorsSyntax = accessor.as(AccessorBlockSyntax.self) {
+        case .accessors(let accessorsSyntax):
             return accessorsSyntax.accessors.compactMap {
                 readAccessor(accessor: $0, on: `var`)
             }
-        } else {
-            return []
         }
     }
 
@@ -421,14 +420,15 @@ public struct Reader {
         initializer initializerSyntax: InitializerDeclSyntax,
         on context: any DeclContext
     ) -> InitDecl {
+        let signatureSyntax = initializerSyntax.signature
+
         var modifiers = ModifierReader()
         modifiers.read(decls: initializerSyntax.modifiers)
-//        modifiers.read(token: initializerSyntax.asyncOrReasyncKeyword) // FIXME: not supported in SwiftSyntax 0.50700.1
-        modifiers.read(token: initializerSyntax.throwsOrRethrowsKeyword)
+        modifiers.read(token: signatureSyntax.asyncOrReasyncKeyword)
+        modifiers.read(token: signatureSyntax.throwsOrRethrowsKeyword)
 
         let `init` = InitDecl(context: context, modifiers: modifiers.modifiers)
-
-        `init`.parameters = initializerSyntax.parameters.parameterList.compactMap { (param) in
+        `init`.parameters = signatureSyntax.input.parameterList.compactMap { (param) in
             readParam(param: param, on: `init`)
         }
 
@@ -512,8 +512,9 @@ public struct Reader {
 
         let name = decl.identifier.text
 
-        guard let underlyingSyntax = decl.initializer,
-              let underlying = TypeReprReader.read(type: underlyingSyntax.value) else { return nil }
+        let underlyingSyntax = decl.initializer
+
+        guard let underlying = TypeReprReader.read(type: underlyingSyntax.value) else { return nil }
 
         let alias = TypeAliasDecl(
             context: context,

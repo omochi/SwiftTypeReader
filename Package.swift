@@ -12,9 +12,9 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax", exact: "0.50700.1"),
+        .package(url: "https://github.com/apple/swift-syntax", exact: "508.0.0"),
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
-        .package(url: "https://github.com/omochi/CodegenKit", from: "1.1.3")
+        .package(url: "https://github.com/omochi/CodegenKit", from: "1.3.0")
     ],
     targets: [
         .executableTarget(
@@ -36,7 +36,7 @@ let package = Package(
         .target(
             name: "SwiftTypeReader",
             dependencies: [
-                .product(name: "SwiftSyntaxParser", package: "swift-syntax"),
+                .product(name: "SwiftParser", package: "swift-syntax"),
                 .product(name: "Collections", package: "swift-collections"),
             ]
         ),
