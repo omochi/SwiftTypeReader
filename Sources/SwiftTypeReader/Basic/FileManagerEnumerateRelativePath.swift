@@ -1,5 +1,6 @@
 import Foundation
 
+#if !os(WASI)
 extension FileManager {
     func enumerateRelative(
         path: URL,
@@ -46,3 +47,4 @@ struct EnumerateRelativePath: Sequence {
         )
     }
 }
+#endif
