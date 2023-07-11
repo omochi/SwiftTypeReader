@@ -181,6 +181,29 @@ enum E {
         )
     }
 
+    func testEnumRawValue() throws {
+        let module = read("""
+enum E: String {
+    case a
+    case b = "B"
+    case c = -1
+    case d = 42
+}
+"""
+        )
+
+        let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
+
+        let a = try XCTUnwrap(e.find(name: "a")?.asEnumCaseElement)
+        XCTAssertNil(a.rawValue)
+        let b = try XCTUnwrap(e.find(name: "b")?.asEnumCaseElement)
+        XCTAssertEqual(b.rawValue, .string("B"))
+        let c = try XCTUnwrap(e.find(name: "c")?.asEnumCaseElement)
+        XCTAssertEqual(c.rawValue, .integer(-1))
+        let d = try XCTUnwrap(e.find(name: "d")?.asEnumCaseElement)
+        XCTAssertEqual(d.rawValue, .integer(42))
+    }
+
     func testProtocol() throws {
         let module = read("""
 protocol P: Encodable {

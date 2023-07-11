@@ -229,7 +229,21 @@ public struct Reader {
         on enum: EnumDecl
     ) -> EnumCaseElementDecl {
         let name = elementSyntax.identifier.text
-        let element = EnumCaseElementDecl(enum: `enum`, name: name)
+
+        var rawValue: EnumCaseElementDecl.LiteralExpr?
+        if let string = elementSyntax.rawValue?.value.as(StringLiteralExprSyntax.self),
+           let value = string.segments.first?.as(StringSegmentSyntax.self)?.content.text {
+            rawValue = .string(value)
+        } else if let integer = elementSyntax.rawValue?.value.as(IntegerLiteralExprSyntax.self),
+                  let value = Int(integer.digits.text) {
+            rawValue = .integer(value)
+        } else if let prefix = elementSyntax.rawValue?.value.as(PrefixOperatorExprSyntax.self),
+                  let integer = prefix.postfixExpression.as(IntegerLiteralExprSyntax.self),
+                  let value = Int(integer.digits.text) {
+            rawValue = .integer(-value)
+        }
+        
+        let element = EnumCaseElementDecl(enum: `enum`, name: name, rawValue: rawValue)
 
         element.associatedValues = Reader.readParamList(
             paramList: elementSyntax.associatedValue?.parameterList,
