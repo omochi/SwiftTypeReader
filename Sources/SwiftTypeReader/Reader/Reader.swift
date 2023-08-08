@@ -228,7 +228,7 @@ public struct Reader {
         element elementSyntax: EnumCaseElementSyntax,
         on enum: EnumDecl
     ) -> EnumCaseElementDecl {
-        let name = elementSyntax.identifier.text
+        let name = Reader.unescapeIdentifier(elementSyntax.identifier.text)
 
         var rawValue: EnumCaseElementDecl.LiteralExpr?
         if let string = elementSyntax.rawValue?.value.as(StringLiteralExprSyntax.self),

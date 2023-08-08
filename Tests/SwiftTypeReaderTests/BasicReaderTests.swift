@@ -1008,4 +1008,21 @@ func f6(e _: Int) {}
         XCTAssertEqual(f6Param0.syntaxName, "_")
         XCTAssertEqual(f6Param0.interfaceName, "e")
     }
+
+    func testUnescapeIdentifier() throws {
+        let module = read("""
+struct S {
+    var `class`: Int
+}
+enum E {
+    case `class`
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        XCTAssertEqual(s.storedProperties[safe: 0]?.name, "class")
+
+        let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
+        XCTAssertEqual(e.caseElements[safe: 0]?.name, "class")
+    }
 }
