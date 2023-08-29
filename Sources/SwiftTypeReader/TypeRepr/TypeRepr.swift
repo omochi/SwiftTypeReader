@@ -8,6 +8,7 @@ extension TypeRepr {
     public var asIdent: IdentTypeRepr? { self as? IdentTypeRepr }
     public var asMetatype: MetatypeTypeRepr? { self as? MetatypeTypeRepr }
     public var asTuple: TupleTypeRepr? { self as? TupleTypeRepr }
+    public var asComposition: CompositionTypeRepr? { self as? CompositionTypeRepr }
     // @end
 
     public func resolve(from context: any DeclContext) -> any SType {

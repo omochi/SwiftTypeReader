@@ -449,6 +449,34 @@ enum E: Decodable {
         }
     }
 
+    func testComplexInheritanceClause() throws {
+        let module = read("""
+struct S: Encodable & Sendable {
+}
+
+class C: (Sendable) {
+}
+
+enum E: (Encodable & (Decodable)) & C {
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        XCTAssertEqual(s.inheritedTypes.count, 2)
+        XCTAssertEqual(s.inheritedTypes[safe: 0]?.asProtocol?.name, "Encodable")
+        XCTAssertEqual(s.inheritedTypes[safe: 1]?.asProtocol?.name, "Sendable")
+
+        let c = try XCTUnwrap(module.find(name: "C")?.asClass)
+        XCTAssertEqual(c.inheritedTypes.count, 1)
+        XCTAssertEqual(c.inheritedTypes[safe: 0]?.asProtocol?.name, "Sendable")
+
+        let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
+        XCTAssertEqual(e.inheritedTypes.count, 3)
+        XCTAssertEqual(e.inheritedTypes[safe: 0]?.asProtocol?.name, "Encodable")
+        XCTAssertEqual(e.inheritedTypes[safe: 1]?.asProtocol?.name, "Decodable")
+        XCTAssertEqual(e.inheritedTypes[safe: 2]?.asClass?.name, "C")
+    }
+
     func testGenericParameter() throws {
         let module = read("""
 struct S<T> {
