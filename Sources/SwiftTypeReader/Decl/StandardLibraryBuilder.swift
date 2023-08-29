@@ -72,6 +72,11 @@ struct StandardLibraryBuilder {
         addProtocol(name: "Decodable")
         addProtocol(name: "Codable")
         addProtocol(name: "Sendable")
+        addProtocol(name: "Hashable")
+        addProtocol(name: "Equatable")
+        addProtocol(name: "RawRepresentable")
+        addProtocol(name: "Error")
+        addProtocol(name: "Identifiable")
 
         module.sources.append(source)
 
