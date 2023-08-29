@@ -4,7 +4,17 @@ public protocol TypeDecl: ValueDecl {
 
 extension TypeDecl {
     public var inheritedTypes: [any SType] {
-        inheritedTypeReprs.map { $0.resolve(from: innermostContext) }
+        func unwrap(repr: any TypeRepr) -> [any TypeRepr] {
+            if let tuple = repr.asTuple {
+                return tuple.elements.flatMap(unwrap(repr:))
+            } else if let composition = repr.asComposition {
+                return composition.elements.flatMap(unwrap(repr:))
+            } else {
+                return [repr]
+            }
+        }
+        return inheritedTypeReprs.flatMap(unwrap(repr:))
+            .map { $0.resolve(from: innermostContext) }
     }
 
     public var declaredInterfaceType: any SType {

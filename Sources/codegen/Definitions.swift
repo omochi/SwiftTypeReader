@@ -108,7 +108,8 @@ struct Definitions {
         .init(.typeRepr, "function"),
         .init(.typeRepr, "ident"),
         .init(.typeRepr, "metatype"),
-        .init(.typeRepr, "tuple")
+        .init(.typeRepr, "tuple"),
+        .init(.typeRepr, "composition"),
     ]
 
     func nodes(kind: Node.Kind) -> [Node] {

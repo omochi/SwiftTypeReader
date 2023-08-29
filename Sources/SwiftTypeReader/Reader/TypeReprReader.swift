@@ -21,6 +21,10 @@ struct TypeReprReader {
             return read(member: member)
         } else if let simple = type.as(SimpleTypeIdentifierSyntax.self) {
             return read(simple: simple)
+        } else if let composition = type.as(CompositionTypeSyntax.self) {
+            return read(composition: composition)
+        } else if let tuple = type.as(TupleTypeSyntax.self) {
+            return read(tuple: tuple)
         } else if let optional = type.as(OptionalTypeSyntax.self) {
             return read(optional: optional)
         } else if let array = type.as(ArrayTypeSyntax.self) {
@@ -61,6 +65,22 @@ struct TypeReprReader {
         return IdentTypeRepr(
             name: simple.name.text,
             genericArgs: args
+        )
+    }
+
+    static func read(composition: CompositionTypeSyntax) -> (any TypeRepr)? {
+        return CompositionTypeRepr(
+            elements: composition.elements.compactMap { (element) in
+                read(type: element.type)
+            }
+        )
+    }
+
+    static func read(tuple: TupleTypeSyntax) -> (any TypeRepr)? {
+        return TupleTypeRepr(
+            elements: tuple.elements.compactMap { (element) in
+                read(type: element.type)
+            }
         )
     }
 
