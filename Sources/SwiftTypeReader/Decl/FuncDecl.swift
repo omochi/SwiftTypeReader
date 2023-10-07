@@ -16,7 +16,7 @@ public final class FuncDecl: ValueDecl & DeclContext {
     public var name: String
     public var valueName: String? { name }
 
-    public var parameters: [ParamDecl]
+    public var parameters: [FuncParamDecl]
     @AnyTypeReprOptionalStorage public var resultTypeRepr: (any TypeRepr)?
 
     public var resultInterfaceType: any SType {

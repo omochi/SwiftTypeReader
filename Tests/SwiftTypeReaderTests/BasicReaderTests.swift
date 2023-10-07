@@ -165,12 +165,12 @@ enum E {
 
         XCTAssertEqual(c.associatedValues.count, 2)
 
-        let x = try XCTUnwrap(c.find(name: "x")?.asParam)
+        let x = try XCTUnwrap(c.find(name: "x")?.asCaseParam)
         XCTAssertIdentical(c.associatedValues[safe: 0], x)
         XCTAssertEqual(x.name, "x")
         XCTAssertEqual(x.interfaceType.asNominal?.name, "Int")
 
-        let y = try XCTUnwrap(c.find(name: "y")?.asParam)
+        let y = try XCTUnwrap(c.find(name: "y")?.asCaseParam)
         XCTAssertIdentical(c.associatedValues[safe: 1], y)
         XCTAssertEqual(y.name, "y")
         XCTAssertEqual(y.interfaceType.asNominal?.name, "String")

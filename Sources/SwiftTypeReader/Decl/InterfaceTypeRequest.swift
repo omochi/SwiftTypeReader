@@ -11,7 +11,9 @@ struct InterfaceTypeRequest: Request {
             return ModuleType(decl: decl)
         case let decl as VarDecl:
             return decl.typeRepr.resolve(from: decl.context)
-        case let decl as ParamDecl:
+        case let decl as CaseParamDecl:
+            return decl.typeRepr.resolve(from: decl.context)
+        case let decl as FuncParamDecl:
             return decl.typeRepr.resolve(from: decl.context)
         case let decl as FuncDecl:
             return functionType(func: decl)
@@ -112,7 +114,7 @@ extension [DeclModifier] {
     }
 }
 
-extension [ParamDecl] {
+extension [FuncParamDecl] {
     fileprivate var asFunctionTypeParams: [FunctionType.Param] {
         map { (param) in
             let type = param.interfaceType

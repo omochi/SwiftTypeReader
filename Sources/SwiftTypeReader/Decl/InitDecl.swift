@@ -13,7 +13,7 @@ public final class InitDecl: ValueDecl & DeclContext {
     public var modifiers: [DeclModifier]
     public var valueName: String? { nil }
 
-    public var parameters: [ParamDecl]
+    public var parameters: [FuncParamDecl]
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.value {

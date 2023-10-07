@@ -278,7 +278,7 @@ public struct Reader {
     static func readParamList(
         paramList paramListSyntax: EnumCaseParameterListSyntax?,
         on context: any DeclContext
-    ) -> [ParamDecl] {
+    ) -> [CaseParamDecl] {
         guard let paramListSyntax else { return [] }
         return paramListSyntax.compactMap { (paramSyntax) in
             readParam(param: paramSyntax, on: context)
@@ -288,7 +288,7 @@ public struct Reader {
     static func readParam(
         param paramSyntax: EnumCaseParameterSyntax,
         on context: any DeclContext
-    ) -> ParamDecl? {
+    ) -> CaseParamDecl? {
         var outerName: String? = nil
         let name: String?
 
@@ -305,7 +305,7 @@ public struct Reader {
 
         guard let typeRepr = TypeReprReader.read(type: paramSyntax.type) else { return nil }
 
-        return ParamDecl(
+        return CaseParamDecl(
             context: context,
             syntaxOuterName: outerName,
             syntaxName: name,
@@ -316,7 +316,7 @@ public struct Reader {
     static func readParamList(
         paramList paramListSyntax: FunctionParameterListSyntax?,
         on context: any DeclContext
-    ) -> [ParamDecl] {
+    ) -> [FuncParamDecl] {
         guard let paramListSyntax else { return [] }
         return paramListSyntax.compactMap { (paramSyntax) in
             readParam(param: paramSyntax, on: context)
@@ -326,7 +326,7 @@ public struct Reader {
     static func readParam(
         param paramSyntax: FunctionParameterSyntax,
         on context: any DeclContext
-    ) -> ParamDecl? {
+    ) -> FuncParamDecl? {
         var outerName: String? = nil
         let name: String
 
@@ -340,7 +340,7 @@ public struct Reader {
 
         guard let typeRepr = TypeReprReader.read(type: paramSyntax.type) else { return nil }
 
-        return ParamDecl(
+        return FuncParamDecl(
             context: context,
             syntaxOuterName: outerName,
             syntaxName: name,
