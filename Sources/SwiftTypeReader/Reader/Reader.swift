@@ -84,13 +84,13 @@ public struct Reader {
         return source
     }
 
-    static func readMembers(block: MemberBlockSyntax, on context: any DeclContext) -> [any ValueDecl] {
+    static func readMembers(block: MemberBlockSyntax, on context: some DeclContext) -> [any ValueDecl] {
         return block.members.flatMap {
             readMember(decl: $0.decl, on: context)
         }
     }
 
-    static func readMember(decl: DeclSyntax, on context: any DeclContext) -> [any ValueDecl] {
+    static func readMember(decl: DeclSyntax, on context: some DeclContext) -> [any ValueDecl] {
         if let type = readNominalType(decl: decl, on: context) {
             return [type]
         } else if let type = readTypeAlias(decl: decl, on: context) {
@@ -110,7 +110,7 @@ public struct Reader {
         }
     }
 
-    static func readNominalType(decl: DeclSyntax, on context: any DeclContext) -> (any NominalTypeDecl)? {
+    static func readNominalType(decl: DeclSyntax, on context: some DeclContext) -> (any NominalTypeDecl)? {
         if let decl = decl.as(StructDeclSyntax.self) {
             return readStruct(struct: decl, on: context)
         } else if let decl = decl.as(EnumDeclSyntax.self) {
@@ -124,7 +124,7 @@ public struct Reader {
         }
     }
 
-    static func readStruct(struct structSyntax: StructDeclSyntax, on context: any DeclContext) -> StructDecl? {
+    static func readStruct(struct structSyntax: StructDeclSyntax, on context: some DeclContext) -> StructDecl? {
         let name = structSyntax.name.text
 
         let `struct` = StructDecl(context: context, name: name)
@@ -146,7 +146,7 @@ public struct Reader {
         return `struct`
     }
 
-    static func readEnum(enum enumSyntax: EnumDeclSyntax, on context: any DeclContext) -> EnumDecl? {
+    static func readEnum(enum enumSyntax: EnumDeclSyntax, on context: some DeclContext) -> EnumDecl? {
         let name = enumSyntax.name.text
 
         let `enum` = EnumDecl(context: context, name: name)
@@ -170,7 +170,7 @@ public struct Reader {
 
     static func readProtocol(
         `protocol` protocolSyntax: ProtocolDeclSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> ProtocolDecl? {
         let name = protocolSyntax.name.text
 
@@ -189,7 +189,7 @@ public struct Reader {
 
     static func readClass(
         class classSyntax: ClassDeclSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> ClassDecl? {
         let name = classSyntax.name.text
 
@@ -214,7 +214,7 @@ public struct Reader {
 
     static func readCaseElements(
         decl: DeclSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> [EnumCaseElementDecl]? {
         guard let caseDecl = decl.as(EnumCaseDeclSyntax.self),
               let `enum` = context.asEnum else { return nil }
@@ -255,7 +255,7 @@ public struct Reader {
 
     static func readAssociatedType(
         decl: DeclSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> AssociatedTypeDecl? {
         guard let decl = decl.as(AssociatedTypeDeclSyntax.self),
               let `protocol` = context.asProtocol else { return nil }
@@ -277,7 +277,7 @@ public struct Reader {
 
     static func readParamList(
         paramList paramListSyntax: EnumCaseParameterListSyntax?,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> [CaseParamDecl] {
         guard let paramListSyntax else { return [] }
         return paramListSyntax.compactMap { (paramSyntax) in
@@ -287,7 +287,7 @@ public struct Reader {
 
     static func readParam(
         param paramSyntax: EnumCaseParameterSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> CaseParamDecl? {
         var outerName: String? = nil
         let name: String?
@@ -315,7 +315,7 @@ public struct Reader {
 
     static func readParamList(
         paramList paramListSyntax: FunctionParameterListSyntax?,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> [FuncParamDecl] {
         guard let paramListSyntax else { return [] }
         return paramListSyntax.compactMap { (paramSyntax) in
@@ -325,7 +325,7 @@ public struct Reader {
 
     static func readParam(
         param paramSyntax: FunctionParameterSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> FuncParamDecl? {
         var outerName: String? = nil
         let name: String
@@ -348,14 +348,14 @@ public struct Reader {
         )
     }
 
-    static func readVars(decl: DeclSyntax, on context: any DeclContext) -> [VarDecl]? {
+    static func readVars(decl: DeclSyntax, on context: some DeclContext) -> [VarDecl]? {
         guard let decl = decl.as(VariableDeclSyntax.self) else { return nil }
         return readVars(var: decl, on: context)
     }
 
     static func readVars(
         `var`: VariableDeclSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> [VarDecl] {
         return `var`.bindings.compactMap { (binding) in
             readVar(var: `var`, binding: binding, on: context)
@@ -365,7 +365,7 @@ public struct Reader {
     static func readVar(
         `var` varSyntax: VariableDeclSyntax,
         binding: PatternBindingSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> VarDecl? {
         guard let ident = binding.pattern.as(IdentifierPatternSyntax.self) else {
             return nil
@@ -434,14 +434,14 @@ public struct Reader {
         return AccessorDecl(var: `var`, modifiers: modifiers.modifiers, kind: kind)
     }
 
-    static func readFunc(decl: DeclSyntax, on context: any DeclContext) -> FuncDecl? {
+    static func readFunc(decl: DeclSyntax, on context: some DeclContext) -> FuncDecl? {
         guard let decl = decl.as(FunctionDeclSyntax.self) else { return nil }
         return readFunc(function: decl, on: context)
     }
 
     static func readFunc(
         function functionSyntax: FunctionDeclSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> FuncDecl {
         let name = functionSyntax.name.text
 
@@ -467,14 +467,14 @@ public struct Reader {
         return `func`
     }
 
-    static func readInit(decl: DeclSyntax, on context: any DeclContext) -> InitDecl? {
+    static func readInit(decl: DeclSyntax, on context: some DeclContext) -> InitDecl? {
         guard let decl = decl.as(InitializerDeclSyntax.self) else { return nil }
         return readInit(initializer: decl, on: context)
     }
 
     static func readInit(
         initializer initializerSyntax: InitializerDeclSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> InitDecl {
         let signatureSyntax = initializerSyntax.signature
 
@@ -501,7 +501,7 @@ public struct Reader {
 
     static func readGenericParamList(
         clause: GenericParameterClauseSyntax?,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> GenericParamList {
         guard let clause else {
             return GenericParamList([])
@@ -511,7 +511,7 @@ public struct Reader {
 
     static func readGenericParamList(
         clause: GenericParameterClauseSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> GenericParamList {
         return GenericParamList(
             clause.parameters.map { (paramSyntax) in
@@ -522,7 +522,7 @@ public struct Reader {
 
     static func readGenericParam(
         param paramSyntax: GenericParameterSyntax,
-        on context: any DeclContext
+        on context: some DeclContext
     ) -> GenericParamDecl {
         let param = GenericParamDecl(
             context: context,
@@ -563,7 +563,7 @@ public struct Reader {
         }
     }
 
-    static func readTypeAlias(decl: DeclSyntax, on context: any DeclContext) -> TypeAliasDecl? {
+    static func readTypeAlias(decl: DeclSyntax, on context: some DeclContext) -> TypeAliasDecl? {
         guard let decl = decl.as(TypeAliasDeclSyntax.self) else { return nil }
 
         let name = decl.name.text
