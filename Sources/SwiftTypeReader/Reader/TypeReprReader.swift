@@ -17,9 +17,9 @@ struct TypeReprReader {
     }
 
     static func read(type: TypeSyntax) -> (any TypeRepr)? {
-        if let member = type.as(MemberTypeIdentifierSyntax.self) {
+        if let member = type.as(MemberTypeSyntax.self) {
             return read(member: member)
-        } else if let simple = type.as(SimpleTypeIdentifierSyntax.self) {
+        } else if let simple = type.as(IdentifierTypeSyntax.self) {
             return read(simple: simple)
         } else if let composition = type.as(CompositionTypeSyntax.self) {
             return read(composition: composition)
@@ -38,7 +38,7 @@ struct TypeReprReader {
         }
     }
 
-    static func read(member: MemberTypeIdentifierSyntax) -> (any TypeRepr)? {
+    static func read(member: MemberTypeSyntax) -> (any TypeRepr)? {
         guard var repr = read(
             type: member.baseType
         )?.asIdent,
@@ -57,7 +57,7 @@ struct TypeReprReader {
         return repr
     }
 
-    static func read(simple: SimpleTypeIdentifierSyntax) -> (any TypeRepr)? {
+    static func read(simple: IdentifierTypeSyntax) -> (any TypeRepr)? {
         guard let args = Reader.readGenericArguments(
             clause: simple.genericArgumentClause
         ) else { return nil }
@@ -97,7 +97,7 @@ struct TypeReprReader {
 
     static func read(array: ArrayTypeSyntax) -> (any TypeRepr)? {
         guard let element = read(
-            type: array.elementType
+            type: array.element
         ) else { return nil }
 
         return IdentTypeRepr(
@@ -108,10 +108,10 @@ struct TypeReprReader {
 
     static func read(dictionary: DictionaryTypeSyntax) -> (any TypeRepr)? {
         guard let key = read(
-            type: dictionary.keyType
+            type: dictionary.key
         ),
               let value = read(
-                type: dictionary.valueType
+                type: dictionary.value
               ) else { return nil }
 
         return IdentTypeRepr(
@@ -121,14 +121,14 @@ struct TypeReprReader {
     }
 
     static func read(function: FunctionTypeSyntax) -> FunctionTypeRepr? {
-        guard let params = read(params: function.arguments),
-              let result = read(type: function.returnType) else {
+        guard let params = read(params: function.parameters),
+              let result = read(type: function.returnClause.type) else {
             return nil
         }
         return FunctionTypeRepr(
             params: params,
-            hasAsync: function.asyncKeyword != nil,
-            hasThrows: function.throwsOrRethrowsKeyword != nil,
+            hasAsync: function.effectSpecifiers?.asyncSpecifier != nil,
+            hasThrows: function.effectSpecifiers?.throwsSpecifier != nil,
             result: result
         )
     }
