@@ -84,7 +84,7 @@ public struct Reader {
         return source
     }
 
-    static func readMembers(block: MemberDeclBlockSyntax, on context: any DeclContext) -> [any ValueDecl] {
+    static func readMembers(block: MemberBlockSyntax, on context: any DeclContext) -> [any ValueDecl] {
         return block.members.flatMap {
             readMember(decl: $0.decl, on: context)
         }
@@ -125,7 +125,7 @@ public struct Reader {
     }
 
     static func readStruct(struct structSyntax: StructDeclSyntax, on context: any DeclContext) -> StructDecl? {
-        let name = structSyntax.identifier.text
+        let name = structSyntax.name.text
 
         let `struct` = StructDecl(context: context, name: name)
 
@@ -140,21 +140,21 @@ public struct Reader {
         )
 
         `struct`.members = readMembers(
-            block: structSyntax.members, on: `struct`
+            block: structSyntax.memberBlock, on: `struct`
         )
 
         return `struct`
     }
 
     static func readEnum(enum enumSyntax: EnumDeclSyntax, on context: any DeclContext) -> EnumDecl? {
-        let name = enumSyntax.identifier.text
+        let name = enumSyntax.name.text
 
         let `enum` = EnumDecl(context: context, name: name)
 
         `enum`.modifiers = readModifires(decls: enumSyntax.modifiers)
 
         `enum`.syntaxGenericParams = readGenericParamList(
-            clause: enumSyntax.genericParameters, on: `enum`
+            clause: enumSyntax.genericParameterClause, on: `enum`
         )
 
         `enum`.inheritedTypeReprs = readInheritedTypes(
@@ -162,7 +162,7 @@ public struct Reader {
         )
 
         `enum`.members = readMembers(
-            block: enumSyntax.members, on: `enum`
+            block: enumSyntax.memberBlock, on: `enum`
         )
 
         return `enum`
@@ -172,7 +172,7 @@ public struct Reader {
         `protocol` protocolSyntax: ProtocolDeclSyntax,
         on context: any DeclContext
     ) -> ProtocolDecl? {
-        let name = protocolSyntax.identifier.text
+        let name = protocolSyntax.name.text
 
         let `protocol` = ProtocolDecl(context: context, name: name)
 
@@ -182,7 +182,7 @@ public struct Reader {
             inheritance: protocolSyntax.inheritanceClause
         )
 
-        `protocol`.members = readMembers(block: protocolSyntax.members, on: `protocol`)
+        `protocol`.members = readMembers(block: protocolSyntax.memberBlock, on: `protocol`)
 
         return `protocol`
     }
@@ -191,7 +191,7 @@ public struct Reader {
         class classSyntax: ClassDeclSyntax,
         on context: any DeclContext
     ) -> ClassDecl? {
-        let name = classSyntax.identifier.text
+        let name = classSyntax.name.text
 
         let `class` = ClassDecl(context: context, name: name)
 
@@ -206,7 +206,7 @@ public struct Reader {
         )
 
         `class`.members = readMembers(
-            block: classSyntax.members, on: `class`
+            block: classSyntax.memberBlock, on: `class`
         )
 
         return `class`
@@ -246,7 +246,7 @@ public struct Reader {
         let element = EnumCaseElementDecl(enum: `enum`, name: name, rawValue: rawValue)
 
         element.associatedValues = Reader.readParamList(
-            paramList: (elementSyntax.associatedValue?.parameters),
+            paramList: (elementSyntax.parameterClause?.parameters),
             on: element
         )
 

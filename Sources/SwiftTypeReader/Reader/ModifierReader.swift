@@ -22,13 +22,13 @@ struct ModifierReader {
         read(decl: decl)
     }
 
-    mutating func read(decls: ModifierListSyntax) {
+    mutating func read(decls: DeclModifierListSyntax) {
         for decl in decls {
             read(decl: decl)
         }
     }
 
-    mutating func read(decls: ModifierListSyntax?) {
+    mutating func read(decls: DeclModifierListSyntax?) {
         guard let decls else { return }
         read(decls: decls)
     }
