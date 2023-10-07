@@ -3,10 +3,10 @@
     {
       "identity" : "codegenkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/sidepelican/CodegenKit",
+      "location" : "https://github.com/omochi/CodegenKit",
       "state" : {
-        "branch" : "swiftsyntax509",
-        "revision" : "410ed94860783d5d1de37554e6f9a5b7e4036772"
+        "branch" : "main",
+        "revision" : "b660db16ade8b34e12cf9b703cbba76e6408501a"
       }
     },
     {
