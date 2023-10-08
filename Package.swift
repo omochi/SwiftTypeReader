@@ -1,4 +1,4 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.7
 
 import PackageDescription
 
@@ -12,9 +12,9 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax", exact: "508.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax", exact: "509.0.0"),
         .package(url: "https://github.com/apple/swift-collections", from: "1.0.4"),
-        .package(url: "https://github.com/omochi/CodegenKit", from: "1.3.0")
+        .package(url: "https://github.com/omochi/CodegenKit", branch: "main")
     ],
     targets: [
         .executableTarget(

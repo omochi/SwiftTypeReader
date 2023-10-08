@@ -17,7 +17,8 @@ extension Decl {
     public var asInit: InitDecl? { self as? InitDecl }
     public var asModule: Module? { self as? Module }
     public var asNominalType: (any NominalTypeDecl)? { self as? any NominalTypeDecl }
-    public var asParam: ParamDecl? { self as? ParamDecl }
+    public var asCaseParam: CaseParamDecl? { self as? CaseParamDecl }
+    public var asFuncParam: FuncParamDecl? { self as? FuncParamDecl }
     public var asProtocol: ProtocolDecl? { self as? ProtocolDecl }
     public var asSourceFile: SourceFile? { self as? SourceFile }
     public var asStruct: StructDecl? { self as? StructDecl }

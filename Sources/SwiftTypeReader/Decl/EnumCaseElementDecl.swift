@@ -16,7 +16,7 @@ public final class EnumCaseElementDecl: ValueDecl & DeclContext {
 
     public var name: String
     public var valueName: String? { name }
-    public var associatedValues: [ParamDecl]
+    public var associatedValues: [CaseParamDecl]
     public var rawValue: LiteralExpr?
 
     public func find(name: String, options: LookupOptions) -> (any Decl)? {

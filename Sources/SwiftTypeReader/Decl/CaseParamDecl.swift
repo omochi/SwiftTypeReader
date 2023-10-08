@@ -1,4 +1,4 @@
-public final class ParamDecl: ValueDecl {
+public final class CaseParamDecl: ValueDecl {
     public init(
         context: any DeclContext,
         syntaxOuterName: String?,
@@ -42,7 +42,7 @@ public final class ParamDecl: ValueDecl {
     public var typeRepr: any TypeRepr
 }
 
-extension [ParamDecl] {
+extension [CaseParamDecl] {
     public func find(name: String, options: LookupOptions) -> (any Decl)? {
         if options.value {
             if let param = self.first(where: { $0.name == name }) {
