@@ -3,7 +3,7 @@
     {
       "identity" : "codegenkit",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/omochi/CodegenKit.git",
+      "location" : "https://github.com/omochi/CodegenKit",
       "state" : {
         "revision" : "56cc81d142f5d073fe0695b20f0a1ed7f68e2fc6",
         "version" : "1.4.1"
