@@ -129,6 +129,8 @@ public struct Reader {
 
         let `struct` = StructDecl(context: context, name: name)
 
+        `struct`.comment = structSyntax.leadingTrivia.description
+
         `struct`.modifiers = readModifires(decls: structSyntax.modifiers)
         
         `struct`.syntaxGenericParams = readGenericParamList(

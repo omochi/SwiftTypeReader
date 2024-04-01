@@ -36,6 +36,7 @@ struct S {
 
     func testSimpleStruct() throws {
         let module = read("""
+/// comment
 struct S {
     var a: Int?
 }
@@ -45,6 +46,7 @@ struct S {
         let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
         XCTAssertEqual(s.name, "S")
 
+        XCTAssertEqual(s.comment, "/// comment\n")
         XCTAssertEqual(s.moduleContext.name, "main")
 
         let a = try XCTUnwrap(s.find(name: "a")?.asVar)
