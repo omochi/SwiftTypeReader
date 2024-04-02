@@ -4,6 +4,7 @@ public final class ClassDecl: NominalTypeDecl {
         name: String
     ) {
         self.context = context
+        self.comment = ""
         self.modifiers = []
         self.name = name
         self.syntaxGenericParams = .init()
@@ -13,6 +14,7 @@ public final class ClassDecl: NominalTypeDecl {
 
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
+    public var comment: String
     public var modifiers: [DeclModifier]
     public var name: String
     public var syntaxGenericParams: GenericParamList

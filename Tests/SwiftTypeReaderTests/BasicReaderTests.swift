@@ -36,6 +36,7 @@ struct S {
 
     func testSimpleStruct() throws {
         let module = read("""
+/// comment
 struct S {
     var a: Int?
 }
@@ -45,6 +46,7 @@ struct S {
         let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
         XCTAssertEqual(s.name, "S")
 
+        XCTAssertEqual(s.comment, "/// comment\n")
         XCTAssertEqual(s.moduleContext.name, "main")
 
         let a = try XCTUnwrap(s.find(name: "a")?.asVar)
@@ -1044,5 +1046,39 @@ enum E {
 
         let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
         XCTAssertEqual(e.caseElements[safe: 0]?.name, "class")
+    }
+
+    func testComment() throws {
+        let module = read("""
+import FoundationEssentials
+
+/// doc comment
+@MainActor
+class C {
+}
+// Which side does this comment attach
+// and multiline
+protocol P {
+}
+
+/* floating */
+
+private enum E {
+    // nested
+    @available(*, unavailable) struct S {}
+}
+""")
+
+        let c = try XCTUnwrap(module.find(name: "C")?.asClass)
+        XCTAssertEqual(c.comment, "\n\n/// doc comment\n")
+
+        let p = try XCTUnwrap(module.find(name: "P")?.asProtocol)
+        XCTAssertEqual(p.comment, "\n// Which side does this comment attach\n// and multiline\n")
+
+        let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
+        XCTAssertEqual(e.comment, "\n\n/* floating */\n\n")
+
+        let s = try XCTUnwrap(e.find(name: "S")?.asStruct)
+        XCTAssertEqual(s.comment, "\n    // nested\n    ")
     }
 }
