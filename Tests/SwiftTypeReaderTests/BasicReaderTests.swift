@@ -1047,4 +1047,33 @@ enum E {
         let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
         XCTAssertEqual(e.caseElements[safe: 0]?.name, "class")
     }
+
+    func testComment() throws {
+        let module = read("""
+import FoundationEssentials
+
+/// doc comment
+@MainActor
+class C {
+}
+// Which side does this comment attach
+// and multiline
+protocol P {
+}
+
+/* floating */
+
+private enum E {
+}
+""")
+
+        let c = try XCTUnwrap(module.find(name: "C")?.asClass)
+        XCTAssertEqual(c.comment, "\n\n/// doc comment\n")
+
+        let p = try XCTUnwrap(module.find(name: "P")?.asProtocol)
+        XCTAssertEqual(p.comment, "\n// Which side does this comment attach\n// and multiline\n")
+
+        let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
+        XCTAssertEqual(e.comment, "\n\n/* floating */\n\n")
+    }
 }

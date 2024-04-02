@@ -1,4 +1,5 @@
 public protocol NominalTypeDecl: GenericTypeDecl {
+    var comment: String { get }
     var name: String { get }
     var members: [any ValueDecl] { get }
 

@@ -153,6 +153,8 @@ public struct Reader {
 
         let `enum` = EnumDecl(context: context, name: name)
 
+        `enum`.comment = enumSyntax.leadingTrivia.description
+
         `enum`.modifiers = readModifires(decls: enumSyntax.modifiers)
 
         `enum`.syntaxGenericParams = readGenericParamList(
@@ -178,6 +180,8 @@ public struct Reader {
 
         let `protocol` = ProtocolDecl(context: context, name: name)
 
+        `protocol`.comment = protocolSyntax.leadingTrivia.description
+
         `protocol`.modifiers = readModifires(decls: protocolSyntax.modifiers)
 
         `protocol`.inheritedTypeReprs = readInheritedTypes(
@@ -196,6 +200,8 @@ public struct Reader {
         let name = classSyntax.name.text
 
         let `class` = ClassDecl(context: context, name: name)
+
+        `class`.comment = classSyntax.leadingTrivia.description
 
         `class`.modifiers = readModifires(decls: classSyntax.modifiers)
 
