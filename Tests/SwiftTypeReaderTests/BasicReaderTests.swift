@@ -1064,6 +1064,8 @@ protocol P {
 /* floating */
 
 private enum E {
+    // nested
+    @available(*, unavailable) struct S {}
 }
 """)
 
@@ -1075,5 +1077,8 @@ private enum E {
 
         let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
         XCTAssertEqual(e.comment, "\n\n/* floating */\n\n")
+
+        let s = try XCTUnwrap(e.find(name: "S")?.asStruct)
+        XCTAssertEqual(s.comment, "\n    // nested\n    ")
     }
 }
