@@ -63,6 +63,7 @@ struct StandardLibraryBuilder {
         addStruct(name: "Float32")
         addStruct(name: "Float64")
         addStruct(name: "Double")
+        addStruct(name: "Character")
         addStruct(name: "String")
         addEnum(name: "Optional", genericParams: ["Wrapped"])
         addStruct(name: "Array", genericParams: ["Element"])
