@@ -13,4 +13,17 @@ public enum DeclModifier: String, Hashable {
     case `fileprivate`
     case `internal`
     case `open`
+
+    public var isStatic: Bool {
+        switch self {
+        case .`static`, .`class`: return true
+        default: return false
+        }
+    }
+}
+
+extension [DeclModifier] {
+    public var isStatic: Bool {
+        contains { $0.isStatic }
+    }
 }

@@ -45,3 +45,13 @@ public final class VarDecl: ValueDecl {
         }
     }
 }
+
+extension [VarDecl] {
+    public var instances: [VarDecl] {
+        filter { !$0.modifiers.isStatic }
+    }
+
+    public var statics: [VarDecl] {
+        filter { $0.modifiers.isStatic }
+    }
+}
