@@ -67,6 +67,7 @@ struct StandardLibraryBuilder {
         addStruct(name: "String")
         addEnum(name: "Optional", genericParams: ["Wrapped"])
         addStruct(name: "Array", genericParams: ["Element"])
+        addStruct(name: "Set", genericParams: ["Element"])
         addStruct(name: "Dictionary", genericParams: ["Key", "Value"])
 
         addProtocol(name: "Encodable")
