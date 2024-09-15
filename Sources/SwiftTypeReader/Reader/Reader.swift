@@ -437,7 +437,7 @@ public struct Reader {
         var modifiers = ModifierReader()
         modifiers.read(decl: accessorSyntax.modifier)
         modifiers.read(token: accessorSyntax.effectSpecifiers?.asyncSpecifier)
-        modifiers.read(token: accessorSyntax.effectSpecifiers?.throwsSpecifier)
+        modifiers.read(token: accessorSyntax.effectSpecifiers?.throwsClause?.throwsSpecifier)
 
         return AccessorDecl(var: `var`, modifiers: modifiers.modifiers, kind: kind)
     }
@@ -456,7 +456,7 @@ public struct Reader {
         var modifiers = ModifierReader()
         modifiers.read(decls: functionSyntax.modifiers)
         modifiers.read(token: functionSyntax.signature.effectSpecifiers?.asyncSpecifier)
-        modifiers.read(token: functionSyntax.signature.effectSpecifiers?.throwsSpecifier)
+        modifiers.read(token: functionSyntax.signature.effectSpecifiers?.throwsClause?.throwsSpecifier)
 
         let `func` = FuncDecl(
             context: context,
@@ -489,7 +489,7 @@ public struct Reader {
         var modifiers = ModifierReader()
         modifiers.read(decls: initializerSyntax.modifiers)
         modifiers.read(token: signatureSyntax.effectSpecifiers?.asyncSpecifier)
-        modifiers.read(token: signatureSyntax.effectSpecifiers?.throwsSpecifier)
+        modifiers.read(token: signatureSyntax.effectSpecifiers?.throwsClause?.throwsSpecifier)
 
         let `init` = InitDecl(context: context, modifiers: modifiers.modifiers)
         `init`.parameters = signatureSyntax.parameterClause.parameters.compactMap { (param) in

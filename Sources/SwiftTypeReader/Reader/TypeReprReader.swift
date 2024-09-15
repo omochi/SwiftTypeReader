@@ -128,7 +128,7 @@ struct TypeReprReader {
         return FunctionTypeRepr(
             params: params,
             hasAsync: function.effectSpecifiers?.asyncSpecifier != nil,
-            hasThrows: function.effectSpecifiers?.throwsSpecifier != nil,
+            hasThrows: function.effectSpecifiers?.throwsClause?.throwsSpecifier != nil,
             result: result
         )
     }
