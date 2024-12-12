@@ -1094,8 +1094,23 @@ enum E {
     case `class`
 }
 
-@MyMacro
+@MyMacro @MainActor
 public protocol P {
+    func foo()
+}
+
+@objc class C: UIView, P {
+    @objc(initWithValue:)
+    init(value: String) {
+        self.value = value
+    }
+
+    @_implements(P, foo)
+    func foo2() { }
+
+    func foo() { }
+
+    @Invalidating(.display) var value: String
 }
 """)
 
@@ -1106,6 +1121,18 @@ public protocol P {
         XCTAssertEqual(e.attributes.map(\.name), ["available"])
 
         let p = try XCTUnwrap(module.find(name: "P")?.asProtocol)
-        XCTAssertEqual(p.attributes.map(\.name), ["MyMacro"])
+        XCTAssertEqual(p.attributes.map(\.name), ["MyMacro", "MainActor"])
+
+        let c = try XCTUnwrap(module.find(name: "C")?.asClass)
+        XCTAssertEqual(p.attributes.map(\.name), ["objc"])
+
+        let cInit = try XCTUnwrap(c.find(name: "init")?.asInit)
+        XCTAssertEqual(cInit.attributes.map(\.name), ["objc"])
+
+        let cFoo = try XCTUnwrap(c.find(name: "foo2")?.asFunc)
+        XCTAssertEqual(cFoo.attributes.map(\.name), ["_implements"])
+
+        let cValue = try XCTUnwrap(c.find(name: "value")?.asVar)
+        XCTAssertEqual(cValue.attributes.map(\.name), ["Invalidating"])
     }
 }
