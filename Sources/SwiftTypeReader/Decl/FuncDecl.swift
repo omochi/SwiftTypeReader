@@ -1,17 +1,18 @@
 public final class FuncDecl: ValueDecl & DeclContext {
     public init(
         context: any DeclContext,
-        modifiers: [DeclModifier],
         name: String
     ) {
         self.context = context
-        self.modifiers = modifiers
+        self.attributes = []
+        self.modifiers = []
         self.name = name
         self.parameters = []
     }
 
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
+    public var attributes: [Attribute]
     public var modifiers: [DeclModifier]
     public var name: String
     public var valueName: String? { name }

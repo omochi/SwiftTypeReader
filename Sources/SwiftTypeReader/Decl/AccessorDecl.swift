@@ -17,16 +17,19 @@ public enum AccessorKind: String {
 public final class AccessorDecl: ValueDecl {
     public init(
         `var`: VarDecl,
+        attributes: [Attribute],
         modifiers: [DeclModifier],
         kind: AccessorKind
     ) {
         self.var = `var`
+        self.attributes = attributes
         self.modifiers = modifiers
         self.kind = kind
     }
 
     public unowned var `var`: VarDecl
     public var parentContext: (any DeclContext)? { `var`.parentContext }
+    public var attributes: [Attribute]
     public var modifiers: [DeclModifier]
     public var kind: AccessorKind
     public var valueName: String? { nil }

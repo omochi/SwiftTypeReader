@@ -1081,4 +1081,31 @@ private enum E {
         let s = try XCTUnwrap(e.find(name: "S")?.asStruct)
         XCTAssertEqual(s.comment, "\n    // nested\n    ")
     }
+
+    func testAttributes() throws {
+        let module = read("""
+@MainActor
+struct S {
+}
+
+@available(*, unavailable) 
+// comment
+enum E {
+    case `class`
+}
+
+@MyMacro
+public protocol P {
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        XCTAssertEqual(s.attributes.map(\.name), ["MainActor"])
+
+        let e = try XCTUnwrap(module.find(name: "E")?.asEnum)
+        XCTAssertEqual(e.attributes.map(\.name), ["available"])
+
+        let p = try XCTUnwrap(module.find(name: "P")?.asProtocol)
+        XCTAssertEqual(p.attributes.map(\.name), ["MyMacro"])
+    }
 }

@@ -4,12 +4,14 @@ public final class InitDecl: ValueDecl & DeclContext {
         modifiers: [DeclModifier]
     ) {
         self.context = context
+        self.attributes = []
         self.modifiers = modifiers
         self.parameters = []
     }
 
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
+    public var attributes: [Attribute]
     public var modifiers: [DeclModifier]
     public var valueName: String? { nil }
 

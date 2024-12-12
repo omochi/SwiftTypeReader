@@ -398,11 +398,11 @@ public struct Reader {
 
         let `var` = VarDecl(
             context: context,
-            modifiers: modifiers.modifiers,
             kind: kind,
             name: name,
             typeRepr: typeRepr
         )
+        `var`.modifiers = modifiers.modifiers
 
         if let accessor = binding.accessorBlock {
             `var`.accessors += readVarAccessor(accessor: accessor.accessors, on: `var`)
@@ -460,9 +460,10 @@ public struct Reader {
 
         let `func` = FuncDecl(
             context: context,
-            modifiers: modifiers.modifiers,
             name: name
         )
+
+        `func`.modifiers = modifiers.modifiers
 
         `func`.parameters = functionSyntax.signature.parameterClause.parameters.compactMap { (param) in
             readParam(param: param, on: `func`)
