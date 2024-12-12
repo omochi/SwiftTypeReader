@@ -1124,9 +1124,9 @@ public protocol P {
         XCTAssertEqual(p.attributes.map(\.name), ["MyMacro", "MainActor"])
 
         let c = try XCTUnwrap(module.find(name: "C")?.asClass)
-        XCTAssertEqual(p.attributes.map(\.name), ["objc"])
+        XCTAssertEqual(c.attributes.map(\.name), ["objc"])
 
-        let cInit = try XCTUnwrap(c.find(name: "init")?.asInit)
+        let cInit = try XCTUnwrap(c.initializers.first)
         XCTAssertEqual(cInit.attributes.map(\.name), ["objc"])
 
         let cFoo = try XCTUnwrap(c.find(name: "foo2")?.asFunc)

@@ -131,6 +131,7 @@ public struct Reader {
 
         `struct`.comment = structSyntax.leadingTrivia.description
 
+        `struct`.attributes = readAttributes(list: structSyntax.attributes)
         `struct`.modifiers = readModifires(decls: structSyntax.modifiers)
         
         `struct`.syntaxGenericParams = readGenericParamList(
@@ -155,6 +156,7 @@ public struct Reader {
 
         `enum`.comment = enumSyntax.leadingTrivia.description
 
+        `enum`.attributes = readAttributes(list: enumSyntax.attributes)
         `enum`.modifiers = readModifires(decls: enumSyntax.modifiers)
 
         `enum`.syntaxGenericParams = readGenericParamList(
@@ -182,6 +184,7 @@ public struct Reader {
 
         `protocol`.comment = protocolSyntax.leadingTrivia.description
 
+        `protocol`.attributes = readAttributes(list: protocolSyntax.attributes)
         `protocol`.modifiers = readModifires(decls: protocolSyntax.modifiers)
 
         `protocol`.inheritedTypeReprs = readInheritedTypes(
@@ -203,6 +206,7 @@ public struct Reader {
 
         `class`.comment = classSyntax.leadingTrivia.description
 
+        `class`.attributes = readAttributes(list: classSyntax.attributes)
         `class`.modifiers = readModifires(decls: classSyntax.modifiers)
 
         `class`.syntaxGenericParams = readGenericParamList(
@@ -393,16 +397,14 @@ public struct Reader {
             return nil
         }
 
-        var modifiers = ModifierReader()
-        modifiers.read(decls: varSyntax.modifiers)
-
         let `var` = VarDecl(
             context: context,
             kind: kind,
             name: name,
             typeRepr: typeRepr
         )
-        `var`.modifiers = modifiers.modifiers
+        `var`.attributes = readAttributes(list: varSyntax.attributes)
+        `var`.modifiers = readModifires(decls: varSyntax.modifiers)
 
         if let accessor = binding.accessorBlock {
             `var`.accessors += readVarAccessor(accessor: accessor.accessors, on: `var`)
@@ -417,7 +419,7 @@ public struct Reader {
     ) -> [AccessorDecl] {
         switch accessor {
         case .getter:
-            let accessor = AccessorDecl(var: `var`, modifiers: [], kind: .get)
+            let accessor = AccessorDecl(var: `var`, attributes: [], modifiers: [], kind: .get)
             return [accessor]
         case .accessors(let declList):
             return declList.compactMap {
@@ -434,12 +436,15 @@ public struct Reader {
             return nil
         }
 
+        var attributes = AttributeReader()
+        attributes.read(list: accessorSyntax.attributes)
+
         var modifiers = ModifierReader()
         modifiers.read(decl: accessorSyntax.modifier)
         modifiers.read(token: accessorSyntax.effectSpecifiers?.asyncSpecifier)
         modifiers.read(token: accessorSyntax.effectSpecifiers?.throwsClause?.throwsSpecifier)
 
-        return AccessorDecl(var: `var`, modifiers: modifiers.modifiers, kind: kind)
+        return AccessorDecl(var: `var`, attributes: attributes.attributes, modifiers: modifiers.modifiers, kind: kind)
     }
 
     static func readFunc(decl: DeclSyntax, on context: some DeclContext) -> FuncDecl? {
@@ -463,6 +468,7 @@ public struct Reader {
             name: name
         )
 
+        `func`.attributes = readAttributes(list: functionSyntax.attributes)
         `func`.modifiers = modifiers.modifiers
 
         `func`.parameters = functionSyntax.signature.parameterClause.parameters.compactMap { (param) in
@@ -493,11 +499,20 @@ public struct Reader {
         modifiers.read(token: signatureSyntax.effectSpecifiers?.throwsClause?.throwsSpecifier)
 
         let `init` = InitDecl(context: context, modifiers: modifiers.modifiers)
+        `init`.attributes = readAttributes(list: initializerSyntax.attributes)
         `init`.parameters = signatureSyntax.parameterClause.parameters.compactMap { (param) in
             readParam(param: param, on: `init`)
         }
 
         return `init`
+    }
+
+    static func readAttributes(
+        list: AttributeListSyntax
+    ) -> [Attribute] {
+        var reader = AttributeReader()
+        reader.read(list: list)
+        return reader.attributes
     }
 
     static func readModifires(
