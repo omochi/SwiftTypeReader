@@ -5,6 +5,7 @@ public final class TypeAliasDecl: GenericTypeDecl {
         underlyingTypeRepr: any TypeRepr
     ) {
         self.context = context
+        self.attributes = []
         self.modifiers = []
         self.name = name
         self.syntaxGenericParams = .init()
@@ -13,6 +14,7 @@ public final class TypeAliasDecl: GenericTypeDecl {
 
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
+    public var attributes: [Attribute]
     public var modifiers: [DeclModifier]
     public var name: String
     public var valueName: String? { name }

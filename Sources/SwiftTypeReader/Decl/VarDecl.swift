@@ -11,13 +11,13 @@ public enum PropertyKind: Hashable {
 public final class VarDecl: ValueDecl {
     public init(
         context: any DeclContext,
-        modifiers: [DeclModifier],
         kind: VarKind,
         name: String,
         typeRepr: any TypeRepr
     ) {
         self.context = context
-        self.modifiers = modifiers
+        self.attributes = []
+        self.modifiers = []
         self.kind = kind
         self.name = name
         self.typeRepr = typeRepr
@@ -26,6 +26,7 @@ public final class VarDecl: ValueDecl {
 
     public unowned var context: any DeclContext
     public var parentContext: (any DeclContext)? { context }
+    public var attributes: [Attribute]
     public var modifiers: [DeclModifier]
     public var kind: VarKind
     public var name: String
