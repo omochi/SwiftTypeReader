@@ -568,7 +568,8 @@ public struct Reader {
         clause: GenericArgumentClauseSyntax
     ) -> [any TypeRepr]? {
         return clause.arguments.compactMap {
-            TypeReprReader.read(type: $0.argument)
+            guard let type = $0.argument.as(TypeSyntax.self) else { return nil }
+            return TypeReprReader.read(type: type)
         }
     }
 
