@@ -38,6 +38,7 @@ let package = Package(
             name: "SwiftTypeReader",
             dependencies: [
                 .product(name: "SwiftParser", package: "swift-syntax"),
+                .product(name: "SwiftIfConfig", package: "swift-syntax"),
                 .product(name: "Collections", package: "swift-collections"),
             ]
         ),

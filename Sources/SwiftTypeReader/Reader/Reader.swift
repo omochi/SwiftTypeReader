@@ -1,6 +1,7 @@
 import Foundation
 import SwiftSyntax
 import SwiftParser
+import SwiftIfConfig
 
 public struct Reader {
     public var context: Context
@@ -8,25 +9,30 @@ public struct Reader {
     public var fileManager: FileManager
 #endif
     public var module: Module
+    public var buildConfiguration: (any BuildConfiguration)?
 
 #if !os(WASI)
     public init(
         context: Context,
         fileManager: FileManager = .default,
-        module: Module? = nil
+        module: Module? = nil,
+        buildConfiguration: (any BuildConfiguration)? = nil
     ) {
         self.context = context
         self.fileManager = fileManager
         self.module = module ?? context.getOrCreateModule(name: "main")
+        self.buildConfiguration = buildConfiguration
     }
 
 #else
     public init(
         context: Context,
-        module: Module? = nil
+        module: Module? = nil,
+        buildConfiguration: (any BuildConfiguration)?
     ) {
         self.context = context
         self.module = module ?? context.getOrCreateModule(name: "main")
+        self.buildConfiguration = buildConfiguration
     }
 #endif
 
@@ -51,7 +57,7 @@ public struct Reader {
 #endif
 
     public func read(source: String, file: URL) -> SourceFile {
-        return Reader.read(source: source, file: file, on: module)
+        return Reader.read(source: source, file: file, on: module, buildConfiguration: buildConfiguration)
     }
 
     static func unescapeIdentifier(_ str: String) -> String {
@@ -60,24 +66,34 @@ public struct Reader {
 
     static func read(
         source sourceString: String, file: URL,
-        on module: Module
+        on module: Module,
+        buildConfiguration: (any BuildConfiguration)?
     ) -> SourceFile {
         let sourceSyntax: SourceFileSyntax = Parser.parse(source: sourceString)
         let source = SourceFile(module: module, file: file)
-        ReaderVisitor(source: source).walk(sourceSyntax)
+        let configuration: any BuildConfiguration = buildConfiguration ?? StaticBuildConfiguration(
+            languageVersion: VersionTuple(components: [6, 0]),
+            compilerVersion: VersionTuple(components: [6, 0])
+        )
+        ReaderVisitor(
+            source: source,
+            configuration: configuration
+        ).walk(sourceSyntax)
         module.sources.append(source)
 
         return source
     }
 
-    private final class ReaderVisitor: SyntaxVisitor {
+    private final class ReaderVisitor: ActiveSyntaxVisitor {
         let source: SourceFile
         var contextStack: [any DeclContext]
-
-        init(source: SourceFile) {
+        init(
+            source: SourceFile,
+            configuration: some BuildConfiguration
+        ) {
             self.source = source
             self.contextStack = [source]
-            super.init(viewMode: .sourceAccurate)
+            super.init(viewMode: .sourceAccurate, configuration: configuration)
         }
 
         var currentContext: any DeclContext {
