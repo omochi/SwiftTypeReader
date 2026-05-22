@@ -192,6 +192,11 @@ public struct Reader {
             }
             return .skipChildren
         }
+
+        override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
+            // extension is not yet supported
+            return .skipChildren
+        }
     }
 
     static func readStruct(struct structSyntax: StructDeclSyntax, on context: some DeclContext) -> StructDecl {

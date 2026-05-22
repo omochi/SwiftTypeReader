@@ -1135,4 +1135,19 @@ public protocol P {
         let cValue = try XCTUnwrap(c.find(name: "value")?.asVar)
         XCTAssertEqual(cValue.attributes.map(\.name), ["Invalidating"])
     }
+
+    func testIgnoreExtension() throws {
+        let module = read("""
+struct S {
+}
+
+extension S {
+    typealias Foo = String
+}
+""")
+
+        let s = try XCTUnwrap(module.find(name: "S")?.asStruct)
+        XCTAssertNil(s.find(name: "Foo"))
+        XCTAssertNil(module.find(name: "Foo"))
+    }
 }
