@@ -19,6 +19,7 @@ public struct Reader {
         self.fileManager = fileManager
         self.module = module ?? context.getOrCreateModule(name: "main")
     }
+
 #else
     public init(
         context: Context,
@@ -62,69 +63,122 @@ public struct Reader {
         on module: Module
     ) -> SourceFile {
         let sourceSyntax: SourceFileSyntax = Parser.parse(source: sourceString)
-
-        let statements = sourceSyntax.statements.map { $0.item }
-
         let source = SourceFile(module: module, file: file)
-
-        for decl in statements.compactMap({ $0.as(DeclSyntax.self) }) {
-            if let type = readNominalType(decl: decl, on: source) {
-                source.types.append(type)
-            } else if let type = readTypeAlias(decl: decl, on: source) {
-                source.types.append(type)
-            } else if let `import` = readImport(decl: decl, on: source) {
-                source.imports.append(`import`)
-            } else if let `func` = readFunc(decl: decl, on: source) {
-                source.funcs.append(`func`)
-            }
-        }
-
+        ReaderVisitor(source: source).walk(sourceSyntax)
         module.sources.append(source)
 
         return source
     }
 
-    static func readMembers(block: MemberBlockSyntax, on context: some DeclContext) -> [any ValueDecl] {
-        return block.members.flatMap {
-            readMember(decl: $0.decl, on: context)
+    private final class ReaderVisitor: SyntaxVisitor {
+        let source: SourceFile
+        var contextStack: [any DeclContext]
+
+        init(source: SourceFile) {
+            self.source = source
+            self.contextStack = [source]
+            super.init(viewMode: .sourceAccurate)
+        }
+
+        var currentContext: any DeclContext {
+            contextStack.last!
+        }
+
+        override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+            let decl = Reader.readStruct(struct: node, on: currentContext)
+            currentContext.append(decl: decl)
+            contextStack.append(decl)
+            return .visitChildren
+        }
+
+        override func visitPost(_ node: StructDeclSyntax) {
+            contextStack.removeLast()
+        }
+
+        override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+            let decl = Reader.readEnum(enum: node, on: currentContext)
+            currentContext.append(decl: decl)
+            contextStack.append(decl)
+            return .visitChildren
+        }
+
+        override func visitPost(_ node: EnumDeclSyntax) {
+            contextStack.removeLast()
+        }
+
+        override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
+            let decl = Reader.readProtocol(protocol: node, on: currentContext)
+            currentContext.append(decl: decl)
+            contextStack.append(decl)
+            return .visitChildren
+        }
+
+        override func visitPost(_ node: ProtocolDeclSyntax) {
+            contextStack.removeLast()
+        }
+
+        override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
+            let decl = Reader.readClass(class: node, on: currentContext)
+            currentContext.append(decl: decl)
+            contextStack.append(decl)
+            return .visitChildren
+        }
+
+        override func visitPost(_ node: ClassDeclSyntax) {
+            contextStack.removeLast()
+        }
+
+        override func visit(_ node: TypeAliasDeclSyntax) -> SyntaxVisitorContinueKind {
+            guard let decl = Reader.readTypeAlias(typeAlias: node, on: currentContext) else {
+                return .skipChildren
+            }
+            currentContext.append(decl: decl)
+            return .skipChildren
+        }
+
+        override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+            Reader.readVars(var: node, on: currentContext).forEach {
+                currentContext.append(decl: $0)
+            }
+            return .skipChildren
+        }
+
+        override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
+            let decl = Reader.readFunc(function: node, on: currentContext)
+            currentContext.append(decl: decl)
+            return .skipChildren
+        }
+
+        override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
+            let decl = Reader.readInit(initializer: node, on: currentContext)
+            currentContext.append(decl: decl)
+            return .skipChildren
+        }
+
+        override func visit(_ node: EnumCaseDeclSyntax) -> SyntaxVisitorContinueKind {
+            Reader.readCaseElements(enumCase: node, on: currentContext).forEach {
+                currentContext.append(decl: $0)
+            }
+            return .skipChildren
+        }
+
+        override func visit(_ node: AssociatedTypeDeclSyntax) -> SyntaxVisitorContinueKind {
+            guard let decl = Reader.readAssociatedType(associatedType: node, on: currentContext) else {
+                return .skipChildren
+            }
+            currentContext.append(decl: decl)
+            return .skipChildren
+        }
+
+        override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
+            if let decl = Reader.readImport(import: node, on: source) {
+                source.imports.append(decl)
+            }
+            return .skipChildren
         }
     }
 
-    static func readMember(decl: DeclSyntax, on context: some DeclContext) -> [any ValueDecl] {
-        if let type = readNominalType(decl: decl, on: context) {
-            return [type]
-        } else if let type = readTypeAlias(decl: decl, on: context) {
-            return [type]
-        } else if let vars = readVars(decl: decl, on: context) {
-            return vars
-        } else if let `func` = readFunc(decl: decl, on: context) {
-            return [`func`]
-        } else if let `init` = readInit(decl: decl, on: context) {
-            return [`init`]
-        } else if let cases = readCaseElements(decl: decl, on: context) {
-            return cases
-        } else if let associatedType = readAssociatedType(decl: decl, on: context) {
-            return [associatedType]
-        } else {
-            return []
-        }
-    }
-
-    static func readNominalType(decl: DeclSyntax, on context: some DeclContext) -> (any NominalTypeDecl)? {
-        if let decl = decl.as(StructDeclSyntax.self) {
-            return readStruct(struct: decl, on: context)
-        } else if let decl = decl.as(EnumDeclSyntax.self) {
-            return readEnum(enum: decl, on: context)
-        } else if let decl = decl.as(ProtocolDeclSyntax.self) {
-            return readProtocol(protocol: decl, on: context)
-        } else if let decl = decl.as(ClassDeclSyntax.self) {
-            return readClass(class: decl, on: context)
-        } else {
-            return nil
-        }
-    }
-
-    static func readStruct(struct structSyntax: StructDeclSyntax, on context: some DeclContext) -> StructDecl? {
+    static func readStruct(struct structSyntax: StructDeclSyntax, on context: some DeclContext) -> StructDecl {
         let name = structSyntax.name.text
 
         let `struct` = StructDecl(context: context, name: name)
@@ -142,14 +196,10 @@ public struct Reader {
             inheritance: structSyntax.inheritanceClause
         )
 
-        `struct`.members = readMembers(
-            block: structSyntax.memberBlock, on: `struct`
-        )
-
         return `struct`
     }
 
-    static func readEnum(enum enumSyntax: EnumDeclSyntax, on context: some DeclContext) -> EnumDecl? {
+    static func readEnum(enum enumSyntax: EnumDeclSyntax, on context: some DeclContext) -> EnumDecl {
         let name = enumSyntax.name.text
 
         let `enum` = EnumDecl(context: context, name: name)
@@ -167,17 +217,13 @@ public struct Reader {
             inheritance: enumSyntax.inheritanceClause
         )
 
-        `enum`.members = readMembers(
-            block: enumSyntax.memberBlock, on: `enum`
-        )
-
         return `enum`
     }
 
     static func readProtocol(
         `protocol` protocolSyntax: ProtocolDeclSyntax,
         on context: some DeclContext
-    ) -> ProtocolDecl? {
+    ) -> ProtocolDecl {
         let name = protocolSyntax.name.text
 
         let `protocol` = ProtocolDecl(context: context, name: name)
@@ -191,15 +237,13 @@ public struct Reader {
             inheritance: protocolSyntax.inheritanceClause
         )
 
-        `protocol`.members = readMembers(block: protocolSyntax.memberBlock, on: `protocol`)
-
         return `protocol`
     }
 
     static func readClass(
         class classSyntax: ClassDeclSyntax,
         on context: some DeclContext
-    ) -> ClassDecl? {
+    ) -> ClassDecl {
         let name = classSyntax.name.text
 
         let `class` = ClassDecl(context: context, name: name)
@@ -217,21 +261,16 @@ public struct Reader {
             inheritance: classSyntax.inheritanceClause
         )
 
-        `class`.members = readMembers(
-            block: classSyntax.memberBlock, on: `class`
-        )
-
         return `class`
     }
 
     static func readCaseElements(
-        decl: DeclSyntax,
+        enumCase caseSyntax: EnumCaseDeclSyntax,
         on context: some DeclContext
-    ) -> [EnumCaseElementDecl]? {
-        guard let caseDecl = decl.as(EnumCaseDeclSyntax.self),
-              let `enum` = context.asEnum else { return nil }
+    ) -> [EnumCaseElementDecl] {
+        guard let `enum` = context.asEnum else { return [] }
 
-        return caseDecl.elements.map { (element) in
+        return caseSyntax.elements.map { (element) in
             readCaseElement(element: element, on: `enum`)
         }
     }
@@ -266,18 +305,10 @@ public struct Reader {
     }
 
     static func readAssociatedType(
-        decl: DeclSyntax,
+        associatedType associatedTypeSyntax: AssociatedTypeDeclSyntax,
         on context: some DeclContext
     ) -> AssociatedTypeDecl? {
-        guard let decl = decl.as(AssociatedTypeDeclSyntax.self),
-              let `protocol` = context.asProtocol else { return nil }
-        return readAssociatedType(associatedType: decl, on: `protocol`)
-    }
-
-    static func readAssociatedType(
-        associatedType associatedTypeSyntax: AssociatedTypeDeclSyntax,
-        on `protocol`: ProtocolDecl
-    ) -> AssociatedTypeDecl {
+        guard let `protocol` = context.asProtocol else { return nil }
         let name = associatedTypeSyntax.name.text
 
         let associatedType = AssociatedTypeDecl(protocol: `protocol`, name: name)
@@ -358,11 +389,6 @@ public struct Reader {
             syntaxName: name,
             typeRepr: typeRepr
         )
-    }
-
-    static func readVars(decl: DeclSyntax, on context: some DeclContext) -> [VarDecl]? {
-        guard let decl = decl.as(VariableDeclSyntax.self) else { return nil }
-        return readVars(var: decl, on: context)
     }
 
     static func readVars(
@@ -447,11 +473,6 @@ public struct Reader {
         return AccessorDecl(var: `var`, attributes: attributes.attributes, modifiers: modifiers.modifiers, kind: kind)
     }
 
-    static func readFunc(decl: DeclSyntax, on context: some DeclContext) -> FuncDecl? {
-        guard let decl = decl.as(FunctionDeclSyntax.self) else { return nil }
-        return readFunc(function: decl, on: context)
-    }
-
     static func readFunc(
         function functionSyntax: FunctionDeclSyntax,
         on context: some DeclContext
@@ -480,11 +501,6 @@ public struct Reader {
         }
 
         return `func`
-    }
-
-    static func readInit(decl: DeclSyntax, on context: some DeclContext) -> InitDecl? {
-        guard let decl = decl.as(InitializerDeclSyntax.self) else { return nil }
-        return readInit(initializer: decl, on: context)
     }
 
     static func readInit(
@@ -588,12 +604,10 @@ public struct Reader {
         }
     }
 
-    static func readTypeAlias(decl: DeclSyntax, on context: some DeclContext) -> TypeAliasDecl? {
-        guard let decl = decl.as(TypeAliasDeclSyntax.self) else { return nil }
+    static func readTypeAlias(typeAlias typeAliasSyntax: TypeAliasDeclSyntax, on context: some DeclContext) -> TypeAliasDecl? {
+        let name = typeAliasSyntax.name.text
 
-        let name = decl.name.text
-
-        let underlyingSyntax = decl.initializer
+        let underlyingSyntax = typeAliasSyntax.initializer
 
         guard let underlying = TypeReprReader.read(type: underlyingSyntax.value) else { return nil }
 
@@ -603,28 +617,22 @@ public struct Reader {
             underlyingTypeRepr: underlying
         )
 
-        alias.modifiers = readModifires(decls: decl.modifiers)
+        alias.attributes = readAttributes(list: typeAliasSyntax.attributes)
+        alias.modifiers = readModifires(decls: typeAliasSyntax.modifiers)
 
-        alias.syntaxGenericParams = readGenericParamList(clause: decl.genericParameterClause, on: alias)
+        alias.syntaxGenericParams = readGenericParamList(clause: typeAliasSyntax.genericParameterClause, on: alias)
 
         return alias
-    }
-
-    static func readImport(decl: DeclSyntax, on source: SourceFile) -> ImportDecl? {
-        if let decl = decl.as(ImportDeclSyntax.self) {
-            return readImport(import: decl, on: source)
-        } else {
-            return nil
-        }
     }
 
     static func readImport(
         `import` importSyntax: ImportDeclSyntax,
         on source: SourceFile
-    ) -> ImportDecl {
+    ) -> ImportDecl? {
         let isScoped = importSyntax.importKindSpecifier != nil
 
         let path = importSyntax.path.map { $0.name.text }
+        guard !path.isEmpty else { return nil }
 
         let moduleName: String
         let declName: String?
@@ -644,3 +652,22 @@ public struct Reader {
     }
 }
 
+extension DeclContext {
+    fileprivate func append(decl: any ValueDecl) {
+        if let source = self.asSourceFile {
+            if let type = decl.asGenericType {
+                source.types.append(type)
+            } else if let `func` = decl.asFunc {
+                source.funcs.append(`func`)
+            }
+        } else if let `struct` = self.asStruct {
+            `struct`.members.append(decl)
+        } else if let `enum` = self.asEnum {
+            `enum`.members.append(decl)
+        } else if let `protocol` = self.asProtocol {
+            `protocol`.members.append(decl)
+        } else if let `class` = self.asClass {
+            `class`.members.append(decl)
+        }
+    }
+}
