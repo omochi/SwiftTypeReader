@@ -6,11 +6,11 @@ struct CodegenPlugin: CommandPlugin {
     func performCommand(context: PluginContext, arguments: [String]) async throws {
         let codegen = try context.tool(named: "codegen")
 
-        let sourcesDir = context.package.directory.appending(subpath: "Sources")
+        let sourcesDir = context.package.directoryURL.appending(path: "Sources")
 
         let process = EasyProcess(
-            path: URL(fileURLWithPath: codegen.path.string),
-            args: [sourcesDir.string]
+            path: codegen.url,
+            args: [sourcesDir.path(percentEncoded: false)]
         )
         try process.run()
     }

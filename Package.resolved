@@ -1,5 +1,24 @@
 {
+  "originHash" : "22fd52a2c30e65376b609473a09ab67e89ebf4e2a0116a6f2ba397eadafa5828",
   "pins" : [
+    {
+      "identity" : "codegenkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/omochi/CodegenKit.git",
+      "state" : {
+        "revision" : "75e9de2abe0d9ea1d821fdd008aba50ce339716e",
+        "version" : "2.1.1"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "626b5b7b2f45e1b0b1c6f4a309296d1d21d7311b",
+        "version" : "1.7.1"
+      }
+    },
     {
       "identity" : "swift-collections",
       "kind" : "remoteSourceControl",
@@ -19,5 +38,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

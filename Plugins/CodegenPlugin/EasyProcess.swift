@@ -4,8 +4,8 @@ struct EasyProcess {
     init(
         path: URL,
         args: [String],
-        outSink: ((Data) -> Void)? = nil,
-        errorSink: ((Data) -> Void)? = nil
+        outSink: (@Sendable (Data) -> Void)? = nil,
+        errorSink: (@Sendable (Data) -> Void)? = nil
     ) {
         self.path = path
         self.args = args
@@ -15,20 +15,20 @@ struct EasyProcess {
 
     var path: URL
     var args: [String]
-    var outSink: (Data) -> Void
-    var errorSink: (Data) -> Void
+    var outSink: @Sendable (Data) -> Void
+    var errorSink: @Sendable (Data) -> Void
 
-    static func makeFileHandleSink(fileHandle: FileHandle) -> (Data) -> Void {
+    static func makeFileHandleSink(fileHandle: FileHandle) -> @Sendable (Data) -> Void {
         return { (data) in
             try? fileHandle.write(contentsOf: data)
         }
     }
 
-    static var defaultOutSink: (Data) -> Void {
+    static var defaultOutSink: @Sendable (Data) -> Void {
         makeFileHandleSink(fileHandle: .standardOutput)
     }
 
-    static var defaultErrorSink: (Data) -> Void {
+    static var defaultErrorSink: @Sendable (Data) -> Void {
         makeFileHandleSink(fileHandle: .standardError)
     }
 
@@ -43,7 +43,7 @@ struct EasyProcess {
         let outPipe = Pipe()
         p.standardOutput = outPipe
 
-        outPipe.fileHandleForReading.readabilityHandler = { (h) in
+        outPipe.fileHandleForReading.readabilityHandler = { [outSink] (h) in
             queue.sync {
                 let data = h.availableData
                 if !data.isEmpty {
@@ -55,7 +55,7 @@ struct EasyProcess {
         let errPipe = Pipe()
         p.standardError = errPipe
 
-        errPipe.fileHandleForReading.readabilityHandler = { (h) in
+        errPipe.fileHandleForReading.readabilityHandler = { [errorSink] (h) in
             queue.sync {
                 let data = h.availableData
                 if !data.isEmpty {

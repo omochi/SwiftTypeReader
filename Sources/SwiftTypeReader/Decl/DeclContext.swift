@@ -4,19 +4,45 @@ public protocol DeclContext: AnyObject & HashableFromIdentity & _DeclParentConte
 
 extension DeclContext {
     // @codegen(as) MARK: - cast
-    public var asClass: ClassDecl? { self as? ClassDecl }
-    public var asEnumCaseElement: EnumCaseElementDecl? { self as? EnumCaseElementDecl }
-    public var asEnum: EnumDecl? { self as? EnumDecl }
-    public var asFunc: FuncDecl? { self as? FuncDecl }
-    public var asGenericContext: (any GenericContext)? { self as? any GenericContext }
-    public var asGenericType: (any GenericTypeDecl)? { self as? any GenericTypeDecl }
-    public var asInit: InitDecl? { self as? InitDecl }
-    public var asModule: Module? { self as? Module }
-    public var asNominalType: (any NominalTypeDecl)? { self as? any NominalTypeDecl }
-    public var asProtocol: ProtocolDecl? { self as? ProtocolDecl }
-    public var asSourceFile: SourceFile? { self as? SourceFile }
-    public var asStruct: StructDecl? { self as? StructDecl }
-    public var asTypeAlias: TypeAliasDecl? { self as? TypeAliasDecl }
+    public var asClass: ClassDecl? {
+        self as? ClassDecl
+    }
+    public var asEnumCaseElement: EnumCaseElementDecl? {
+        self as? EnumCaseElementDecl
+    }
+    public var asEnum: EnumDecl? {
+        self as? EnumDecl
+    }
+    public var asFunc: FuncDecl? {
+        self as? FuncDecl
+    }
+    public var asGenericContext: (any GenericContext)? {
+        self as? any GenericContext
+    }
+    public var asGenericType: (any GenericTypeDecl)? {
+        self as? any GenericTypeDecl
+    }
+    public var asInit: InitDecl? {
+        self as? InitDecl
+    }
+    public var asModule: Module? {
+        self as? Module
+    }
+    public var asNominalType: (any NominalTypeDecl)? {
+        self as? any NominalTypeDecl
+    }
+    public var asProtocol: ProtocolDecl? {
+        self as? ProtocolDecl
+    }
+    public var asSourceFile: SourceFile? {
+        self as? SourceFile
+    }
+    public var asStruct: StructDecl? {
+        self as? StructDecl
+    }
+    public var asTypeAlias: TypeAliasDecl? {
+        self as? TypeAliasDecl
+    }
     // @end
 
     public func find(name: String) -> (any Decl)? {
@@ -29,7 +55,9 @@ extension DeclContext {
                 name: name,
                 options: LookupOptions(value: false, type: true)
             )
-        else { return nil }
+        else {
+            return nil
+        }
         return (decl as! any TypeDecl)
     }
 
