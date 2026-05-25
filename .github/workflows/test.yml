@@ -1,14 +1,32 @@
 name: test
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
+    name: "test (swift-syntax: ${{ matrix.swift-syntax-version }})"
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        swift-syntax-version:
+          - "602.0.0..<603.0.0"
+          - "603.0.0..<604.0.0"
+
     steps:
       - uses: actions/checkout@v4
-      - run: swift test
+
+      - uses: vapor/swiftly-action@v0.2
+        with:
+          toolchain: "6.3"
+
+      - name: Test
+        run: swift test
+        env:
+          SWIFTTYPEREADER_SWIFTSYNTAX_VERSION: ${{ matrix.swift-syntax-version }}
