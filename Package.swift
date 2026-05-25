@@ -1,6 +1,27 @@
-// swift-tools-version: 6.1
+// swift-tools-version: 6.0
 
 import PackageDescription
+
+let defaultSwiftSyntaxVersionRange: Range<Version> = "602.0.0"..<"999.0.0"
+
+func swiftSyntaxVersionRange() -> Range<Version> {
+    let key = "SWIFTTYPEREADER_SWIFTSYNTAX_VERSION"
+
+    guard let versionString = Context.environment[key] else {
+        return defaultSwiftSyntaxVersionRange
+    }
+
+    let rangeParts = versionString.split(separator: "..<", maxSplits: 1).map(String.init)
+    guard
+        rangeParts.count == 2,
+        let lowerBound = Version(rangeParts[0]),
+        let upperBound = Version(rangeParts[1])
+    else {
+        fatalError("Invalid \(key): \(versionString)")
+    }
+
+    return lowerBound..<upperBound
+}
 
 let package = Package(
     name: "SwiftTypeReader",
@@ -12,7 +33,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", "603.0.1"..<"999.0.0"),
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", swiftSyntaxVersionRange()),
         .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.3"),
         .package(url: "https://github.com/omochi/CodegenKit.git", from: "2.1.1"),
     ],
