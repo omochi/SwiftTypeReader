@@ -2,7 +2,7 @@
 
 import PackageDescription
 
-let defaultSwiftSyntaxVersionRange: Range<Version> = "603.0.0"..<"999.0.0"
+let defaultSwiftSyntaxVersionRange: Range<Version> = "602.0.0"..<"999.0.0"
 
 func swiftSyntaxVersionRange() -> Range<Version> {
     let key = "SWIFTTYPEREADER_SWIFTSYNTAX_VERSION"
