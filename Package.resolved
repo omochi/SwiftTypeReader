@@ -1,13 +1,13 @@
 {
-  "originHash" : "111b50a06af21281b2c34d7246bb7dc3d8e90764751c80a6a086f1703913dd3c",
+  "originHash" : "22fd52a2c30e65376b609473a09ab67e89ebf4e2a0116a6f2ba397eadafa5828",
   "pins" : [
     {
       "identity" : "codegenkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/omochi/CodegenKit.git",
       "state" : {
-        "revision" : "180de40437117d4faba3efe48188ea5c29ab9892",
-        "version" : "2.1.0"
+        "revision" : "75e9de2abe0d9ea1d821fdd008aba50ce339716e",
+        "version" : "2.1.1"
       }
     },
     {

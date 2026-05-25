@@ -3,12 +3,24 @@ public protocol TypeRepr: Hashable & CustomStringConvertible {
 
 extension TypeRepr {
     // @codegen(as) MARK: - cast
-    public var asError: ErrorTypeRepr? { self as? ErrorTypeRepr }
-    public var asFunction: FunctionTypeRepr? { self as? FunctionTypeRepr }
-    public var asIdent: IdentTypeRepr? { self as? IdentTypeRepr }
-    public var asMetatype: MetatypeTypeRepr? { self as? MetatypeTypeRepr }
-    public var asTuple: TupleTypeRepr? { self as? TupleTypeRepr }
-    public var asComposition: CompositionTypeRepr? { self as? CompositionTypeRepr }
+    public var asError: ErrorTypeRepr? {
+        self as? ErrorTypeRepr
+    }
+    public var asFunction: FunctionTypeRepr? {
+        self as? FunctionTypeRepr
+    }
+    public var asIdent: IdentTypeRepr? {
+        self as? IdentTypeRepr
+    }
+    public var asMetatype: MetatypeTypeRepr? {
+        self as? MetatypeTypeRepr
+    }
+    public var asTuple: TupleTypeRepr? {
+        self as? TupleTypeRepr
+    }
+    public var asComposition: CompositionTypeRepr? {
+        self as? CompositionTypeRepr
+    }
     // @end
 
     public func resolve(from context: any DeclContext) -> any SType {

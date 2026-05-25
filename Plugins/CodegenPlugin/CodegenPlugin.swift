@@ -10,7 +10,7 @@ struct CodegenPlugin: CommandPlugin {
 
         let process = EasyProcess(
             path: codegen.url,
-            args: [sourcesDir.description]
+            args: [sourcesDir.path(percentEncoded: false)]
         )
         try process.run()
     }

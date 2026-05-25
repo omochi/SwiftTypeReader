@@ -14,7 +14,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", "603.0.1"..<"999.0.0"),
         .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.3"),
-        .package(url: "https://github.com/omochi/CodegenKit.git", from: "2.1.0"),
+        .package(url: "https://github.com/omochi/CodegenKit.git", from: "2.1.1"),
     ],
     targets: [
         .executableTarget(
