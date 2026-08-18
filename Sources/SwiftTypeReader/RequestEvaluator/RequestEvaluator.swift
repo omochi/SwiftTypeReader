@@ -1,5 +1,3 @@
-import Collections
-
 public final class RequestEvaluator {
     public init() {
         resultCache = .init()
@@ -7,7 +5,7 @@ public final class RequestEvaluator {
     }
 
     private var resultCache: Dictionary<AnyKey, Result<Any, Swift.Error>>
-    private var activeRequests: OrderedSet<AnyKey>
+    private var activeRequests: Set<AnyKey>
 
     public func callAsFunction<Q: Request>(_ request: Q) throws -> Q.Result {
         return try evaluate(request)
@@ -27,7 +25,7 @@ public final class RequestEvaluator {
             throw CycleRequestError(request: request)
         }
 
-        activeRequests.append(key)
+        activeRequests.insert(key)
         let typedResult = Result<Q.Result, Swift.Error> {
             try request.evaluate(on: self)
         }
